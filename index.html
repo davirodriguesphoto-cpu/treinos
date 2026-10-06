@@ -139,7 +139,10 @@ textarea{width:100%;min-height:220px;border-radius:12px;border:1px solid var(--l
   nav.tabs button.tab{font-size:13px}
 }
 body.signed-out nav.tabs{display:none}
-.topr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.iconbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--text);display:grid;place-items:center;padding:0}
+.iconbtn svg{display:block}
+.who#status{display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin:-2px 0 4px;font-size:13px;color:var(--muted);text-align:right}
+.who#status .linkbtn{font-size:13px}
 .btn.small{padding:5px 10px;font-size:13px}
 .per{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
 .pernav{display:flex;align-items:center;gap:6px}
@@ -172,7 +175,8 @@ body.signed-out nav.tabs{display:none}
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><h1>Treinos</h1><div class="topr"><button class="btn ghost small" id="btnTema">Tema: auto</button><span class="who" id="status">Carregando seus dados…</span></div></div>
+  <div class="top head"><h1>Treinos</h1><button class="iconbtn" id="btnTema" aria-label="Mudar tema"></button></div>
+  <div class="who" id="status">Carregando seus dados…</div>
   <main id="view"></main>
 </div>
 <nav class="tabs" aria-label="Seções"><div class="in">
@@ -517,14 +521,14 @@ function vPeriodo(){
   const tr=ss.filter(s=>s.kind==='treino'), co=ss.filter(s=>s.kind==='corrida');
   const km=co.reduce((x,s)=>x+(s.distKm||0),0)+tr.reduce((x,s)=>x+(s.blocks||[]).reduce((y,b)=>y+b.items.filter(i=>i.name==='Corrida').reduce((z,i)=>z+itemTotals(i).distM/1000,0),0),0);
   const kc=ss.reduce((x,s)=>x+((s.band||s).kcalTotal||0),0);
-  const zon=state.zonesOn||(state.zonesOn={leve:1,intensivo:1,aerobico:1,anaerobico:1,vo2:1});
+  const solo=state.zoneSolo||null;
   return `<h2>Frequência</h2>
   <div class="per"><div class="chips" role="group" aria-label="Período">${[['semana','Semana'],['mes','Mês'],['ano','Ano'],['tudo','Tudo']].map(([k,l])=>`<button class="chip" data-per="${k}" aria-pressed="${R.mode===k}">${l}</button>`).join('')}</div>
   ${R.mode!=='tudo'?`<div class="pernav"><button class="btn ghost" data-pnav="-1" aria-label="Período anterior">‹</button><b>${esc(R.label)}</b><button class="btn ghost" data-pnav="1" aria-label="Próximo período" ${R.canNext?'':'disabled'}>›</button></div>`:''}</div>
   <div class="lifetime four"><div><b>${tr.length}</b><span>treinos</span></div><div><b>${co.length}</b><span>corridas</span></div><div><b>${fmtNum(km,1)}</b><span>km</span></div><div><b>${fmtNum(kc,0)}</b><span>kcal</span></div></div>
   <div class="panel"><div class="chart"><canvas id="cFreq" aria-label="Atividades no período"></canvas></div><div class="legend"><span><i style="background:var(--z2)"></i>Treinos</span><span><i style="background:var(--z1)"></i>Corridas</span></div></div>
-  <h2>Intensidade</h2><p class="sub">${R.daily?'Minutos em cada zona de FC por dia, somando treinos e corridas.':'Média de minutos em cada zona de FC por sessão, mês a mês.'} Toque nas zonas para mostrar ou esconder.</p>
-  <div class="chips" role="group" aria-label="Zonas">${ZL.map(([k,l,c,cl])=>`<button class="chip zchip" data-zone="${k}" aria-pressed="${!!zon[k]}"><i class="${cl}"></i>${l}</button>`).join('')}</div>
+  <h2>Intensidade</h2><p class="sub">${R.daily?'Minutos em cada zona de FC por dia, somando treinos e corridas.':'Média de minutos em cada zona de FC por sessão, mês a mês.'} Toque numa zona para ver só ela; toque de novo para ver todas.</p>
+  <div class="chips" role="group" aria-label="Zonas">${ZL.map(([k,l,c,cl])=>`<button class="chip zchip" data-zone="${k}" aria-pressed="${!solo||solo===k}"><i class="${cl}"></i>${l}</button>`).join('')}</div>
   <div class="panel"><div class="chart"><canvas id="cZones" aria-label="Zonas de FC no período"></canvas></div></div>`;
 }
 function drawResumo(){
@@ -537,7 +541,7 @@ function drawResumo(){
   const stackX={stacked:true,grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkipPadding:8}};
   mk('cFreq',{type:'bar',data:{labels:lab,datasets:[{label:'Treinos',data:keys.map(k=>cT[k]||0),backgroundColor:css('--z2'),stack:'a',borderRadius:2},{label:'Corridas',data:keys.map(k=>cC[k]||0),backgroundColor:css('--z1'),stack:'a',borderRadius:2}]},
     options:baseOpts({scales:{x:stackX,y:{stacked:true,beginAtZero:true,ticks:{color:css('--muted'),precision:0},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw}}}})});
-  const zon=state.zonesOn||(state.zonesOn={leve:1,intensivo:1,aerobico:1,anaerobico:1,vo2:1}); const on=ZL.filter(([k])=>zon[k]);
+  const on=ZL.filter(([k])=>!state.zoneSolo||state.zoneSolo===k);
   mk('cZones',{type:'bar',data:{labels:lab,datasets:on.map(([k,l,c])=>({label:l,data:keys.map(q=>zs[q]?+(R.daily?zs[q][k]:zs[q][k]/zs[q].n).toFixed(1):0),backgroundColor:css(c),stack:'z',borderRadius:2}))},
     options:baseOpts({scales:{x:stackX,y:{stacked:true,beginAtZero:true,ticks:{color:css('--muted'),callback:v=>v+' min'},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtNum(c.raw,1)+' min'}}}})});
 }
@@ -670,8 +674,8 @@ document.addEventListener('click',e=>{
   if(t.dataset.mode){ state.exMode=t.dataset.mode; render(); return; }
   if(t.dataset.per){ state.per={mode:t.dataset.per,ref:todayISO()}; render(); return; }
   if(t.dataset.pnav){ const P=state.per, d=d2(P.ref), n=+t.dataset.pnav; if(P.mode==='semana') d.setDate(d.getDate()+7*n); else if(P.mode==='mes') d.setMonth(d.getMonth()+n,1); else d.setFullYear(d.getFullYear()+n); const y=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); P.ref=y; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
-  if(t.dataset.zone){ const z=state.zonesOn; z[t.dataset.zone]=!z[t.dataset.zone]; if(!Object.values(z).some(Boolean)) z[t.dataset.zone]=1; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
-  if(t.id==='btnTema'){ const ord=['auto','escuro','claro']; const cur=localStorage.getItem('tema')||'auto'; const nx=ord[(ord.indexOf(cur)+1)%3]; try{localStorage.setItem('tema',nx);}catch(e){} aplicaTema(); render(); return; }
+  if(t.dataset.zone){ state.zoneSolo=state.zoneSolo===t.dataset.zone?null:t.dataset.zone; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
+  if(t.id==='btnTema'){ const nx=temaAtual()==='escuro'?'claro':'escuro'; try{localStorage.setItem('tema',nx);}catch(e){} aplicaTema(); render(); return; }
   if(t.dataset.sf){ state.sessFilter=t.dataset.sf; render(); return; }
   if(t.dataset.sess){ state.openSess[t.dataset.sess]=!state.openSess[t.dataset.sess]; const box=t.parentElement; box.classList.toggle('open'); t.setAttribute('aria-expanded',box.classList.contains('open')); return; }
   if(t.dataset.del){ delSession(t.dataset.del); return; }
@@ -815,7 +819,7 @@ async function loadAll(){
   state.sessions=s.data.map(r=>r.data);
   state.config={aliases:(c.data&&c.data.aliases)||{}};
   state.bio={refs:(c.data&&c.data.bio_refs)||{},evaluations:b.data.map(r=>r.data)};
-  state.ready=true; $('#status').innerHTML=`${state.sessions.length} sessões · <button class="linkbtn" id="btnMenu">Conta</button>`;
+  state.ready=true; $('#status').innerHTML=`<span>${state.sessions.length} sessões</span><button class="linkbtn" id="btnMenu">Conta</button>`;
   if(!$('#dlgReg').open) render();
 }
 async function importFile(file){
@@ -846,13 +850,16 @@ document.addEventListener('click',async e=>{
 document.getElementById('fileImport').addEventListener('change',e=>{ const f=e.target.files[0]; e.target.value=''; if(f) importFile(f); });
 
 // ---------- tema
+const SOL='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>';
+const LUA='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z" fill="currentColor"/></svg>';
+function temaAtual(){ let t='auto'; try{ t=localStorage.getItem('tema')||'auto'; }catch(e){} if(t==='auto') t=matchMedia('(prefers-color-scheme: light)').matches?'claro':'escuro'; return t; }
 function aplicaTema(){ let t='auto'; try{ t=localStorage.getItem('tema')||'auto'; }catch(e){}
   if(t==='auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme',t==='escuro'?'dark':'light');
-  const b=document.getElementById('btnTema'); if(b){ b.textContent=t==='auto'?'Tema: auto':t==='escuro'?'Tema: escuro':'Tema: claro'; } }
+  const b=document.getElementById('btnTema'); if(b){ const esc=temaAtual()==='escuro'; b.innerHTML=esc?LUA:SOL; b.setAttribute('aria-label',esc?'Modo escuro ativo. Mudar para claro':'Modo claro ativo. Mudar para escuro'); b.title=esc?'Mudar para modo claro':'Mudar para modo escuro'; } }
 aplicaTema();
 // ---------- conexão
 render();
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>render());
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{aplicaTema();render();});
 (async()=>{
   if(!window.supabase){ state.msg='Não foi possível carregar o app. Confira a internet e recarregue.'; render(); return; }
   sb=window.supabase.createClient(SB_URL,SB_KEY);
