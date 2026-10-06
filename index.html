@@ -226,6 +226,9 @@ details.sg summary{cursor:pointer}
 .authlogo small{display:block;margin-top:6px;font-size:13px;letter-spacing:.22em;color:var(--muted)}
 .signed-out .head .brand{visibility:hidden}
 .toast.masc{align-items:center;gap:10px;white-space:nowrap;background:var(--raised);color:var(--text);border:1px solid var(--z4);font-size:16px}
+.who#status{flex-direction:row;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.pill{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--z3);color:var(--z3)}
+.pill.off{border-color:var(--bad);color:var(--bad)}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -1036,11 +1039,43 @@ $('#btnEdSave').onclick=async()=>{ const s=state.edit; if(!s) return; const btn=
     const old=state.editOrig; let id=old;
     if(s.date!==old.slice(0,10)){ const base=s.date+'-'+(s.kind==='corrida'?'c':'t'); const taken=new Set(allSessions().map(x=>x.id)); id=base; let n=1; while(taken.has(id)){ n++; id=base+'-'+n; } }
     s.id=id;
-    const r=await sb.from('sessions').upsert({id,date:s.date,kind:s.kind,data:s}); if(r.error) throw r.error;
-    if(id!==old){ const d=await sb.from('sessions').delete().eq('id',old); if(d.error) throw d.error; }
-    $('#dlgEdit').close(); state.edit=null; await loadAll(); toast('Alterações salvas.');
+    const ops=[{t:'sessions',k:'upsert',rows:[{id,date:s.date,kind:s.kind,data:s}]}]; if(id!==old) ops.push({t:'sessions',k:'delete',id:old});
+    const mode=await write(ops);
+    $('#dlgEdit').close(); state.edit=null; render(); toast(mode==='offline'?OFFMSG:'Alterações salvas.');
   }catch(err){ console.error(err); toast('Não foi possível salvar agora.'); } finally{ btn.disabled=false; } };
 document.getElementById('dlgEdit').addEventListener('close',()=>{ state.edit=null; });
+
+// ---------- offline: cache local + fila de sincronização
+const LSD='wodio:data:', LSQ='wodio:fila:';
+function ukey(k){ return k+(user?user.id:''); }
+function saveCache(){ try{ localStorage.setItem(ukey(LSD), JSON.stringify({sessions:state.sessions,bio:state.bio,config:state.config,at:Date.now()})); }catch(e){} }
+function loadCache(){ try{ const j=JSON.parse(localStorage.getItem(ukey(LSD))||'null'); if(j){ state.sessions=j.sessions||[]; state.bio=j.bio; state.config=j.config||{aliases:{}}; state.cacheAt=j.at; return true; } }catch(e){} return false; }
+function getQ(){ try{ return JSON.parse(localStorage.getItem(ukey(LSQ))||'[]'); }catch(e){ return []; } }
+function setQ(q){ try{ localStorage.setItem(ukey(LSQ),JSON.stringify(q)); }catch(e){} updStatus(); }
+const isNet=e=>!navigator.onLine || /fetch|network|failed|load failed|timeout/i.test(String((e&&(e.message||e.details))||e));
+async function execOp(op){ let r;
+  if(op.t==='sessions'&&op.k==='upsert') r=await sb.from('sessions').upsert(op.rows);
+  else if(op.t==='sessions'&&op.k==='delete') r=await sb.from('sessions').delete().eq('id',op.id);
+  else if(op.t==='bio') r=await sb.from('bio_evaluations').upsert(op.rows);
+  else if(op.t==='settings') r=await sb.from('settings').upsert(op.row);
+  if(r&&r.error) throw r.error; }
+function applyLocal(op){
+  if(op.t==='sessions'&&op.k==='upsert') for(const row of op.rows){ state.sessions=state.sessions.filter(s=>s.id!==row.id); state.sessions.push(row.data); }
+  if(op.t==='sessions'&&op.k==='delete') state.sessions=state.sessions.filter(s=>s.id!==op.id);
+  if(op.t==='bio'){ state.bio=state.bio||{refs:{},evaluations:[]}; for(const row of op.rows) state.bio.evaluations=state.bio.evaluations.filter(e=>e.date!==row.date).concat([row.data]).sort((a,b)=>a.date.localeCompare(b.date)); }
+  if(op.t==='settings') state.config.aliases=op.row.aliases||state.config.aliases; }
+async function write(ops){
+  if(navigator.onLine && !getQ().length){ try{ for(const op of ops) await execOp(op); await loadAll(); return 'online'; }catch(e){ if(!isNet(e)) throw e; } }
+  setQ(getQ().concat(ops)); for(const op of ops) applyLocal(op); saveCache(); return 'offline'; }
+async function flushQ(){ let q=getQ(); if(!q.length||!navigator.onLine||!user||state.flushing) return; state.flushing=true; let n=0;
+  try{ while(q.length){ try{ await execOp(q[0]); }catch(e){ if(isNet(e)) break; console.error('descartado',e); } q.shift(); n++; setQ(q); } }
+  finally{ state.flushing=false; }
+  if(n){ await loadAll(); toast(n+(n>1?' alterações sincronizadas.':' alteração sincronizada.')); } }
+function updStatus(){ const el=$('#status'); if(!el||!user) return; const q=getQ().length;
+  el.innerHTML=`${!navigator.onLine?'<span class="pill off">sem internet</span>':''}${q?`<span class="pill">${q} para sincronizar</span>`:''}<button class="linkbtn" id="btnMenu">Conta</button>`; }
+window.addEventListener('online',()=>{ updStatus(); flushQ(); });
+window.addEventListener('offline',()=>updStatus());
+const OFFMSG='Salvo no aparelho. Sincroniza sozinho quando voltar a internet.';
 // ---------- registrar
 $('#btnReg').onclick=()=>{ state.watch=null; $('#imgStatus').textContent='Opcional. O print é lido aqui no celular e não fica salvo.'; $('#regStep1').hidden=false; $('#regStep2').hidden=true; $('#dlgReg').showModal(); setTimeout(()=>$('#regText').focus(),50); };
 $('#btnBack').onclick=()=>{ $('#regStep1').hidden=false; $('#regStep2').hidden=true; };
@@ -1102,17 +1137,15 @@ $('#btnSave').onclick=async()=>{
       taken.add(s.id); delete s.dupMode;
       rows.push({id:s.id,date:s.date,kind:s.kind,data:s});
     }
-    const {error}=await sb.from('sessions').upsert(rows); if(error) throw error;
-    if(alChanged){ const r=await sb.from('settings').upsert({aliases:al,bio_refs:state.bio?state.bio.refs:{}}); if(r.error) throw r.error; state.config.aliases=al; }
-    await loadAll();
-    $('#dlgReg').close(); $('#regText').value=''; state.pending=null; state.watch=null; if(state._burpee) mascote("WÓD'IO registrado"); else toast('Treino salvo.'); state._burpee=false; state.tab='sessoes'; state.sper={mode:'mes',ref:rows.length?rows[0].date:todayISO()}; render();
+    const ops=[{t:'sessions',k:'upsert',rows}]; if(alChanged) ops.push({t:'settings',row:{aliases:al,bio_refs:state.bio?state.bio.refs:{}}});
+    const mode=await write(ops); if(alChanged) state.config.aliases=al;
+    $('#dlgReg').close(); $('#regText').value=''; state.pending=null; state.watch=null; if(mode==='offline') toast(OFFMSG); else if(state._burpee) mascote("WÓD'IO registrado"); else toast('Treino salvo.'); state._burpee=false; state.tab='sessoes'; state.sper={mode:'mes',ref:rows.length?rows[0].date:todayISO()}; render();
   }catch(err){ console.error(err); toast('Não foi possível salvar agora. Confira a conexão e tente de novo.'); }
   finally{ btn.disabled=false; }
 };
 async function delSession(id){
   if(!confirm('Excluir essa sessão? Não dá para desfazer.')) return;
-  const {error}=await sb.from('sessions').delete().eq('id',id);
-  if(error){ toast('Não foi possível excluir agora.'); return; } await loadAll(); toast('Sessão excluída.');
+  try{ const mode=await write([{t:'sessions',k:'delete',id}]); render(); toast(mode==='offline'?'Excluída no aparelho. Sincroniza quando voltar a internet.':'Sessão excluída.'); }catch(e){ toast('Não foi possível excluir agora.'); }
 }
 // ---------- bio
 function openBio(){
@@ -1129,8 +1162,7 @@ $('#btnBioSave').onclick=async()=>{
   const n=v=>{ v=String(v||'').trim().replace(',','.'); return v===''?null:parseFloat(v); };
   for(const [k] of BIO_FIELDS){ const v=n(fd.get(k)); if(v!=null&&!isNaN(v)) ev[k]=v; }
   for(const [k] of MED){ const v=n(fd.get('m_'+k)); if(v!=null&&!isNaN(v)) ev.medidas[k]=v; }
-  const {error}=await sb.from('bio_evaluations').upsert({date:ev.date,data:ev});
-  if(error){ toast('Não foi possível salvar agora.'); return; } $('#dlgBio').close(); await loadAll(); toast('Avaliação salva.');
+  try{ const mode=await write([{t:'bio',k:'upsert',rows:[{date:ev.date,data:ev}]}]); $('#dlgBio').close(); render(); toast(mode==='offline'?OFFMSG:'Avaliação salva.'); }catch(e){ toast('Não foi possível salvar agora.'); }
 };
 
 // ---------- conta
@@ -1166,11 +1198,13 @@ async function doAuth(){
 }
 async function loadAll(){
   const [s,b,c]=await Promise.all([sb.from('sessions').select('data').order('date'),sb.from('bio_evaluations').select('data').order('date'),sb.from('settings').select('*').maybeSingle()]);
-  if(s.error||b.error){ state.msg='Não foi possível carregar seus dados. Recarregue a página.'; state.ready=false; render(); return; }
+  if(s.error||b.error){ if(loadCache()){ for(const op of getQ()) applyLocal(op); state.ready=true; updStatus(); if(!$('#dlgReg').open) render(); return; }
+    state.msg=navigator.onLine?'Não foi possível carregar seus dados. Recarregue a página.':'Sem internet e sem dados salvos neste aparelho ainda. Abra o app uma vez com internet.'; state.ready=false; render(); return; }
   state.sessions=s.data.map(r=>r.data);
   state.config={aliases:(c.data&&c.data.aliases)||{}};
   state.bio={refs:(c.data&&c.data.bio_refs)||{},evaluations:b.data.map(r=>r.data)};
-  state.ready=true; $('#status').innerHTML=`<button class="linkbtn" id="btnMenu">Conta</button>`;
+  for(const op of getQ()) applyLocal(op);
+  saveCache(); state.ready=true; updStatus();
   if(!$('#dlgReg').open) render();
 }
 async function listBackups(){ const el=$('#bkList'); el.innerHTML='<p class="note">Carregando…</p>';
@@ -1178,6 +1212,7 @@ async function listBackups(){ const el=$('#bkList'); el.innerHTML='<p class="not
   if(r.error||!r.data.length){ el.innerHTML='<p class="note">Nenhum backup automático ainda. Ele roda todo dia de madrugada.</p>'; return; }
   el.innerHTML=r.data.map(b=>{ const d=new Date(b.created_at); const w=d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); return `<div class="item"><span>${w} <span class="m">· ${b.sessions} sessões</span></span><button class="btn ghost small" data-restore="${b.id}" data-when="${esc(w)}">Restaurar</button></div>`; }).join(''); }
 async function restoreBackup(id,when){
+  if(!navigator.onLine){ toast('Para restaurar, conecte à internet.'); return; }
   if(!confirm('Restaurar o backup de '+when+'? Tudo o que foi registrado ou alterado depois dele será substituído.')) return;
   try{ toast('Restaurando…'); const r=await sb.from('backups').select('data').eq('id',id).single(); if(r.error) throw r.error; const j=r.data.data;
     let x=await sb.from('sessions').delete().neq('id',''); if(x.error) throw x.error;
@@ -1189,6 +1224,7 @@ async function restoreBackup(id,when){
     $('#dlgConta').close(); await loadAll(); toast('Backup restaurado: '+rows.length+' sessões.');
   }catch(e){ console.error(e); toast('Não foi possível restaurar agora. Tente de novo.'); } }
 async function importFile(file){
+  if(!navigator.onLine){ toast('Para importar, conecte à internet.'); return; }
   try{
     const j=JSON.parse(await file.text());
     const rows=(j.sessions||[]).map(s=>({id:s.id,date:s.date,kind:s.kind,data:s}));
@@ -1239,7 +1275,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{aplica
     const was=user&&user.id; user=session?session.user:null;
     if(!user){ state.auth=true; state.ready=false; state.sessions=[]; $('#status').textContent=''; render(); return; }
     state.auth=false; $('#contaEmail').textContent=user.email||'';
-    if(was!==user.id) setTimeout(loadAll,0);
+    if(was!==user.id){ if(loadCache()){ for(const op of getQ()) applyLocal(op); state.ready=true; updStatus(); render(); } setTimeout(async()=>{ await loadAll(); flushQ(); },0); }
   });
 })();
 })();
