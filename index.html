@@ -267,7 +267,7 @@ details.sg summary{cursor:pointer}
 <dialog id="dlgConta" aria-labelledby="contaT">
   <div class="mh"><h3 id="contaT">Conta</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb"><p class="note" style="margin-top:0">Conectado como <b id="contaEmail"></b></p>
-    <div class="actions" style="justify-content:flex-start"><button class="btn" id="btnExport">Baixar backup</button><button class="btn" id="btnImport2">Importar arquivo</button><button class="btn danger" id="btnLogout">Sair</button></div>
+    <div class="actions" style="justify-content:flex-start"><button class="btn" id="btnExport">Baixar backup</button><button class="btn" id="btnImport2">Importar arquivo</button><button class="btn" id="btnChangePw">Trocar senha</button><button class="btn danger" id="btnLogout">Sair</button></div>
     <p class="note">O backup é um arquivo com todos os seus treinos, corridas e avaliações. Guarde de vez em quando no seu Drive.</p>
     <h4 style="margin:16px 0 4px">Backups automáticos</h4><p class="note" style="margin-top:0">Todo dia de madrugada o sistema guarda uma cópia. Ficam os últimos 30 dias.</p><div id="bkList"></div></div>
 </dialog>
@@ -906,6 +906,7 @@ function render(){
   document.querySelectorAll('nav .tab').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===state.tab?'page':'false'));
   const v=$('#view');
   document.body.classList.toggle('signed-out',!user);
+  if(state.recovery){ v.innerHTML=vRecovery(); return; }
   if(state.auth){ v.innerHTML=vAuth(); return; }
   if(!state.ready){ v.innerHTML=`<div class="empty">${esc(state.msg||'Carregando…')}</div>`; return; }
   if(!state.sessions.length && !(state.bio&&state.bio.evaluations.length)){ v.innerHTML=vEmpty(); return; }
@@ -1115,8 +1116,21 @@ function vAuth(){ const m=state.authMode||'entrar';
     <label>Senha<input type="password" name="password" autocomplete="${m==='entrar'?'current-password':'new-password'}" minlength="6" required></label>
     <button class="btn primary" id="btnAuth">${m==='entrar'?'Entrar':'Criar conta'}</button>
     <p class="note" id="authMsg">${esc(state.authMsg||'')}</p>
+    ${m==='entrar'?'<button class="linkbtn" id="btnForgot" type="button" style="justify-self:start">Esqueci minha senha</button>':''}
     <button class="btn ghost" id="btnAuthMode" type="button">${m==='entrar'?'Ainda não tenho conta':'Já tenho conta'}</button>
   </form></section>`; }
+function vRecovery(){ return `<section class="auth"><h2>Nova senha</h2><p class="sub">Escolha uma senha nova para a sua conta.</p>
+  <form id="recForm" class="authform" onsubmit="return false"><label>Nova senha<input type="password" name="p1" autocomplete="new-password" minlength="6" required></label>
+  <label>Repita a senha<input type="password" name="p2" autocomplete="new-password" minlength="6" required></label>
+  <button class="btn primary" id="btnRecSave">Salvar nova senha</button><p class="note" id="recMsg">${esc(state.recMsg||'')}</p></form></section>`; }
+async function saveNewPassword(){ const f=new FormData($('#recForm')); const a=String(f.get('p1')||''), b=String(f.get('p2')||'');
+  if(a.length<6){ state.recMsg='A senha precisa ter pelo menos 6 caracteres.'; render(); return; } if(a!==b){ state.recMsg='As duas senhas não são iguais.'; render(); return; }
+  const r=await sb.auth.updateUser({password:a}); if(r.error){ state.recMsg='Não deu certo: '+r.error.message; render(); return; }
+  state.recovery=false; state.recMsg=''; history.replaceState(null,'',location.pathname); toast('Senha alterada.'); render(); if(user) loadAll(); }
+async function forgot(){ const email=String(new FormData($('#authForm')).get('email')||'').trim();
+  if(!email){ state.authMsg='Digite seu e-mail acima e toque de novo em "Esqueci minha senha".'; render(); return; }
+  const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
+  state.authMsg=r.error?('Não deu certo: '+r.error.message):'Se esse e-mail tiver conta, chegou um link para criar uma senha nova. Confira também o spam.'; render(); }
 function vEmpty(){ return `<div class="empty"><p>Sua conta está pronta, mas ainda sem dados.</p><p>Importe o arquivo de histórico para trazer os treinos, corridas e avaliações, ou registre o treino de hoje.</p><p><button class="btn primary" id="btnImport">Importar histórico</button></p></div>`; }
 async function doAuth(){
   const f=new FormData($('#authForm')); const email=String(f.get('email')||'').trim(), password=String(f.get('password')||'');
@@ -1167,6 +1181,9 @@ function exportFile(){
 document.addEventListener('click',async e=>{
   const t=e.target.closest('button'); if(!t) return;
   if(t.id==='btnAuth'){ t.disabled=true; await doAuth(); t.disabled=false; }
+  if(t.id==='btnForgot'){ t.disabled=true; await forgot(); }
+  if(t.id==='btnRecSave'){ t.disabled=true; await saveNewPassword(); }
+  if(t.id==='btnChangePw'){ $('#dlgConta').close(); state.recovery=true; state.recMsg=''; render(); }
   if(t.id==='btnAuthMode'){ state.authMode=state.authMode==='criar'?'entrar':'criar'; state.authMsg=''; render(); }
   if(t.id==='btnImport'){ $('#fileImport').click(); }
   if(t.id==='btnMenu'){ $('#dlgConta').showModal(); listBackups(); }
@@ -1192,6 +1209,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{aplica
   if(!window.supabase){ state.msg='Não foi possível carregar o app. Confira a internet e recarregue.'; render(); return; }
   sb=window.supabase.createClient(SB_URL,SB_KEY);
   sb.auth.onAuthStateChange((ev,session)=>{
+    if(ev==='PASSWORD_RECOVERY'){ state.recovery=true; }
     const was=user&&user.id; user=session?session.user:null;
     if(!user){ state.auth=true; state.ready=false; state.sessions=[]; $('#status').textContent=''; render(); return; }
     state.auth=false; $('#contaEmail').textContent=user.email||'';
