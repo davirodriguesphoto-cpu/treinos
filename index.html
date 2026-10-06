@@ -19,6 +19,7 @@
   --z1:#5B8DEF;--z2:#2EC4B6;--z3:#F2C14E;--z4:#F28C38;--z5:#E5484D;
   --load:#F2C14E;--body:#2EC4B6;--good:#4ADE9B;--bad:#F2786E;
   color-scheme:dark;
+  --bodybase:#E9ECF1;--bodyline:#2B2F36;--bodybg:#F7F8FA;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121722;--surface:#1A2130;--raised:#222B3C;--line:#2C364A;--text:#E9EDF4;--muted:#8E98AC;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#121722;--surface:#1A2130;--raised:#222B3C;--line:#2C364A;--text:#E9EDF4;--muted:#8E98AC;color-scheme:dark}
@@ -169,19 +170,20 @@ body.signed-out nav.tabs{display:none}
 .ztot span{font-size:12px;color:var(--muted)}
 .btn.accent{background:var(--load);color:#1A1405;border-color:var(--load)}
 .mgwrap{display:grid;grid-template-columns:minmax(260px,1fr) 1fr;gap:16px;align-items:start;margin-top:10px}
-.bodies{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px}
+.bodies{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bodybg);border:1px solid var(--line);border-radius:14px;padding:10px}
 .bodysvg{width:100%;height:auto;display:block}
 .mglist{display:grid;gap:2px}
-.mgrow{display:grid;grid-template-columns:120px 1fr 44px;align-items:center;gap:10px;background:none;border:0;border-radius:8px;padding:6px 8px;text-align:left;font-size:14px}
+.mgrow{display:grid;grid-template-columns:110px 1fr 40px 70px;align-items:center;gap:10px;background:none;border:0;border-radius:8px;padding:6px 8px;text-align:left;font-size:14px}
 .mgrow.on,.mgrow:hover{background:var(--surface)}
 .mgrow .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
-.mgrow .bar i{display:block;height:100%;background:var(--z4);border-radius:4px}
+.mgrow .bar i{display:block;height:100%;background:#E03B45;border-radius:4px}
 .mgrow b{font-family:"Barlow Condensed",sans-serif;font-size:18px;text-align:right}
 .mgex{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
 .mgex h4{margin:0 0 6px;font-size:14px}
 details.sg{margin-top:12px;color:var(--muted);font-size:13px}
 details.sg summary{cursor:pointer}
-@media (max-width:640px){.mgwrap{grid-template-columns:1fr}.mgrow{grid-template-columns:105px 1fr 40px}}
+@media (max-width:640px){.mgwrap{grid-template-columns:1fr}.mgrow{grid-template-columns:100px 1fr 38px 64px}}
+.mgrow .m{font-size:12px;color:var(--muted);text-align:right}
 .dupbox{border:1px solid color-mix(in srgb,var(--z3) 45%,var(--line));border-radius:10px;padding:8px 10px;margin:6px 0;display:grid;gap:4px;font-size:14px}
 .edblock{border:1px solid var(--line);border-radius:12px;padding:10px;margin:12px 0;display:grid;gap:8px}
 .edbh{display:grid;grid-template-columns:1fr 1.5fr;gap:8px}
@@ -457,7 +459,10 @@ if(typeof module!=='undefined') module.exports={parseWatch}; else window.parseWa
 // mapeamento exercício -> grupos musculares (peso 1 = principal, 0.5 = secundário)
 const MG=[['peito','Peito'],['ombros','Ombros'],['biceps','Bíceps'],['triceps','Tríceps'],['antebraco','Antebraço'],['abdomen','Abdômen'],['quadriceps','Quadríceps'],['adutores','Adutores'],['panturrilha','Panturrilha'],['trapezio','Trapézio'],['costas','Costas'],['lombar','Lombar'],['gluteos','Glúteos'],['posterior','Posterior de coxa']];
 const MRULES=[
- [/mobilidade|mobility|saudacao|gato|camelo|aviaozinho|90\/90|spider$|alongamento|inch ?worm/, {}],
+ [/squat \+ distorce/, {quadriceps:1,gluteos:.6}],
+ [/sniper|kneeling to standing/, {quadriceps:1,gluteos:.8,adutores:.3}],
+ [/distorce|mobilidade|mobility|saudacao|gato|camelo|aviaozinho|90\/90|spider$|alongamento|inch ?worm/, {}],
+ [/cross body/, {biceps:1,antebraco:.5}],
  [/gto|ground to overhead/, {ombros:.8,posterior:.7,gluteos:.7,quadriceps:.5,trapezio:.3}],
  [/shoulder to shoulder/, {ombros:.8,quadriceps:.5,gluteos:.5,posterior:.5,abdomen:.4}],
  [/med ball slam|slam/, {abdomen:.8,ombros:.6,costas:.6}],
@@ -504,7 +509,18 @@ function muscleMap(name){ const k=name.toLowerCase().normalize('NFD').replace(/[
   for(const [re,m] of MRULES) if(re.test(k)) return m;
   if(CARDIO.test(k)) return {_cardio:1};
   return null; }
-if(typeof module!=='undefined') module.exports={MG,muscleMap}; else { window.MG=MG; window.muscleMap=muscleMap; }
+function muscleMapItem(i){ const k=i.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  if(k==='remador') return i.loadKg?{costas:1,biceps:.5,abdomen:.3}:{abdomen:1};
+  if(/complex/.test(k)){
+    const merge=(ms)=>{ const o={}; for(const x of ms) if(x) for(const [g,w] of Object.entries(x)) if(g[0]!=='_') o[g]=Math.max(o[g]||0,w); return Object.keys(o).length?o:null; };
+    const parts=String(i.note||'').split(/\+|,|\be\b|\/|;/).map(x=>x.replace(/^[\s\d]+(x\s*)?/i,'').trim()).filter(x=>x.length>2);
+    const fromNote=merge(parts.map(x=>muscleMap(x)));
+    if(fromNote) return fromNote;
+    const rest=k.replace(/complex|unilateral|alternado|\b0?\d+\b/g,' ').replace(/\s+/g,' ').trim();
+    if(rest){ const r=muscleMap(rest); if(r&&Object.keys(r).length) return r; }
+    return null; }
+  return muscleMap(i.name); }
+if(typeof module!=='undefined') module.exports={MG,muscleMap,muscleMapItem}; else { window.MG=MG; window.muscleMap=muscleMap; window.muscleMapItem=muscleMapItem; }
 </script><script>
 (function(){
 const P=window.TreinoParser;
@@ -712,49 +728,68 @@ const MED=[['torax','Tórax'],['cintura','Cintura'],['abdomen','Abdômen'],['qua
 const LOWER_GOOD={peso:1,pesoAcima:1,gorduraPct:1,gorduraKg:1,gorduraAcima:1,imc:1,visceral:1,rcq:1,idadeCorporal:1,idadeDif:1,musculoPct:0,musculoKg:0};
 
 // ---------- grupos musculares
-const BODY={
- front:[['head','c',100,30,17],['neck','r',93,46,14,10,3],
-  ['trapezio','p','M84 56 L100 50 L116 56 L108 64 L92 64 Z'],
-  ['ombros','e',64,74,15,12],['ombros','e',136,74,15,12],
-  ['peito','p','M76 70 Q88 64 99 68 L99 100 Q86 106 76 98 Z'],['peito','p','M124 70 Q112 64 101 68 L101 100 Q114 106 124 98 Z'],
-  ['biceps','e',55,108,9,20],['biceps','e',145,108,9,20],
-  ['antebraco','e',48,150,8,22],['antebraco','e',152,150,8,22],['hand','e',45,180,7,9],['hand','e',155,180,7,9],
-  ['abdomen','p','M82 104 Q100 110 118 104 L116 166 Q100 174 84 166 Z'],
-  ['torso','p','M76 100 L82 104 L84 166 L78 168 L74 120 Z'],['torso','p','M124 100 L118 104 L116 166 L122 168 L126 120 Z'],
-  ['quadriceps','p','M78 172 Q90 170 98 180 L96 250 Q86 258 78 248 Q72 210 78 172 Z'],['quadriceps','p','M122 172 Q110 170 102 180 L104 250 Q114 258 122 248 Q128 210 122 172 Z'],
-  ['adutores','p','M96 178 L100 176 L100 222 L97 228 Z'],['adutores','p','M104 178 L100 176 L100 222 L103 228 Z'],
-  ['shin','e',86,300,8,34],['shin','e',114,300,8,34],['foot','e',86,342,8,6],['foot','e',114,342,8,6]],
- back:[['head','c',100,30,17],['neck','r',93,46,14,10,3],
-  ['trapezio','p','M80 58 L100 50 L120 58 L110 90 L100 98 L90 90 Z'],
-  ['ombros','e',64,74,15,12],['ombros','e',136,74,15,12],
-  ['costas','p','M78 74 L90 90 L100 98 L100 136 Q86 132 78 120 Z'],['costas','p','M122 74 L110 90 L100 98 L100 136 Q114 132 122 120 Z'],
-  ['triceps','e',55,108,9,20],['triceps','e',145,108,9,20],
-  ['antebraco','e',48,150,8,22],['antebraco','e',152,150,8,22],['hand','e',45,180,7,9],['hand','e',155,180,7,9],
-  ['lombar','p','M80 122 Q90 136 100 138 Q110 136 120 122 L118 166 L82 166 Z'],
-  ['gluteos','e',89,184,13,16],['gluteos','e',111,184,13,16],
-  ['posterior','p','M78 196 Q88 202 98 198 L96 252 Q86 258 79 250 Q74 222 78 196 Z'],['posterior','p','M122 196 Q112 202 102 198 L104 252 Q114 258 121 250 Q126 222 122 196 Z'],
-  ['panturrilha','e',86,292,10,28],['panturrilha','e',114,292,10,28],['shin','e',86,328,6,12],['shin','e',114,328,6,12],['foot','e',86,342,8,6],['foot','e',114,342,8,6]]};
+function mx(d){ return d.replace(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/g,(m,x,y)=>(200-(+x))+' '+y); }
+const BODYP={
+ front:[
+  ['head','M100 10 Q117 10 118 30 Q118 46 108 52 L92 52 Q82 46 82 30 Q83 10 100 10 Z'],
+  ['neck','M91 50 L109 50 L111 62 L89 62 Z'],
+  ['trapezio','M89 58 L72 66 Q82 66 92 64 Z',1],
+  ['ombros','M74 64 Q58 64 54 82 Q55 94 62 100 Q68 86 80 74 Q80 68 74 64 Z',1],
+  ['peito','M100 66 L84 66 Q74 74 72 90 Q84 102 100 98 Z',1],
+  ['biceps','M62 100 Q54 108 53 124 Q56 138 63 140 Q70 126 70 106 Z',1],
+  ['antebraco','M53 141 Q46 162 44 188 L55 190 Q62 166 64 142 Z',1],
+  ['hand','M44 190 Q40 204 44 214 Q50 220 56 212 Q58 200 55 190 Z',1],
+  ['abdomen','M74 92 Q75 122 82 156 L87 150 L87 100 Z',1],
+  ['abdomen','M88 100 L99 100 L99 115 L88 115 Z',1],['abdomen','M88 117 L99 117 L99 132 L88 132 Z',1],['abdomen','M88 134 L99 134 L99 149 L88 149 Z',1],
+  ['abdomen','M88 151 L99 151 L99 182 Q93 176 88 166 Z',1],
+  ['quadriceps','M78 172 Q68 214 75 256 L87 262 Q85 216 89 182 Z',1],
+  ['quadriceps','M89 182 Q85 216 87 262 L97 264 Q101 230 98 190 Z',1],
+  ['adutores','M97 182 L100 184 L100 228 L98 240 Q101 214 97 182 Z',1],
+  ['knee','M77 260 Q76 274 86 280 Q96 278 97 266 Q88 268 77 260 Z',1],
+  ['panturrilha','M77 280 Q72 312 80 350 L88 352 Q84 316 86 282 Z',1],
+  ['shin','M86 282 Q84 316 88 352 L96 352 Q99 316 96 280 Z',1],
+  ['foot','M80 352 L96 352 Q100 362 96 368 L80 368 Q76 362 80 352 Z',1]],
+ back:[
+  ['head','M100 10 Q117 10 118 30 Q118 46 108 52 L92 52 Q82 46 82 30 Q83 10 100 10 Z'],
+  ['neck','M91 50 L109 50 L111 60 L89 60 Z'],
+  ['trapezio','M100 50 L72 66 Q86 70 92 84 L100 116 L108 84 Q114 70 128 66 Z'],
+  ['ombros','M74 64 Q58 64 54 82 Q55 94 62 100 Q68 86 78 74 Q78 68 74 64 Z',1],
+  ['costas','M78 72 Q90 76 92 86 L100 118 L100 136 Q86 134 78 122 Q72 98 78 72 Z',1],
+  ['triceps','M62 100 Q54 108 53 124 Q56 138 63 140 Q70 126 70 106 Z',1],
+  ['antebraco','M53 141 Q46 162 44 188 L55 190 Q62 166 64 142 Z',1],
+  ['hand','M44 190 Q40 204 44 214 Q50 220 56 212 Q58 200 55 190 Z',1],
+  ['lombar','M80 126 Q90 136 100 138 Q110 136 120 126 L119 160 L81 160 Z'],
+  ['gluteos','M100 158 Q86 154 80 166 Q74 184 84 196 Q94 202 100 194 Z',1],
+  ['posterior','M78 192 Q70 228 77 258 L88 262 Q87 226 90 198 Z',1],
+  ['posterior','M90 198 Q87 226 88 262 L97 262 Q101 230 99 196 Z',1],
+  ['knee','M78 260 Q77 272 87 276 Q96 274 97 264 Q88 266 78 260 Z',1],
+  ['panturrilha','M78 276 Q70 300 79 326 Q86 326 88 304 Q88 286 86 276 Z',1],
+  ['panturrilha','M88 276 Q86 296 89 324 Q97 324 98 300 Q99 284 96 276 Z',1],
+  ['shin','M80 326 L95 326 L93 352 L84 352 Z',1],
+  ['foot','M80 352 L96 352 Q100 362 96 368 L80 368 Q76 362 80 352 Z',1]]};
 function bodySVG(side,val,max){
-  const fill=g=>{ if(!MG.some(m=>m[0]===g)) return 'var(--line)'; const v=val[g]||0; if(!v) return 'var(--raised)'; const t=Math.max(.18,v/max); return `color-mix(in srgb, var(--z4) ${Math.round(t*100)}%, var(--raised))`; };
-  const sel=state.mgSel;
-  const el=s=>{ const [g,k]=s; const st=`fill:${fill(g)};stroke:${sel===g?'var(--text)':'var(--bg)'};stroke-width:${sel===g?2:1.2}`; const da=MG.some(m=>m[0]===g)?` data-mg="${g}" style="${st};cursor:pointer"`:` style="${st}"`;
-    if(k==='c') return `<circle cx="${s[2]}" cy="${s[3]}" r="${s[4]}"${da}/>`; if(k==='e') return `<ellipse cx="${s[2]}" cy="${s[3]}" rx="${s[4]}" ry="${s[5]}"${da}/>`;
-    if(k==='r') return `<rect x="${s[2]}" y="${s[3]}" width="${s[4]}" height="${s[5]}" rx="${s[6]}"${da}/>`; return `<path d="${s[2]}"${da}/>`; };
-  return `<svg viewBox="30 8 140 345" class="bodysvg" role="img" aria-label="Corpo ${side==='front'?'de frente':'de costas'}">${BODY[side].map(el).join('')}</svg>`; }
+  const fill=g=>{ if(!MG.some(m=>m[0]===g)) return 'var(--bodybase)'; const v=val[g]||0; if(!v) return 'var(--bodybase)'; const t=Math.max(.22,v/max); return `color-mix(in srgb, #E03B45 ${Math.round(t*100)}%, var(--bodybase))`; };
+  const sel=state.mgSel; const out=[];
+  for(const [g,d,mir] of BODYP[side]){ const isM=MG.some(m=>m[0]===g);
+    const st=`fill:${fill(g)};stroke:var(--bodyline);stroke-width:${sel===g?2.2:1.1};stroke-linejoin:round`;
+    const at=isM?` data-mg="${g}" style="${st};cursor:pointer"`:` style="${st}"`;
+    out.push(`<path d="${d}"${at}/>`); if(mir) out.push(`<path d="${mx(d)}"${at}/>`); }
+  return `<svg viewBox="36 6 128 368" class="bodysvg" role="img" aria-label="Corpo ${side==='front'?'de frente':'de costas'}">${out.join('')}</svg>`; }
 function vMusculos(){
   const per=state.mgPer||'30'; const all=allSessions().filter(s=>s.kind==='treino');
-  const from=per==='tudo'?'0000':(()=>{const d=new Date(); d.setDate(d.getDate()-(+per)+1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+  const from=per==='tudo'?'0000':per==='hoje'?todayISO():(()=>{const d=new Date(); d.setDate(d.getDate()-(+per)+1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
   const ss=all.filter(s=>s.date>=from); const val={}, ex={}, sess={}; const semGrupo={};
-  for(const s of ss) for(const b of s.blocks||[]) for(const i of b.items||[]){ const m=muscleMap(i.name); if(m===null){ semGrupo[i.name]=(semGrupo[i.name]||0)+1; continue; }
+  for(const s of ss) for(const b of s.blocks||[]) for(const i of b.items||[]){ const m=muscleMapItem(i); if(m===null){ semGrupo[i.name]=(semGrupo[i.name]||0)+1; continue; }
     const sets=(i.ladder?i.ladder.length:(i.sets||1)); for(const [g,w] of Object.entries(m)){ if(g[0]==='_') continue; val[g]=(val[g]||0)+sets*w; (ex[g]=ex[g]||{})[i.name]=((ex[g]||{})[i.name]||0)+sets*w; (sess[g]=sess[g]||new Set()).add(s.id); } }
-  const max=Math.max(1,...Object.values(val)); const rank=MG.map(([k,l])=>({k,l,v:val[k]||0,n:sess[k]?sess[k].size:0})).sort((a,b)=>b.v-a.v);
+  const max=Math.max(1,...Object.values(val)); const tot=Object.values(val).reduce((a,b)=>a+b,0)||1; const rank=MG.map(([k,l])=>({k,l,v:val[k]||0,n:sess[k]?sess[k].size:0})).sort((a,b)=>b.v-a.v);
   const sel=state.mgSel; const top=sel&&ex[sel]?Object.entries(ex[sel]).sort((a,b)=>b[1]-a[1]).slice(0,8):[];
   const sg=Object.entries(semGrupo).sort((a,b)=>b[1]-a[1]);
-  return `<h2 style="margin-top:12px">Grupos musculares</h2><p class="sub">Séries por grupo muscular no período. Exercícios compostos contam inteiro no músculo principal e pela metade nos auxiliares. Toque num músculo para ver os exercícios.</p>
-  <div class="chips" role="group" aria-label="Período">${[['7','7 dias'],['30','30 dias'],['90','90 dias'],['365','12 meses'],['tudo','Tudo']].map(([k,l])=>`<button class="chip" data-mgper="${k}" aria-pressed="${per===k}">${l}</button>`).join('')}</div>
+  return `<h2 style="margin-top:12px">Grupos musculares</h2><p class="sub">Quanto cada músculo foi trabalhado no período, em séries e em porcentagem do total. Exercícios compostos contam inteiro no músculo principal e pela metade nos auxiliares. Toque num músculo para ver os exercícios.</p>
+  <div class="chips" role="group" aria-label="Período">${[['hoje','Hoje'],['7','7 dias'],['30','30 dias'],['90','90 dias'],['365','12 meses'],['tudo','Tudo']].map(([k,l])=>`<button class="chip" data-mgper="${k}" aria-pressed="${per===k}">${l}</button>`).join('')}</div>
   <div class="mgwrap"><div class="bodies">${bodySVG('front',val,max)}${bodySVG('back',val,max)}</div>
-  <div class="mglist">${rank.map(r=>`<button class="mgrow ${sel===r.k?'on':''}" data-mg="${r.k}"><span>${r.l}</span><span class="bar"><i style="width:${Math.round(100*r.v/max)}%"></i></span><b>${fmtNum(r.v,0)}</b></button>`).join('')}
-  ${sel?`<div class="mgex"><h4>${esc(MG.find(m=>m[0]===sel)[1])} · ${sess[sel]?sess[sel].size:0} treinos</h4>${top.length?top.map(([n,v])=>`<div class="item"><span>${esc(n)}</span><span class="q">${fmtNum(v,1)} séries</span></div>`).join(''):'<p class="note">Nada nesse período.</p>'}</div>`:''}</div></div>
+  <div class="mglist">${rank.map(r=>`<button class="mgrow ${sel===r.k?'on':''}" data-mg="${r.k}"><span>${r.l}</span><span class="bar"><i style="width:${Math.round(100*r.v/max)}%"></i></span><b>${r.v?Math.round(100*r.v/tot)+'%':'–'}</b><span class="m">${fmtNum(r.v,0)} séries</span></button>`).join('')}
+  ${sel?`<div class="mgex"><h4>${esc(MG.find(m=>m[0]===sel)[1])} · ${sess[sel]?sess[sel].size:0} treinos · ${Math.round(100*(val[sel]||0)/tot)}% do total</h4>${top.length?top.map(([n,v])=>`<div class="item"><span>${esc(n)}</span><span class="q">${fmtNum(v,1)} séries</span></div>`).join(''):'<p class="note">Nada nesse período.</p>'}</div>`:''}</div></div>
+  ${!ss.length?`<p class="note">Nenhum treino nesse período.</p>`:''}
   ${sg.length?`<details class="sg"><summary>${sg.length} exercícios sem grupo muscular definido</summary><p class="note">${sg.map(([n,c])=>esc(n)+' ('+c+')').join(', ')}</p></details>`:''}`;
 }
 function vCorpo(){
@@ -807,7 +842,7 @@ function sessHTML(s){
   <div class="block"><h4>Relógio</h4><div class="item"><span>Ritmo mais rápido</span><span class="q">${pace(s.paceBest)}</span></div><div class="item"><span>BPM máximo</span><span class="q">${s.bpmMax||'–'}</span></div><div class="item"><span>Passos</span><span class="q">${s.steps?fmtNum(s.steps,0):'–'}</span></div><div class="item"><span>Cadência média</span><span class="q">${s.cadAvg||'–'}</span></div></div>
   <div class="actions"><button class="btn" data-edit="${esc(s.id)}">Editar</button><button class="btn danger" data-del="${esc(s.id)}">Excluir corrida</button></div></div></div>`;
   const b=s.band||{}; const n=(s.blocks||[]).reduce((a,x)=>a+x.items.length,0);
-  return `<div class="sess ${open?'open':''}"><button data-sess="${esc(s.id)}" aria-expanded="${!!open}"><div class="date"><b>${d.getDate()}</b><span>${DIA[d.getDay()]}</span></div><div><div class="t">${esc(s.foco||'Treino')}${s.focoExtra?` <span class="m">· ${esc(s.focoExtra)}</span>`:''}${s.fase?` <span class="tag">fase ${s.fase} · sem ${s.semana}</span>`:''}</div><div class="meta"><span>${s.soRelogio?'só relógio':n+' exercícios'}</span>${b.durSec?`<span>${mmss(b.durSec)}</span>`:''}${b.bpmAvg?`<span>${b.bpmAvg} bpm médio</span>`:''}</div>${zoneStrip(b.zones)}</div><span class="m">${b.kcalTotal?b.kcalTotal+' kcal':''}</span></button>
+  return `<div class="sess ${open?'open':''}"><button data-sess="${esc(s.id)}" aria-expanded="${!!open}"><div class="date"><b>${d.getDate()}</b><span>${DIA[d.getDay()]}</span></div><div><div class="t">${esc(s.focos?s.focos.join(' + '):(s.foco||'Treino'))}${s.focoExtra?` <span class="m">· ${esc(s.focoExtra)}</span>`:''}${s.fase?` <span class="tag">fase ${s.fase} · sem ${s.semana}</span>`:''}</div><div class="meta"><span>${s.soRelogio?'só relógio':n+' exercícios'}</span>${b.durSec?`<span>${mmss(b.durSec)}</span>`:''}${b.bpmAvg?`<span>${b.bpmAvg} bpm médio</span>`:''}</div>${zoneStrip(b.zones)}</div><span class="m">${b.kcalTotal?b.kcalTotal+' kcal':''}</span></button>
   <div class="detail">${(s.blocks||[]).map(bl=>`<div class="block"><h4>${esc(bl.name)}${bl.result?` <span class="res">${esc(bl.result)}</span>`:''}</h4>${bl.items.map(i=>`<div class="item"><span>${esc(i.name)}${i.note?` <span class="m">(${esc(i.note)})</span>`:''}</span><span><span class="q">${esc(qty(i))}</span>${i.loadKg!=null&&!i.ladder?` <span class="kg">${fmtNum(i.loadKg)} kg</span>`:''}</span></div>`).join('')}</div>`).join('')}
   ${b.bpmMax?`<div class="block"><h4>Relógio</h4><div class="item"><span>BPM máximo</span><span class="q">${b.bpmMax}</span></div><div class="item"><span>Calorias ativas / total</span><span class="q">${b.kcal||'–'} / ${b.kcalTotal||'–'} kcal</span></div>${b.zones?`<div class="item"><span>Leve · Intensivo · Aeróbico · Anaeróbico · VO₂</span><span class="q">${['leve','intensivo','aerobico','anaerobico','vo2'].map(k=>mmss(b.zones[k])).join(' · ')}</span></div>`:''}</div>`:''}
   <div class="actions"><button class="btn" data-edit="${esc(s.id)}">Editar</button><button class="btn danger" data-del="${esc(s.id)}">Excluir treino</button></div></div></div>`;
@@ -816,8 +851,9 @@ function focoKey(f){ return String(f||'').toLowerCase().normalize('NFD').replace
 function vTipos(){
   const all=allSessions(); const g={};
   for(const s of all){ let k,l; if(s.kind==='corrida'){ k='~corrida'+(s.local==='box'?'box':''); l=s.local==='box'?'Corridas no box':'Corridas livres'; }
-    else if(s.soRelogio||!s.foco){ k='~relogio'; l=s.soRelogio?'Treinos só relógio':'Treinos sem foco'; } else { k=focoKey(s.foco); l=null; }
-    const G=g[k]=g[k]||{k,label:l,names:{},list:[]}; G.list.push(s); if(!l){ G.names[s.foco]=(G.names[s.foco]||0)+1; } }
+    else if(s.soRelogio||!s.foco){ k='~relogio'; l=s.soRelogio?'Treinos só relógio':'Treinos sem tipo'; }
+    else { for(const f of (s.focos||[s.foco])){ const kk=focoKey(f); const G=g[kk]=g[kk]||{k:kk,label:null,names:{},list:[]}; G.list.push(s); G.names[f]=(G.names[f]||0)+1; } continue; }
+    const G=g[k]=g[k]||{k,label:l,names:{},list:[]}; G.list.push(s); }
   const groups=Object.values(g).map(G=>{ if(!G.label){ const n=Object.entries(G.names).sort((a,b)=>b[1]-a[1])[0][0]; G.label=n.toLowerCase().split(' ').map(w=>w?w.charAt(0).toUpperCase()+w.slice(1):w).join(' '); } return G; })
     .sort((a,b)=>(a.k[0]==='~')-(b.k[0]==='~')||b.list.length-a.list.length);
   const q=(state.tipoQ||'').toLowerCase();
@@ -826,7 +862,7 @@ function vTipos(){
   <p class="sub">${groups.length} tipos de treino. Toque para abrir.</p>
   ${vis.map(G=>{ const last=G.list[G.list.length-1]; const open=state.tipoOpen===G.k; const kc=G.list.reduce((x,s)=>x+((s.band||s).kcalTotal||0),0);
     return `<div class="tipo ${open?'open':''}"><button class="tipohead" data-tipo="${esc(G.k)}" aria-expanded="${open}"><span class="t">${esc(G.label)}</span><span class="m">${G.list.length} ${G.list.length>1?'sessões':'sessão'} · última em ${fmtD(last.date)}</span><span class="chev" aria-hidden="true">${open?'▴':'▾'}</span></button>
-    ${open?`<div class="tipobody"><p class="note" style="margin:4px 0 8px">Total: ${fmtNum(kc,0)} kcal${Object.keys(G.names).length>1?' · escrito como: '+Object.keys(G.names).map(esc).join(', '):''}</p>${[...G.list].reverse().map(sessHTML).join('')}</div>`:''}</div>`; }).join('')}`;
+    ${open?`<div class="tipobody"><p class="note" style="margin:4px 0 8px">Total: ${fmtNum(kc,0)} kcal${(()=>{const ex=[...new Set(G.list.map(s=>s.focoExtra).filter(Boolean))]; return ex.length?' · '+(G.k==='tecnica'?'técnicas':'ênfases')+': '+ex.map(esc).join(', '):'';})()}</p>${[...G.list].reverse().map(sessHTML).join('')}</div>`:''}</div>`; }).join('')}`;
 }
 function vSessoes(){
   const all=allSessions(); if(!all.length) return `<div class="empty">Nenhuma sessão registrada.</div>`;
@@ -982,7 +1018,11 @@ $('#btnParse').onclick=()=>{
   if(!out.length){ toast('Não encontrei treino, monitoramento nem corrida nesse texto.'); return; }
   const known=new Set(knownNames()); const al=state.config.aliases||{};
   for(const s of out) if(s.kind==='treino') for(const b of s.blocks) for(const i of b.items){ const c=P.canon(i.name,al); if(c) i.name=c; else { const hit=[...known].find(k=>P.nkey(k)===P.nkey(i.name)); if(hit) i.name=hit; else i.isNew=true; } delete i.raw; }
-  for(const s of out) if(s.kind==='treino'&&s.foco){ const parts=s.foco.split('/').map(x=>x.trim()).filter(Boolean); const hit=parts.findIndex(x=>al['foco:'+focoKey(x)]);
+  for(const s of out) if(s.kind==='treino'&&s.foco){
+    const tm=/^\s*t[ée]cnica\s*:?\s*(.*)$/i.exec(s.foco); if(tm){ s.focoOriginal=s.foco; s.foco='Técnica'; const x=tm[1].split('/')[0].trim(); if(x) s.focoExtra=x; continue; }
+    if(/push\s*(&|e|and)\s*pull/i.test(s.foco)){ s.focoOriginal=s.foco; s.foco='Puxadores'; s.focos=['Puxadores','Empurradores']; continue; }
+    const om=/^\s*open\s*(.*)$/i.exec(s.foco); if(om){ s.focoOriginal=s.foco; s.foco='Open CrossFit Games'; const x=om[1].replace(/^[\s/:-]+/,'').trim(); if(x) s.focoExtra=x; continue; }
+    const parts=s.foco.split('/').map(x=>x.trim()).filter(Boolean); const hit=parts.findIndex(x=>al['foco:'+focoKey(x)]);
     if(hit>=0){ const novo=al['foco:'+focoKey(parts[hit])]; const extra=parts.filter((x,i)=>i!==hit).join(' / '); if(novo!==s.foco) s.focoOriginal=s.foco; s.foco=novo; if(extra) s.focoExtra=extra; } }
   state.pending=out; renderPreview(); $('#regStep1').hidden=true; $('#regStep2').hidden=false;
 };
