@@ -275,10 +275,11 @@ function parseItem(raw){
   it.name=name; return it;
 }
 function parseLadder(l){
-  if(!/^\d+(?:\/\d+)?\s*r\s*-/i.test(l)) return null;
-  const out=[]; for(const seg of l.split(/\s*[\/|]\s*(?=\d+(?:\/\d+)?\s*r\b)|\s*\|\s*/)){
-    const m=/^(\d+)(?:\/(\d+))?\s*r\s*-\s*(?:(\d+)\s*x\s*)?(\d+(?:[.,]\d+)?)\s*kg/i.exec(seg.trim()); if(!m) continue;
-    const c=m[3]?+m[3]:1; out.push({reps:+m[1]*(m[2]?2:1),loadKg:c*num(m[4])}); }
+  l=l.replace(/^\(|\)$/g,'').trim();
+  if(!/^(?:\d+\s*x\s*)?\d+(?:\/\d+)?\s*r\s*-/i.test(l)) return null;
+  const out=[]; for(const seg of l.split(/\s*[\/|]\s*(?=(?:\d+\s*x\s*)?\d+(?:\/\d+)?\s*r\b)|\s*\|\s*/)){
+    const m=/^(?:(\d+)\s*x\s*)?(\d+)(?:\/(\d+))?\s*r\s*-\s*(?:(\d+)\s*x\s*)?(\d+(?:[.,]\d+)?)\s*kg/i.exec(seg.trim()); if(!m) continue;
+    const c=m[4]?+m[4]:1, sets=m[1]?+m[1]:1; out.push({reps:+m[2]*(m[3]?2:1)*sets,loadKg:c*num(m[5])}); }
   return out.length?out:null;
 }
 function splitCombo(line){
@@ -307,11 +308,11 @@ function parseWorkout(t){
     if(lad){ let last=cur.items[cur.items.length-1];
       if(cur.pending){ const nm=cleanName(cur.pending); if(nm){ last={raw:cur.pending,name:nm}; const ld=parseLoad(cur.pending); if(ld) last.implement=ld.implement; cur.items.push(last);} cur.pending=null; }
       if(last){ last.ladder=lad; last.loadKg=Math.max(...lad.map(x=>x.loadKg)); last.reps=lad.reduce((a,x)=>a+x.reps,0); last.unitKg=null; } continue; }
-    if(/^(?:[•*]\s*)?\d*\s*º?\s*tabata/i.test(l) || /^\d+\s*rounds?\b/i.test(l) || /\b(on|ativo)\s*[\/|]\s*\d+\s*(?:"|''|”)?\s*(off|descanso)/i.test(l)){ cur.result=(cur.result?cur.result+' · ':'')+l.replace(/^[•*]\s*/,'').replace(/:$/,''); continue; }
+    if(/^(?:[•*]\s*)?\d*\s*º?\s*tabata/i.test(l) || /^\d+\s*rounds?\b/i.test(l) || /\b(on|ativo)\b.*\b(off|descanso)\b/i.test(l) || /^esta[çc][ãa]o$/i.test(l)){ cur.result=(cur.result?cur.result+' · ':'')+l.replace(/^[•*]\s*/,'').replace(/:$/,''); continue; }
     if(/^\d+\s*(minutos?|repeti[çc][õo]es)\b/i.test(l)) continue;
     if(/^\(/.test(l)){ const last=cur.items[cur.items.length-1]; if(last){ last.note=(last.note?last.note+' ':'')+l.replace(/^\(|\)$/g,''); } continue; }
     if(/^(monitoramento|fonte de dados|tipo de treino|data\/hora|calorias|tempo:|bpm|leve|intensivo|aer|anaer|vo)/i.test(l)) continue;
-    let got=false; for(const part of splitCombo(l)){ const it=parseItem(part); if(it){ cur.items.push(it); got=true; } }
+    let got=false; for(const part of splitCombo(l)){ const it=parseItem(part); if(it){ if(/^isometria$/i.test(it.name)){ const pv=[...cur.items].reverse().find(x=>!/^isometria/i.test(x.name)); if(pv) it.name='Isometria '+pv.name; } cur.items.push(it); got=true; } }
     cur.pending=got?null:l;
   }
   w.blocks=w.blocks.filter(b=>b.items.length||b.result); w.blocks.forEach(b=>delete b.pending);
@@ -419,9 +420,9 @@ function mk(id,cfg){ kill(id); const el=document.getElementById(id); if(!el||!wi
 
 // ---------- views
 function kmStats(){ const ss=allSessions(); let livre=0,treino=0,nT=0;
-  for(const s of ss){ if(s.kind==='corrida'){ livre+=(s.distKm||0)*1000; continue; }
+  for(const s of ss){ if(s.kind==='corrida'){ if(s.local==='box'){ treino+=(s.distKm||0)*1000; nT++; } else livre+=(s.distKm||0)*1000; continue; }
     let had=false; for(const b of s.blocks||[]) for(const i of b.items||[]) if(i.name==='Corrida'){ const d=itemTotals(i).distM; if(d){ treino+=d; had=true; } } if(had) nT++; }
-  return {livre:livre/1000,treino:treino/1000,total:(livre+treino)/1000,nL:ss.filter(s=>s.kind==='corrida').length,nT}; }
+  return {livre:livre/1000,treino:treino/1000,total:(livre+treino)/1000,nL:ss.filter(s=>s.kind==='corrida'&&s.local!=='box').length,nT}; }
 function kmBlock(){ const k=kmStats(); if(!k.total) return '';
   return `<h2>Quilômetros</h2><p class="sub">Tudo o que você correu, somando as corridas livres e a corrida dentro dos treinos.</p>
   <div class="lifetime km"><div><b>${fmtNum(k.total,1)}</b><span>km total</span></div><div><b>${fmtNum(k.treino,1)}</b><span>km em treino · ${k.nT} treinos</span></div><div><b>${fmtNum(k.livre,1)}</b><span>km livre · ${k.nL} corridas</span></div></div>`; }
@@ -444,7 +445,7 @@ function vResumo(){
     <div class="heroside">
       <div class="stat"><span>Treinos em ${todayISO().slice(0,4)}</span><b>${yr}</b></div>
       <div class="stat"><span>Média por treino</span><b>${kAvg?fmtNum(kAvg,0)+' kcal':'–'}</b></div>
-      <div class="stat"><span>Corridas livres</span><b>${runs.length}</b></div>
+      <div class="stat"><span>Corridas livres</span><b>${runs.filter(r=>r.local!=='box').length}</b></div>
       ${bodyStat('Peso (desde jan/25)','peso',' kg')}
       ${bodyStat('Gordura corporal','gorduraPct','%')}
     </div>
@@ -485,18 +486,36 @@ function vExercicios(){
   return `<h2 style="margin-top:12px">Exercícios</h2><p class="sub">${Object.keys(ex).length} movimentos diferentes registrados.</p>
   <input class="search" id="exSearch" type="search" placeholder="Buscar exercício" value="${esc(state.exFilter)}" aria-label="Buscar exercício">
   <div class="chips" role="group" aria-label="Ordenar">${[['freq','Mais feitos'],['total','Mais reps na vida'],['carga','Maior carga'],['recente','Mais recentes'],['az','A–Z']].map(([k,l])=>`<button class="chip" data-mode="${k}" aria-pressed="${mode===k}">${l}</button>`).join('')}</div>
-  <div class="rows">${(mode==='az'?list:list.slice(0,200)).map((e,k,arr)=>`${mode==='az'&&(k===0||ini(e.name)!==ini(arr[k-1].name))?`<div class="month">${esc(ini(e.name))}</div>`:''}<button class="row" data-ex="${esc(e.name)}"><div><div class="t">${esc(e.name)}</div><div class="m">${e.count} ${e.count>1?'sessões':'sessão'}${fmtTotals(e.tot).map(x=>' · '+x).join('')} · última em ${fmtD(e.lastDate)}</div></div><div class="r">${e.best!=null?`<b>${fmtNum(e.best)} kg</b>`:'<span class="m">sem carga</span>'}</div></button>`).join('')}</div>`;
+  <div class="rows">${(mode==='az'?list:list.slice(0,200)).map((e,k,arr)=>`${mode==='az'&&(k===0||ini(e.name)!==ini(arr[k-1].name))?`<div class="month">${esc(ini(e.name))}</div>`:''}<button class="row" data-ex="${esc(e.name)}"><div><div class="t">${esc(e.name)}</div><div class="m">${e.count} ${e.count>1?'sessões':'sessão'}${e.name==='Corrida'?' · '+fmtNum(kmStats().total,1)+' km no total':fmtTotals(e.tot).map(x=>' · '+x).join('')} · última em ${fmtD(e.lastDate)}</div></div><div class="r">${e.best!=null?`<b>${fmtNum(e.best)} kg</b>`:'<span class="m">sem carga</span>'}</div></button>`).join('')}</div>`;
+}
+function vCorrida(e){
+  const K=kmStats(); const runs=allSessions().filter(s=>s.kind==='corrida');
+  const rows=[...e.sessions.map(r=>({date:r.date,feito:r.items.map(i=>esc(qty(i))).join('<br>'),bloco:esc([...new Set(r.items.map(i=>i.block))].join(', ')),extra:''})),
+    ...runs.map(s=>({date:s.date,feito:fmtNum(s.distKm,2)+' km',bloco:s.local==='box'?'<span class="tag">box</span>':'<span class="tag run">corrida livre</span>',extra:`${mmss(s.durSec)} · ${pace(s.pace)}/km`}))].sort((a,b)=>b.date.localeCompare(a.date));
+  return `<p style="margin:10px 0 0"><button class="btn ghost" id="exBack">Todos os exercícios</button></p>
+  <h2>Corrida</h2>
+  <div class="lifetime km"><div><b>${fmtNum(K.total,1)}</b><span>km total</span></div><div><b>${fmtNum(K.treino,1)}</b><span>km em treino · ${K.nT} treinos</span></div><div><b>${fmtNum(K.livre,1)}</b><span>km livre · ${K.nL} corridas</span></div></div>
+  <div class="panel"><h3>Quilômetros por mês</h3><div class="chart"><canvas id="cKm" aria-label="Quilômetros por mês"></canvas></div><div class="legend"><span><i style="background:var(--z3)"></i>Em treino</span><span><i style="background:var(--z2)"></i>Livre</span></div></div>
+  <h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Feito</th><th>Tempo · ritmo</th><th>Tipo</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${fmtD(r.date)}</td><td>${r.feito}</td><td>${r.extra||'–'}</td><td>${r.bloco}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function drawKm(){
+  const mo={}; const add=(d,k,v)=>{const m=d.slice(0,7);(mo[m]=mo[m]||{t:0,l:0})[k]+=v;};
+  for(const s of allSessions()){ if(s.kind==='corrida') add(s.date,s.local==='box'?'t':'l',s.distKm||0); else for(const b of s.blocks||[]) for(const i of b.items||[]) if(i.name==='Corrida') add(s.date,'t',itemTotals(i).distM/1000); }
+  const ks=Object.keys(mo).sort(); const lab=ks.map(k=>MES[+k.slice(5)-1]+'/'+k.slice(2,4));
+  mk('cKm',{type:'bar',data:{labels:lab,datasets:[{label:'Em treino',data:ks.map(k=>+mo[k].t.toFixed(2)),backgroundColor:css('--z3'),stack:'k'},{label:'Livre',data:ks.map(k=>+mo[k].l.toFixed(2)),backgroundColor:css('--z2'),stack:'k'}]},
+    options:baseOpts({scales:{x:{stacked:true,grid:{display:false},ticks:{color:css('--muted')}},y:{stacked:true,ticks:{color:css('--muted'),callback:v=>v+' km'},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtNum(c.raw,1)+' km'}}}})});
 }
 function vExDetail(e){
+  if(e.name==='Corrida') return vCorrida(e);
   const hasLoad=e.loaded.length>0;
   const rows=[...e.sessions].reverse().map(r=>`<tr><td>${fmtD(r.date)}${r.pr?' <span class="tag new">recorde</span>':''}</td><td>${r.items.map(i=>esc(qty(i))).join('<br>')}</td><td>${r.max!=null?fmtNum(r.max)+' kg':'–'}</td><td>${r.vol?fmtNum(r.vol,0)+' kg':'–'}</td><td>${esc([...new Set(r.items.map(i=>i.block))].join(', '))}</td></tr>`).join('');
   return `<p style="margin:10px 0 0"><button class="btn ghost" id="exBack">Todos os exercícios</button></p>
-  <h2>${esc(e.name)}</h2>${fmtTotals(e.tot,true).length?`<div class="lifetime">${fmtTotals(e.tot,true).map(x=>{const [n,...u]=x.split(' ');return `<div><b>${n}</b><span>${u.join(' ')} na vida</span></div>`}).join('')}<div><b>${e.count}</b><span>${e.count>1?'sessões':'sessão'}</span></div></div>`:''}<p class="sub">${e.count} ${e.count>1?'sessões':'sessão'}${hasLoad?` · carga de ${fmtNum(e.first)} kg na primeira vez para ${fmtNum(e.best)} kg na melhor`:''}.</p>
+  <h2>${esc(e.name)}</h2>${fmtTotals(e.tot,true).length?`<div class="lifetime">${fmtTotals(e.tot,true).map(x=>{const [n,...u]=x.split(' ');return `<div><b>${n}</b><span>${u.join(' ')} na vida</span></div>`}).join('')}<div><b>${e.count}</b><span>${e.count>1?'sessões':'sessão'}</span></div></div>`:''}${hasLoad?`<p class="sub">Carga de ${fmtNum(e.first)} kg na primeira vez para ${fmtNum(e.best)} kg na melhor.</p>`:''}
   ${hasLoad?`<div class="panel"><div class="chart tall"><canvas id="cEx" aria-label="Evolução de carga"></canvas></div><div class="legend"><span><i style="background:var(--load)"></i>Carga máxima na sessão</span><span><i style="background:var(--z2);opacity:.5"></i>Volume (carga × reps)</span><span><i style="background:var(--text)"></i>Recorde</span></div></div>`:'<p class="sub">Esse exercício não tem carga registrada; o histórico abaixo mostra reps e tempo.</p>'}
   <h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Feito</th><th>Carga máx.</th><th>Volume</th><th>Bloco</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function drawEx(){
-  const ex=exerciseIndex(); const e=state.ex&&ex[state.ex]; if(!e||!e.loaded.length) return;
+  const ex=exerciseIndex(); const e=state.ex&&ex[state.ex]; if(e&&e.name==='Corrida'){ drawKm(); return; } if(!e||!e.loaded.length) return;
   const T=r=>d2(r.date).getTime();
   mk('cEx',{data:{datasets:[
     {type:'line',label:'Carga',data:e.loaded.map(r=>({x:T(r),y:r.max})),borderColor:css('--load'),backgroundColor:css('--load'),pointRadius:e.loaded.map(r=>r.pr?6:3),pointBackgroundColor:e.loaded.map(r=>r.pr?css('--text'):css('--load')),tension:.15,yAxisID:'y',stepped:false},
@@ -540,7 +559,7 @@ function bioChart(id,k,color){
 function drawCorpo(){ if(!state.bio||!state.bio.evaluations||!state.bio.evaluations.length) return; bioChart('cPeso','peso','--text'); bioChart('cGord','gorduraPct','--z4'); bioChart('cMusc','musculoPct','--body'); bioChart('cVisc','visceral','--z5'); }
 function sessHTML(s){
   const d=d2(s.date); const open=state.openSess[s.id];
-  if(s.kind==='corrida') return `<div class="sess ${open?'open':''}"><button data-sess="${esc(s.id)}" aria-expanded="${!!open}"><div class="date"><b>${d.getDate()}</b><span>${DIA[d.getDay()]}</span></div><div><div><span class="tag run">corrida</span> <span class="t">${fmtNum(s.distKm,2)} km</span></div><div class="meta"><span>${mmss(s.durSec)}</span><span>ritmo ${pace(s.pace)}/km</span>${s.bpmAvg?`<span>${s.bpmAvg} bpm</span>`:''}</div>${zoneStrip(s.zones)}</div><span class="m">${s.kcalTotal?s.kcalTotal+' kcal':''}</span></button>
+  if(s.kind==='corrida') return `<div class="sess ${open?'open':''}"><button data-sess="${esc(s.id)}" aria-expanded="${!!open}"><div class="date"><b>${d.getDate()}</b><span>${DIA[d.getDay()]}</span></div><div><div><span class="tag run">${s.local==='box'?'corrida no box':'corrida'}</span>${s.source?` <span class="tag">${esc(s.source)}</span>`:''}${s.note?` <span class="m">${esc(s.note)}</span>`:''} <span class="t">${fmtNum(s.distKm,2)} km</span></div><div class="meta"><span>${mmss(s.durSec)}</span><span>ritmo ${pace(s.pace)}/km</span>${s.bpmAvg?`<span>${s.bpmAvg} bpm</span>`:''}</div>${zoneStrip(s.zones)}</div><span class="m">${s.kcalTotal?s.kcalTotal+' kcal':''}</span></button>
   <div class="detail">${s.splits&&s.splits.length?`<div class="block"><h4>Ritmo por km</h4>${s.splits.map(x=>`<div class="item"><span>Km ${x.km}${x.partial?' (parcial)':''}</span><span class="q">${pace(x.pace)}</span></div>`).join('')}</div>`:''}
   <div class="block"><h4>Relógio</h4><div class="item"><span>Ritmo mais rápido</span><span class="q">${pace(s.paceBest)}</span></div><div class="item"><span>BPM máximo</span><span class="q">${s.bpmMax||'–'}</span></div><div class="item"><span>Passos</span><span class="q">${s.steps?fmtNum(s.steps,0):'–'}</span></div><div class="item"><span>Cadência média</span><span class="q">${s.cadAvg||'–'}</span></div></div>
   <div class="actions"><button class="btn danger" data-del="${esc(s.id)}">Excluir corrida</button></div></div></div>`;
@@ -556,7 +575,7 @@ function vSessoes(){
   let html=`<h2 style="margin-top:12px">Sessões</h2><div class="chips" role="group" aria-label="Filtrar">${[['todos','Tudo'],['treino','Treinos'],['corrida','Corridas']].map(([k,l])=>`<button class="chip" data-sf="${k}" aria-pressed="${f===k}">${l}</button>`).join('')}</div>`;
   if(f==='corrida'){ const km=list.reduce((a,r)=>a+(r.distKm||0),0), t=list.reduce((a,r)=>a+(r.durSec||0),0), kc=list.reduce((a,r)=>a+(r.kcalTotal||0),0);
     const K=kmStats();
-    html+=`<div class="lifetime"><div><b>${fmtNum(K.total,1)}</b><span>km total</span></div><div><b>${fmtNum(K.treino,1)}</b><span>km em treino</span></div><div><b>${fmtNum(km,1)}</b><span>km livre · ${list.length} corridas</span></div><div><b>${fmtNum(t/3600,1)}</b><span>horas correndo</span></div><div><b>${fmtNum(kc,0)}</b><span>kcal</span></div></div>`; }
+    html+=`<div class="lifetime"><div><b>${fmtNum(K.total,1)}</b><span>km total</span></div><div><b>${fmtNum(K.treino,1)}</b><span>km em treino</span></div><div><b>${fmtNum(K.livre,1)}</b><span>km livre · ${K.nL} corridas</span></div><div><b>${fmtNum(t/3600,1)}</b><span>horas correndo</span></div><div><b>${fmtNum(kc,0)}</b><span>kcal</span></div></div>`; }
   let cur='';
   for(const s of list){ const m=s.date.slice(0,7); if(m!==cur){ cur=m; html+=`<div class="month">${MES[+m.slice(5)-1]} ${m.slice(0,4)}</div>`; } html+=sessHTML(s); }
   return html+zoneLegend;
