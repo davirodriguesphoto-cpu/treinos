@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" translate="no">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Treinos do Davi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -139,6 +140,8 @@ textarea{width:100%;min-height:220px;border-radius:12px;border:1px solid var(--l
 body.signed-out nav.tabs{display:none}
 .lifetime{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin:10px 0 14px}
 .lifetime div{border-left:2px solid var(--z2);padding-left:10px}
+.lifetime.km div:first-child{border-left-color:var(--z3)}
+.lifetime.km div:first-child b{font-size:44px}
 .lifetime b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:34px;font-weight:700;line-height:1}
 .lifetime span{font-size:13px;color:var(--muted)}
 .auth{max-width:380px;margin:40px auto 0}
@@ -415,6 +418,13 @@ function timeX(){ return {type:'linear',grid:{display:false},ticks:{color:css('-
 function mk(id,cfg){ kill(id); const el=document.getElementById(id); if(!el||!window.Chart) return; charts[id]=new Chart(el,cfg); }
 
 // ---------- views
+function kmStats(){ const ss=allSessions(); let livre=0,treino=0,nT=0;
+  for(const s of ss){ if(s.kind==='corrida'){ livre+=(s.distKm||0)*1000; continue; }
+    let had=false; for(const b of s.blocks||[]) for(const i of b.items||[]) if(i.name==='Corrida'){ const d=itemTotals(i).distM; if(d){ treino+=d; had=true; } } if(had) nT++; }
+  return {livre:livre/1000,treino:treino/1000,total:(livre+treino)/1000,nL:ss.filter(s=>s.kind==='corrida').length,nT}; }
+function kmBlock(){ const k=kmStats(); if(!k.total) return '';
+  return `<h2>Quilômetros</h2><p class="sub">Tudo o que você correu, somando as corridas livres e a corrida dentro dos treinos.</p>
+  <div class="lifetime km"><div><b>${fmtNum(k.total,1)}</b><span>km total</span></div><div><b>${fmtNum(k.treino,1)}</b><span>km em treino · ${k.nT} treinos</span></div><div><b>${fmtNum(k.livre,1)}</b><span>km livre · ${k.nL} corridas</span></div></div>`; }
 function vResumo(){
   const ss=allSessions(); const tr=ss.filter(s=>s.kind==='treino'); const runs=ss.filter(s=>s.kind==='corrida');
   if(!tr.length) return `<div class="empty">Nenhum treino ainda. Toque em Registrar e cole o texto do seu treino.</div>`;
@@ -434,11 +444,12 @@ function vResumo(){
     <div class="heroside">
       <div class="stat"><span>Treinos em ${todayISO().slice(0,4)}</span><b>${yr}</b></div>
       <div class="stat"><span>Média por treino</span><b>${kAvg?fmtNum(kAvg,0)+' kcal':'–'}</b></div>
-      <div class="stat"><span>Corridas (${runs.length})</span><b>${fmtNum(runs.reduce((a,r)=>a+(r.distKm||0),0),1)} km</b></div>
+      <div class="stat"><span>Corridas livres</span><b>${runs.length}</b></div>
       ${bodyStat('Peso (desde jan/25)','peso',' kg')}
       ${bodyStat('Gordura corporal','gorduraPct','%')}
     </div>
   </section>
+  ${kmBlock()}
   <h2>Carga em alta</h2><p class="sub">Exercícios com maior ganho entre a primeira carga registrada e a melhor.</p>
   <div class="rows">${up.map(e=>`<button class="row" data-ex="${esc(e.name)}"><div class="trend"><div><div class="t">${esc(e.name)}</div><div class="m">${e.count} sessões · última em ${fmtD(e.lastDate)}</div></div><div class="r"><b>${fmtNum(e.first)} → ${fmtNum(e.best)} kg</b></div>${sparkSVG(e.loaded.map(r=>r.max),css('--load'))}</div><span></span></button>`).join('')||'<p class="sub">Ainda não há exercícios com carga suficiente para comparar.</p>'}</div>
   <h2>Frequência</h2><p class="sub">Treinos por semana.</p>
@@ -460,19 +471,21 @@ function drawResumo(){
   mk('cZones',{type:'bar',data:{labels:lab,datasets:Z.map(([k,l,c])=>({label:l,data:ks.map(m=>+(mo[m][k]/mo[m].n).toFixed(1)),backgroundColor:css(c),stack:'z'}))},
     options:baseOpts({scales:{x:{stacked:true,grid:{display:false},ticks:{color:css('--muted')}},y:{stacked:true,ticks:{color:css('--muted'),callback:v=>v+' min'},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+' min'}}}})});
 }
+const ini=n=>{const c=n.normalize('NFD').replace(/[\u0300-\u036f]/g,'')[0].toUpperCase();return /[A-Z]/.test(c)?c:'#'};
 function vExercicios(){
   const ex=exerciseIndex();
   if(state.ex&&ex[state.ex]) return vExDetail(ex[state.ex]);
   const f=state.exFilter.toLowerCase(); const mode=state.exMode||'freq';
   let list=Object.values(ex).filter(e=>!f||e.name.toLowerCase().includes(f));
   if(mode==='carga') list=list.filter(e=>e.best!=null).sort((a,b)=>b.best-a.best);
+  else if(mode==='az') list.sort((a,b)=>a.name.localeCompare(b.name,'pt',{sensitivity:'base'}));
   else if(mode==='total') list.sort((a,b)=>b.tot.reps-a.tot.reps);
   else if(mode==='recente') list.sort((a,b)=>b.lastDate.localeCompare(a.lastDate));
   else list.sort((a,b)=>b.count-a.count);
   return `<h2 style="margin-top:12px">Exercícios</h2><p class="sub">${Object.keys(ex).length} movimentos diferentes registrados.</p>
   <input class="search" id="exSearch" type="search" placeholder="Buscar exercício" value="${esc(state.exFilter)}" aria-label="Buscar exercício">
-  <div class="chips" role="group" aria-label="Ordenar">${[['freq','Mais feitos'],['total','Mais reps na vida'],['carga','Maior carga'],['recente','Mais recentes']].map(([k,l])=>`<button class="chip" data-mode="${k}" aria-pressed="${mode===k}">${l}</button>`).join('')}</div>
-  <div class="rows">${list.slice(0,200).map(e=>`<button class="row" data-ex="${esc(e.name)}"><div><div class="t">${esc(e.name)}</div><div class="m">${e.count} ${e.count>1?'sessões':'sessão'}${fmtTotals(e.tot).map(x=>' · '+x).join('')} · última em ${fmtD(e.lastDate)}</div></div><div class="r">${e.best!=null?`<b>${fmtNum(e.best)} kg</b>`:'<span class="m">sem carga</span>'}</div></button>`).join('')}</div>`;
+  <div class="chips" role="group" aria-label="Ordenar">${[['freq','Mais feitos'],['total','Mais reps na vida'],['carga','Maior carga'],['recente','Mais recentes'],['az','A–Z']].map(([k,l])=>`<button class="chip" data-mode="${k}" aria-pressed="${mode===k}">${l}</button>`).join('')}</div>
+  <div class="rows">${(mode==='az'?list:list.slice(0,200)).map((e,k,arr)=>`${mode==='az'&&(k===0||ini(e.name)!==ini(arr[k-1].name))?`<div class="month">${esc(ini(e.name))}</div>`:''}<button class="row" data-ex="${esc(e.name)}"><div><div class="t">${esc(e.name)}</div><div class="m">${e.count} ${e.count>1?'sessões':'sessão'}${fmtTotals(e.tot).map(x=>' · '+x).join('')} · última em ${fmtD(e.lastDate)}</div></div><div class="r">${e.best!=null?`<b>${fmtNum(e.best)} kg</b>`:'<span class="m">sem carga</span>'}</div></button>`).join('')}</div>`;
 }
 function vExDetail(e){
   const hasLoad=e.loaded.length>0;
@@ -542,7 +555,8 @@ function vSessoes(){
   const f=state.sessFilter||'todos'; const list=ss.filter(s=>f==='todos'||s.kind===f);
   let html=`<h2 style="margin-top:12px">Sessões</h2><div class="chips" role="group" aria-label="Filtrar">${[['todos','Tudo'],['treino','Treinos'],['corrida','Corridas']].map(([k,l])=>`<button class="chip" data-sf="${k}" aria-pressed="${f===k}">${l}</button>`).join('')}</div>`;
   if(f==='corrida'){ const km=list.reduce((a,r)=>a+(r.distKm||0),0), t=list.reduce((a,r)=>a+(r.durSec||0),0), kc=list.reduce((a,r)=>a+(r.kcalTotal||0),0);
-    html+=`<div class="lifetime"><div><b>${list.length}</b><span>corridas</span></div><div><b>${fmtNum(km,1)}</b><span>km na vida</span></div><div><b>${fmtNum(t/3600,1)}</b><span>horas correndo</span></div><div><b>${fmtNum(kc,0)}</b><span>kcal</span></div></div>`; }
+    const K=kmStats();
+    html+=`<div class="lifetime"><div><b>${fmtNum(K.total,1)}</b><span>km total</span></div><div><b>${fmtNum(K.treino,1)}</b><span>km em treino</span></div><div><b>${fmtNum(km,1)}</b><span>km livre · ${list.length} corridas</span></div><div><b>${fmtNum(t/3600,1)}</b><span>horas correndo</span></div><div><b>${fmtNum(kc,0)}</b><span>kcal</span></div></div>`; }
   let cur='';
   for(const s of list){ const m=s.date.slice(0,7); if(m!==cur){ cur=m; html+=`<div class="month">${MES[+m.slice(5)-1]} ${m.slice(0,4)}</div>`; } html+=sessHTML(s); }
   return html+zoneLegend;
