@@ -19,7 +19,7 @@
   --z1:#5B8DEF;--z2:#2EC4B6;--z3:#F2C14E;--z4:#F28C38;--z5:#E5484D;
   --load:#F2C14E;--body:#2EC4B6;--good:#4ADE9B;--bad:#F2786E;
   color-scheme:dark;
-  --bodybase:#E9ECF1;--bodyline:#2B2F36;--bodybg:#F7F8FA;
+  --bodybase:var(--raised);--bodyline:var(--bg);--bodybg:transparent;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121722;--surface:#1A2130;--raised:#222B3C;--line:#2C364A;--text:#E9EDF4;--muted:#8E98AC;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#121722;--surface:#1A2130;--raised:#222B3C;--line:#2C364A;--text:#E9EDF4;--muted:#8E98AC;color-scheme:dark}
@@ -169,11 +169,11 @@ body.signed-out nav.tabs{display:none}
 .ztot b{font-family:"Barlow Condensed",sans-serif;font-size:22px;font-weight:600}
 .ztot span{font-size:12px;color:var(--muted)}
 .btn.accent{background:var(--load);color:#1A1405;border-color:var(--load)}
-.mgwrap{display:grid;grid-template-columns:minmax(260px,1fr) 1fr;gap:16px;align-items:start;margin-top:10px}
-.bodies{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bodybg);border:1px solid var(--line);border-radius:14px;padding:10px}
+.mgwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:10px}
+.bodies{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:transparent;padding:4px 0}
 .bodysvg{width:100%;height:auto;display:block}
 .mglist{display:grid;gap:2px}
-.mgrow{display:grid;grid-template-columns:110px 1fr 40px 70px;align-items:center;gap:10px;background:none;border:0;border-radius:8px;padding:6px 8px;text-align:left;font-size:14px}
+.mgrow{min-width:0;display:grid;grid-template-columns:minmax(80px,110px) minmax(40px,1fr) 40px 70px;align-items:center;gap:10px;background:none;border:0;border-radius:8px;padding:6px 8px;text-align:left;font-size:14px}
 .mgrow.on,.mgrow:hover{background:var(--surface)}
 .mgrow .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
 .mgrow .bar i{display:block;height:100%;background:#E03B45;border-radius:4px}
@@ -771,7 +771,7 @@ function bodySVG(side,val,max){
   const fill=g=>{ if(!MG.some(m=>m[0]===g)) return 'var(--bodybase)'; const v=val[g]||0; if(!v) return 'var(--bodybase)'; const t=Math.max(.22,v/max); return `color-mix(in srgb, #E03B45 ${Math.round(t*100)}%, var(--bodybase))`; };
   const sel=state.mgSel; const out=[];
   for(const [g,d,mir] of BODYP[side]){ const isM=MG.some(m=>m[0]===g);
-    const st=`fill:${fill(g)};stroke:var(--bodyline);stroke-width:${sel===g?2.2:1.1};stroke-linejoin:round`;
+    const st=`fill:${fill(g)};stroke:${sel===g?'var(--text)':'var(--bodyline)'};stroke-width:${sel===g?2:1.2};stroke-linejoin:round`;
     const at=isM?` data-mg="${g}" style="${st};cursor:pointer"`:` style="${st}"`;
     out.push(`<path d="${d}"${at}/>`); if(mir) out.push(`<path d="${mx(d)}"${at}/>`); }
   return `<svg viewBox="36 6 128 368" class="bodysvg" role="img" aria-label="Corpo ${side==='front'?'de frente':'de costas'}">${out.join('')}</svg>`; }
