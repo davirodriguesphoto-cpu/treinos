@@ -482,7 +482,7 @@ const MRULES=[
  [/devil press/, {ombros:1,peito:.6,quadriceps:.5,gluteos:.5,posterior:.4,costas:.4,abdomen:.4}],
  [/burpee pull/, {costas:1,peito:.6,quadriceps:.5,biceps:.5,ombros:.4}],
  [/burpee step/, {quadriceps:1,peito:.6,gluteos:.5,ombros:.4,abdomen:.4}],
- [/burpee broad|burpee bread|burpee board/, {quadriceps:1,gluteos:.6,peito:.6,ombros:.4,abdomen:.4}],
+ [/burpee broad|burpee bread|burpee board/, {quadriceps:1,gluteos:.6,peito:.6,panturrilha:.4,ombros:.4,abdomen:.4}],
  [/burpee/, {peito:1,quadriceps:.6,ombros:.5,abdomen:.5,triceps:.4}],
  [/wall walk|handstand|pike push|dolphin/, {ombros:1,triceps:.6,abdomen:.5}],
  [/thruster/, {quadriceps:1,gluteos:.7,ombros:.8,triceps:.4}],
@@ -497,8 +497,10 @@ const MRULES=[
  [/dead ?lift|stiff|terra|good morning|polideadlift/, {posterior:1,gluteos:.8,lombar:.7,trapezio:.3}],
  [/elevacao pelvica|hip thrust|ponte/, {gluteos:1,posterior:.6}],
  [/sumo|cossack/, {quadriceps:.8,adutores:1,gluteos:.8}],
+ [/jump bulgaro|jump lunge/, {quadriceps:1,gluteos:.8,panturrilha:.4}],
  [/bulgaro|lunge|longe|reverse|avanco|afundo|pistol|step|lungster/, {quadriceps:1,gluteos:.8,posterior:.3}],
- [/squat|agachamento|goblet|cadeirinha|cadeira|box jump|broad jump|jump|salto|extensora/, {quadriceps:1,gluteos:.6}],
+ [/box jump|broad jump|jump|salto|toes and jump/, {quadriceps:1,gluteos:.6,panturrilha:.4}],
+ [/squat|agachamento|goblet|cadeirinha|cadeira|extensora/, {quadriceps:1,gluteos:.6}],
  [/sled|treno/, {quadriceps:1,gluteos:.8,panturrilha:.5}],
  [/farm|farmer|marcha/, {antebraco:1,trapezio:.8,abdomen:.5}],
  [/push up|flexao|supino|chest|floor press|crucifixo/, {peito:1,triceps:.5,ombros:.4}],
@@ -782,9 +784,10 @@ function bodySVG(val,max){
   const fill=g=>{ if(!MG.some(m=>m[0]===g)) return 'var(--bodybase)'; const v=val[g]||0; if(!v) return 'var(--bodybase)'; const t=Math.max(.25,v/max); return `color-mix(in srgb, var(--z4) ${Math.round(t*100)}%, var(--bodybase))`; };
   const sel=state.mgSel; const out=[];
   for(const side of ['front','back']) for(const [g,d] of BODYDATA.regs[side]){ const isM=MG.some(m=>m[0]===g);
-    out.push(`<path d="${d}" style="fill:${fill(g)};${sel===g?'stroke:var(--text);stroke-width:1.4;':''}${isM?'cursor:pointer':''}"${isM?` data-mg="${g}"`:''}/>`); }
+    const f=sel?(sel===g?'var(--text)':fill(g)):fill(g); const op=sel&&sel!==g?'opacity:.5;':'';
+    out.push(`<path d="${d}" style="fill:${f};${op}${isM?'cursor:pointer':''}"${isM?` data-mg="${g}"`:''}/>`); }
   const lines=BODYDATA.lines.map(([c,d])=>c==='s'?`<path d="${d}" class="bl-s"/>`:`<path d="${d}" class="bl-f"/>`).join('');
-  return `<svg viewBox="10 28 280 236" class="bodysvg" role="img" aria-label="Corpo de frente e de costas">${out.join('')}<g class="blines">${lines}</g></svg>`; }
+  return `<svg viewBox="10 28 280 236" class="bodysvg" role="img" aria-label="Corpo de frente e de costas">${out.join('')}<g class="blines" style="${sel?'opacity:.5':''}">${lines}</g></svg>`; }
 function vMusculos(){
   const per=state.mgPer||'30'; const all=allSessions().filter(s=>s.kind==='treino');
   const from=per==='tudo'?'0000':per==='hoje'?todayISO():(()=>{const d=new Date(); d.setDate(d.getDate()-(+per)+1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
