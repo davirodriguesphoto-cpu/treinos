@@ -226,7 +226,9 @@ details.sg summary{cursor:pointer}
 .authlogo small{display:block;margin-top:6px;font-size:13px;letter-spacing:.22em;color:var(--muted)}
 .signed-out .head .brand{visibility:hidden}
 .toast.masc{align-items:center;gap:10px;white-space:nowrap;background:var(--raised);color:var(--text);border:1px solid var(--z4);font-size:16px}
-.who#status{flex-direction:row;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.who#status{flex-direction:row;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin:0}
+.topright{display:flex;align-items:center;gap:10px}
+.avatarbtn .avatar{width:40px;height:40px}
 .pill{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--z3);color:var(--z3)}
 .pill.off{border-color:var(--bad);color:var(--bad)}
 .avatarbtn{background:none;border:0;padding:0;border-radius:50%;line-height:0}
@@ -237,6 +239,13 @@ details.sg summary{cursor:pointer}
 .pline{color:var(--muted);font-size:14px}.pline.small{font-size:12px;margin-top:2px}
 .fotoedit{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .fotoedit label.btn{cursor:pointer}
+.cropwrap{display:grid;gap:10px;justify-items:center;margin:0 0 14px;padding:12px;border:1px solid var(--line);border-radius:12px}
+.cropbox{position:relative;overflow:hidden;border-radius:12px;touch-action:none;cursor:grab;background:#000;max-width:100%}
+.cropbox img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none;max-width:none}
+.cropmask{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 9999px rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.85);pointer-events:none}
+.cropwrap[hidden]{display:none}
+.cropzoom{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);width:260px}
+.cropzoom input{flex:1;accent-color:var(--z4)}
 .hello{margin:6px 0 0;color:var(--muted);font-size:15px}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
@@ -263,8 +272,7 @@ details.sg summary{cursor:pointer}
 </head>
 <body>
 <div class="wrap">
-  <div class="top head"><div class="brand"><span class="brandface" aria-hidden="true"></span><div class="wmh"><h1 class="wm">WÓD<span class="ap">'</span>IO</h1><small>seu treino diário</small></div></div><button class="iconbtn" id="btnTema" aria-label="Mudar tema"></button></div>
-  <div class="who" id="status">Carregando seus dados…</div>
+  <div class="top head"><div class="brand"><span class="brandface" aria-hidden="true"></span><div class="wmh"><h1 class="wm">WÓD<span class="ap">'</span>IO</h1><small>seu treino diário</small></div></div><div class="topright"><div class="who" id="status"></div><button class="iconbtn" id="btnTema" aria-label="Mudar tema"></button></div></div>
   <main id="view"></main>
 </div>
 <nav class="tabs" aria-label="Seções"><div class="in">
@@ -1102,8 +1110,9 @@ function avatarHTML(sz){ const P=state.profile||{}; if(P.foto) return `<img src=
 function renderPerfilCard(){ const P=state.profile||{}; const ida=idadeDe(P.nascimento);
   $('#perfilCard').innerHTML=`<div class="pcard">${avatarHTML(64)}<div><div class="pname">${esc(((P.nome||'')+' '+(P.sobrenome||'')).trim()||'Seu nome')}</div><div class="pline">${esc(perfilLinha()||'Complete seu perfil')}</div>${ida!=null?`<div class="pline small">FC máxima estimada: ${220-ida} bpm · as zonas seguem as do relógio</div>`:''}</div></div>
   <button class="btn" id="btnPerfilEdit">Editar perfil</button>`; }
-function openPerfil(){ const P=state.profile||{}; state.fotoNova=undefined;
+function openPerfil(){ const P=state.profile||{}; state.fotoNova=undefined; cropClose();
   $('#perfilForm').innerHTML=`<div class="fotoedit">${avatarHTML(80)}<div><label class="btn" for="perfilFoto">Escolher foto</label><input type="file" id="perfilFoto" accept="image/*" hidden> ${P.foto?'<button class="btn ghost small" id="btnFotoRm" type="button">Remover</button>':''}</div></div>
+  <div id="cropWrap" class="cropwrap" hidden></div>
   <div class="form"><label>Nome<input name="nome" value="${esc(P.nome||'')}" autocomplete="given-name"></label><label>Sobrenome<input name="sobrenome" value="${esc(P.sobrenome||'')}" autocomplete="family-name"></label>
   <label>Data de nascimento<input type="date" name="nascimento" value="${esc(P.nascimento||'')}"></label>
   <label>Sexo<select name="sexo"><option value="">—</option><option value="M" ${P.sexo==='M'?'selected':''}>Masculino</option><option value="F" ${P.sexo==='F'?'selected':''}>Feminino</option></select></label>
@@ -1113,8 +1122,31 @@ function openPerfil(){ const P=state.profile||{}; state.fotoNova=undefined;
 async function fotoReduzida(file){ const url=URL.createObjectURL(file); const img=await new Promise((ok,no)=>{const i=new Image(); i.onload=()=>ok(i); i.onerror=no; i.src=url;});
   const s=256, c=document.createElement('canvas'); c.width=s; c.height=s; const g=c.getContext('2d'); const m=Math.min(img.width,img.height);
   g.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,s,s); URL.revokeObjectURL(url); return c.toDataURL('image/jpeg',.82); }
-document.addEventListener('change',async e=>{ if(e.target.id!=='perfilFoto') return; const f=e.target.files[0]; if(!f) return;
-  try{ state.fotoNova=await fotoReduzida(f); const el=document.querySelector('.fotoedit .avatar'); if(el) el.outerHTML=`<img src="${state.fotoNova}" alt="" width="80" height="80" class="avatar">`; }catch(err){ toast('Não consegui abrir essa imagem.'); } });
+// enquadrar foto: arrastar + zoom
+const CROP={img:null,url:null,x:0,y:0,s:1,min:1,box:260,drag:null};
+function cropDraw(){ const im=$('#cropImg'); if(!im) return; im.style.transform=`translate(${CROP.x}px,${CROP.y}px) scale(${CROP.s})`; }
+function cropClamp(){ const w=CROP.img.width*CROP.s, h=CROP.img.height*CROP.s, B=CROP.box; CROP.x=Math.min(0,Math.max(B-w,CROP.x)); CROP.y=Math.min(0,Math.max(B-h,CROP.y)); }
+async function abrirCrop(file){ const url=URL.createObjectURL(file); const img=await new Promise((ok,no)=>{const i=new Image(); i.onload=()=>ok(i); i.onerror=no; i.src=url;});
+  Object.assign(CROP,{img,url}); const B=CROP.box; CROP.min=Math.max(B/img.width,B/img.height); CROP.s=CROP.min; CROP.x=(B-img.width*CROP.s)/2; CROP.y=(B-img.height*CROP.s)/2;
+  $('#cropWrap').innerHTML=`<div class="cropbox" id="cropBox" style="width:${B}px;height:${B}px"><img id="cropImg" src="${url}" alt="" draggable="false" style="width:${img.width}px;height:${img.height}px"><div class="cropmask"></div></div>
+  <label class="cropzoom">Zoom<input type="range" id="cropZoom" min="0" max="100" value="0"></label>
+  <p class="note" style="margin:0">Arraste a foto para enquadrar.</p>
+  <div class="actions"><button class="btn ghost small" id="btnCropCancel" type="button">Cancelar</button><button class="btn primary small" id="btnCropOk" type="button">Usar foto</button></div>`;
+  $('#cropWrap').hidden=false; cropDraw();
+  const box=$('#cropBox');
+  box.addEventListener('pointerdown',ev=>{ CROP.drag={px:ev.clientX,py:ev.clientY,x:CROP.x,y:CROP.y}; box.setPointerCapture(ev.pointerId); });
+  box.addEventListener('pointermove',ev=>{ if(!CROP.drag) return; CROP.x=CROP.drag.x+ev.clientX-CROP.drag.px; CROP.y=CROP.drag.y+ev.clientY-CROP.drag.py; cropClamp(); cropDraw(); });
+  box.addEventListener('pointerup',()=>{ CROP.drag=null; }); box.addEventListener('pointercancel',()=>{ CROP.drag=null; });
+  $('#cropZoom').addEventListener('input',ev=>{ const B=CROP.box, cx=(B/2-CROP.x)/CROP.s, cy=(B/2-CROP.y)/CROP.s; CROP.s=CROP.min*(1+(+ev.target.value)/50); CROP.x=B/2-cx*CROP.s; CROP.y=B/2-cy*CROP.s; cropClamp(); cropDraw(); }); }
+function cropExport(){ const s=256, c=document.createElement('canvas'); c.width=s; c.height=s; const g=c.getContext('2d'); const k=s/CROP.box;
+  g.drawImage(CROP.img,-CROP.x/CROP.s,-CROP.y/CROP.s,CROP.box/CROP.s,CROP.box/CROP.s,0,0,s,s); return c.toDataURL('image/jpeg',.85); }
+function cropClose(){ if(CROP.url) URL.revokeObjectURL(CROP.url); CROP.img=null; CROP.url=null; const w=$('#cropWrap'); if(w){ w.hidden=true; w.innerHTML=''; } }
+document.addEventListener('change',async e=>{ if(e.target.id!=='perfilFoto') return; const f=e.target.files[0]; e.target.value=''; if(!f) return;
+  try{ await abrirCrop(f); }catch(err){ toast('Não consegui abrir essa imagem.'); } });
+document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t) return;
+  if(t.id==='btnCropOk'){ state.fotoNova=cropExport(); const el=document.querySelector('.fotoedit .avatar'); if(el) el.outerHTML=`<img src="${state.fotoNova}" alt="" width="80" height="80" class="avatar">`; cropClose(); }
+  if(t.id==='btnCropCancel'){ cropClose(); }
+  if(t.id==='btnFotoAdj' && state.profile && (state.fotoNova||state.profile.foto)){ fetch(state.fotoNova||state.profile.foto).then(r=>r.blob()).then(abrirCrop); } });
 async function salvarPerfil(){ const f=new FormData($('#perfilForm')); const P={...(state.profile||{})};
   for(const k of ['nome','sobrenome','nascimento','sexo']){ const v=String(f.get(k)||'').trim(); if(v) P[k]=v; else delete P[k]; }
   const h=parseInt(f.get('altura'),10); if(h>90&&h<250) P.altura=h; else delete P.altura;
