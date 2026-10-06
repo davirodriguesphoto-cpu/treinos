@@ -229,6 +229,15 @@ details.sg summary{cursor:pointer}
 .who#status{flex-direction:row;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .pill{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--z3);color:var(--z3)}
 .pill.off{border-color:var(--bad);color:var(--bad)}
+.avatarbtn{background:none;border:0;padding:0;border-radius:50%;line-height:0}
+.avatar{border-radius:50%;object-fit:cover;display:inline-block;border:2px solid var(--line)}
+.avatar.ini{display:inline-grid;place-items:center;background:var(--raised);color:var(--text);font-weight:600;font-family:"Barlow Condensed",sans-serif}
+.pcard{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.pname{font-family:"Barlow Condensed",sans-serif;font-size:24px;font-weight:600;line-height:1.1}
+.pline{color:var(--muted);font-size:14px}.pline.small{font-size:12px;margin-top:2px}
+.fotoedit{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.fotoedit label.btn{cursor:pointer}
+.hello{margin:6px 0 0;color:var(--muted);font-size:15px}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -291,7 +300,7 @@ details.sg summary{cursor:pointer}
 </dialog>
 <dialog id="dlgConta" aria-labelledby="contaT">
   <div class="mh"><h3 id="contaT">Conta</h3><button class="btn ghost" data-close>Fechar</button></div>
-  <div class="mb"><p class="note" style="margin-top:0">Conectado como <b id="contaEmail"></b></p>
+  <div class="mb"><div id="perfilCard"></div><p class="note">Conectado como <b id="contaEmail"></b></p>
     <div class="actions" style="justify-content:flex-start"><button class="btn" id="btnExport">Baixar backup</button><button class="btn" id="btnImport2">Importar arquivo</button><button class="btn" id="btnChangePw">Trocar senha</button><button class="btn danger" id="btnLogout">Sair</button></div>
     <p class="note">O backup é um arquivo com todos os seus treinos, corridas e avaliações. Guarde de vez em quando no seu Drive.</p>
     <h4 style="margin:16px 0 4px">Backups automáticos</h4><p class="note" style="margin-top:0">Todo dia de madrugada o sistema guarda uma cópia. Ficam os últimos 30 dias.</p><div id="bkList"></div><p class="zion">Feito com 🧡 pro Zion</p></div>
@@ -301,6 +310,11 @@ details.sg summary{cursor:pointer}
   <div class="mh"><h3 id="edT">Editar sessão</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb"><div id="edForm"></div><datalist id="exNames"></datalist>
     <div class="actions"><button class="btn ghost" data-close>Cancelar</button><button class="btn primary" id="btnEdSave">Salvar alterações</button></div></div>
+</dialog>
+<dialog id="dlgPerfil" aria-labelledby="pfT">
+  <div class="mh"><h3 id="pfT">Editar perfil</h3><button class="btn ghost" data-close>Fechar</button></div>
+  <div class="mb"><form id="perfilForm" onsubmit="return false"></form>
+    <div class="actions"><button class="btn ghost" data-close>Cancelar</button><button class="btn primary" id="btnPerfilSave">Salvar perfil</button></div></div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
 <script>
@@ -642,6 +656,7 @@ function vResumo(){
   const bodyStat=(lab,k,u,lowerIsGood=true)=>{ if(!b0||!b1) return ''; const d=b1[k]-b0[k]; const good=lowerIsGood?d<0:d>0;
     return `<div class="kpi"><span>${lab}</span><b>${fmtNum(b1[k])}${u}</b><span class="delta ${good?'good':'bad'}">${d>0?'+':''}${fmtNum(d)}${u} desde jan/25</span></div>`; };
   return `
+  ${state.profile&&state.profile.nome?`<p class="hello">Bom treino, ${esc(state.profile.nome)}.</p>`:''}
   <section class="hero2">
     <div class="herohead"><div class="big">${tr.length}<small>treinos</small></div>
       <p class="sub">Desde ${fmtD(first.date)}. Último: ${DIA[d2(last.date).getDay()]}, ${fmtD(last.date)}${last.foco?' · '+esc(last.foco):''}.</p>
@@ -833,8 +848,9 @@ function vMusculos(){
   ${!ss.length?`<p class="note">Nenhum treino nesse período.</p>`:''}
   ${sg.length?`<details class="sg"><summary>${sg.length} exercícios sem grupo muscular definido</summary><p class="note">${sg.map(([n,c])=>esc(n)+' ('+c+')').join(', ')}</p></details>`:''}`;
 }
+function refsPadrao(){ const P=state.profile||{}; const f=P.sexo==='F'; const r={imc:[18.5,25],visceral:[1,9],gorduraPct:f?[21,32.9]:[8,19.9],musculoPct:f?[24.3,30.3]:[33.3,39.3]}; if(P.altura){ const m=P.altura/100; r.peso=[+(18.5*m*m).toFixed(1),+(25*m*m).toFixed(1)]; } return r; }
 function vCorpo(){
-  const ev=(state.bio&&state.bio.evaluations)||[]; const refs=(state.bio&&state.bio.refs)||{};
+  const ev=(state.bio&&state.bio.evaluations)||[]; const refs=Object.keys((state.bio&&state.bio.refs)||{}).length?state.bio.refs:refsPadrao();
   const add=`<button class="btn" id="btnBio">Nova avaliação</button>`;
   if(!ev.length) return vMusculos()+`<h2>Corpo</h2><div class="empty">Nenhuma avaliação ainda.<br><br>${add}</div>`;
   const a=ev[0],z=ev[ev.length-1];
@@ -843,6 +859,7 @@ function vCorpo(){
   const medRows=MED.map(([k,l])=>`<tr><td>${l}</td>${ev.map(e=>`<td>${e.medidas&&e.medidas[k]!=null?e.medidas[k]:'–'}</td>`).join('')}<td>${(()=>{const d=(z.medidas||{})[k]-(a.medidas||{})[k];return isNaN(d)?'–':`<span class="delta ${d<0?'good':d>0?'bad':''}" style="margin:0">${d>0?'+':''}${d} cm</span>`})()}</td></tr>`).join('');
   return vMusculos()+`<div class="top" style="margin-top:34px"><h2 style="margin:0">Bioimpedância</h2>${add}</div>
   <p class="sub">${ev.length} avaliações, de ${fmtD(a.date)} a ${fmtD(z.date)}. Valores da mais recente, com a variação desde a primeira.</p>
+  ${(()=>{ const ida=idadeDe((state.profile||{}).nascimento); return ida!=null&&z.idadeCorporal?`<p class="note" style="margin:0 0 10px">Idade real: <b>${ida} anos</b> · idade corporal na última avaliação: <b>${z.idadeCorporal} anos</b> (${z.idadeCorporal-ida>0?'+':''}${z.idadeCorporal-ida}).</p>`:''; })()}
   <div class="metric-grid">${BIO_FIELDS.map(([k,l,u])=>card(k,l,u)).join('')}</div>
   <h2>Peso e composição</h2><p class="sub">A faixa clara marca a referência da avaliação.</p>
   <div class="grid2">
@@ -1048,8 +1065,8 @@ document.getElementById('dlgEdit').addEventListener('close',()=>{ state.edit=nul
 // ---------- offline: cache local + fila de sincronização
 const LSD='wodio:data:', LSQ='wodio:fila:';
 function ukey(k){ return k+(user?user.id:''); }
-function saveCache(){ try{ localStorage.setItem(ukey(LSD), JSON.stringify({sessions:state.sessions,bio:state.bio,config:state.config,at:Date.now()})); }catch(e){} }
-function loadCache(){ try{ const j=JSON.parse(localStorage.getItem(ukey(LSD))||'null'); if(j){ state.sessions=j.sessions||[]; state.bio=j.bio; state.config=j.config||{aliases:{}}; state.cacheAt=j.at; return true; } }catch(e){} return false; }
+function saveCache(){ try{ localStorage.setItem(ukey(LSD), JSON.stringify({sessions:state.sessions,bio:state.bio,config:state.config,profile:state.profile,at:Date.now()})); }catch(e){} }
+function loadCache(){ try{ const j=JSON.parse(localStorage.getItem(ukey(LSD))||'null'); if(j){ state.sessions=j.sessions||[]; state.bio=j.bio; state.config=j.config||{aliases:{}}; state.profile=j.profile||{}; state.cacheAt=j.at; return true; } }catch(e){} return false; }
 function getQ(){ try{ return JSON.parse(localStorage.getItem(ukey(LSQ))||'[]'); }catch(e){ return []; } }
 function setQ(q){ try{ localStorage.setItem(ukey(LSQ),JSON.stringify(q)); }catch(e){} updStatus(); }
 const isNet=e=>!navigator.onLine || /fetch|network|failed|load failed|timeout/i.test(String((e&&(e.message||e.details))||e));
@@ -1063,7 +1080,7 @@ function applyLocal(op){
   if(op.t==='sessions'&&op.k==='upsert') for(const row of op.rows){ state.sessions=state.sessions.filter(s=>s.id!==row.id); state.sessions.push(row.data); }
   if(op.t==='sessions'&&op.k==='delete') state.sessions=state.sessions.filter(s=>s.id!==op.id);
   if(op.t==='bio'){ state.bio=state.bio||{refs:{},evaluations:[]}; for(const row of op.rows) state.bio.evaluations=state.bio.evaluations.filter(e=>e.date!==row.date).concat([row.data]).sort((a,b)=>a.date.localeCompare(b.date)); }
-  if(op.t==='settings') state.config.aliases=op.row.aliases||state.config.aliases; }
+  if(op.t==='settings'){ if(op.row.aliases) state.config.aliases=op.row.aliases; if(op.row.profile) state.profile=op.row.profile; } }
 async function write(ops){
   if(navigator.onLine && !getQ().length){ try{ for(const op of ops) await execOp(op); await loadAll(); return 'online'; }catch(e){ if(!isNet(e)) throw e; } }
   setQ(getQ().concat(ops)); for(const op of ops) applyLocal(op); saveCache(); return 'offline'; }
@@ -1072,10 +1089,37 @@ async function flushQ(){ let q=getQ(); if(!q.length||!navigator.onLine||!user||s
   finally{ state.flushing=false; }
   if(n){ await loadAll(); toast(n+(n>1?' alterações sincronizadas.':' alteração sincronizada.')); } }
 function updStatus(){ const el=$('#status'); if(!el||!user) return; const q=getQ().length;
-  el.innerHTML=`${!navigator.onLine?'<span class="pill off">sem internet</span>':''}${q?`<span class="pill">${q} para sincronizar</span>`:''}<button class="linkbtn" id="btnMenu">Conta</button>`; }
+  el.innerHTML=`${!navigator.onLine?'<span class="pill off">sem internet</span>':''}${q?`<span class="pill">${q} para sincronizar</span>`:''}<button class="avatarbtn" id="btnMenu" aria-label="Conta e perfil">${avatarHTML(36)}</button>`; }
 window.addEventListener('online',()=>{ updStatus(); flushQ(); });
 window.addEventListener('offline',()=>updStatus());
 const OFFMSG='Salvo no aparelho. Sincroniza sozinho quando voltar a internet.';
+
+// ---------- perfil
+function idadeDe(nasc){ if(!nasc) return null; const n=d2(nasc), h=new Date(); let a=h.getFullYear()-n.getFullYear(); const m=h.getMonth()-n.getMonth(); if(m<0||(m===0&&h.getDate()<n.getDate())) a--; return a; }
+function perfilLinha(){ const P=state.profile||{}; const ida=idadeDe(P.nascimento); return [P.sexo==='M'?'Masculino':P.sexo==='F'?'Feminino':null,P.altura?P.altura+'cm':null,ida!=null?ida:null].filter(x=>x!=null).join(' | '); }
+function avatarHTML(sz){ const P=state.profile||{}; if(P.foto) return `<img src="${P.foto}" alt="" width="${sz}" height="${sz}" class="avatar">`;
+  const ini=((P.nome||'')[0]||'')+((P.sobrenome||'')[0]||''); return `<span class="avatar ini" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*.4)}px">${esc(ini.toUpperCase()||'?')}</span>`; }
+function renderPerfilCard(){ const P=state.profile||{}; const ida=idadeDe(P.nascimento);
+  $('#perfilCard').innerHTML=`<div class="pcard">${avatarHTML(64)}<div><div class="pname">${esc(((P.nome||'')+' '+(P.sobrenome||'')).trim()||'Seu nome')}</div><div class="pline">${esc(perfilLinha()||'Complete seu perfil')}</div>${ida!=null?`<div class="pline small">FC máxima estimada: ${220-ida} bpm · as zonas seguem as do relógio</div>`:''}</div></div>
+  <button class="btn" id="btnPerfilEdit">Editar perfil</button>`; }
+function openPerfil(){ const P=state.profile||{}; state.fotoNova=undefined;
+  $('#perfilForm').innerHTML=`<div class="fotoedit">${avatarHTML(80)}<div><label class="btn" for="perfilFoto">Escolher foto</label><input type="file" id="perfilFoto" accept="image/*" hidden> ${P.foto?'<button class="btn ghost small" id="btnFotoRm" type="button">Remover</button>':''}</div></div>
+  <div class="form"><label>Nome<input name="nome" value="${esc(P.nome||'')}" autocomplete="given-name"></label><label>Sobrenome<input name="sobrenome" value="${esc(P.sobrenome||'')}" autocomplete="family-name"></label>
+  <label>Data de nascimento<input type="date" name="nascimento" value="${esc(P.nascimento||'')}"></label>
+  <label>Sexo<select name="sexo"><option value="">—</option><option value="M" ${P.sexo==='M'?'selected':''}>Masculino</option><option value="F" ${P.sexo==='F'?'selected':''}>Feminino</option></select></label>
+  <label>Altura (cm)<input name="altura" inputmode="numeric" value="${esc(P.altura||'')}"></label></div>
+  <p class="note">A data de nascimento calcula sua idade real (comparada com a idade corporal da bioimpedância). Sexo ajusta as faixas de referência, e a altura calcula o IMC das próximas avaliações.</p>`;
+  $('#dlgPerfil').showModal(); }
+async function fotoReduzida(file){ const url=URL.createObjectURL(file); const img=await new Promise((ok,no)=>{const i=new Image(); i.onload=()=>ok(i); i.onerror=no; i.src=url;});
+  const s=256, c=document.createElement('canvas'); c.width=s; c.height=s; const g=c.getContext('2d'); const m=Math.min(img.width,img.height);
+  g.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,s,s); URL.revokeObjectURL(url); return c.toDataURL('image/jpeg',.82); }
+document.addEventListener('change',async e=>{ if(e.target.id!=='perfilFoto') return; const f=e.target.files[0]; if(!f) return;
+  try{ state.fotoNova=await fotoReduzida(f); const el=document.querySelector('.fotoedit .avatar'); if(el) el.outerHTML=`<img src="${state.fotoNova}" alt="" width="80" height="80" class="avatar">`; }catch(err){ toast('Não consegui abrir essa imagem.'); } });
+async function salvarPerfil(){ const f=new FormData($('#perfilForm')); const P={...(state.profile||{})};
+  for(const k of ['nome','sobrenome','nascimento','sexo']){ const v=String(f.get(k)||'').trim(); if(v) P[k]=v; else delete P[k]; }
+  const h=parseInt(f.get('altura'),10); if(h>90&&h<250) P.altura=h; else delete P.altura;
+  if(state.fotoNova!==undefined){ if(state.fotoNova) P.foto=state.fotoNova; else delete P.foto; }
+  try{ const mode=await write([{t:'settings',row:{profile:P}}]); state.profile=P; saveCache(); $('#dlgPerfil').close(); updStatus(); renderPerfilCard(); render(); toast(mode==='offline'?OFFMSG:'Perfil salvo.'); }catch(e){ console.error(e); toast('Não foi possível salvar agora.'); } }
 // ---------- registrar
 $('#btnReg').onclick=()=>{ state.watch=null; $('#imgStatus').textContent='Opcional. O print é lido aqui no celular e não fica salvo.'; $('#regStep1').hidden=false; $('#regStep2').hidden=true; $('#dlgReg').showModal(); setTimeout(()=>$('#regText').focus(),50); };
 $('#btnBack').onclick=()=>{ $('#regStep1').hidden=false; $('#regStep2').hidden=true; };
@@ -1162,6 +1206,7 @@ $('#btnBioSave').onclick=async()=>{
   const n=v=>{ v=String(v||'').trim().replace(',','.'); return v===''?null:parseFloat(v); };
   for(const [k] of BIO_FIELDS){ const v=n(fd.get(k)); if(v!=null&&!isNaN(v)) ev[k]=v; }
   for(const [k] of MED){ const v=n(fd.get('m_'+k)); if(v!=null&&!isNaN(v)) ev.medidas[k]=v; }
+  const alt=(state.profile||{}).altura; if(alt&&ev.peso){ const imc=+(ev.peso/((alt/100)**2)).toFixed(1); if(ev.imc==null) ev.imc=imc; else if(Math.abs(ev.imc-imc)>0.5 && !confirm('O IMC informado ('+ev.imc+') não bate com o calculado pela sua altura ('+imc+'). Salvar mesmo assim?')) return; }
   try{ const mode=await write([{t:'bio',k:'upsert',rows:[{date:ev.date,data:ev}]}]); $('#dlgBio').close(); render(); toast(mode==='offline'?OFFMSG:'Avaliação salva.'); }catch(e){ toast('Não foi possível salvar agora.'); }
 };
 
@@ -1201,7 +1246,7 @@ async function loadAll(){
   if(s.error||b.error){ if(loadCache()){ for(const op of getQ()) applyLocal(op); state.ready=true; updStatus(); if(!$('#dlgReg').open) render(); return; }
     state.msg=navigator.onLine?'Não foi possível carregar seus dados. Recarregue a página.':'Sem internet e sem dados salvos neste aparelho ainda. Abra o app uma vez com internet.'; state.ready=false; render(); return; }
   state.sessions=s.data.map(r=>r.data);
-  state.config={aliases:(c.data&&c.data.aliases)||{}};
+  state.config={aliases:(c.data&&c.data.aliases)||{}}; state.profile=(c.data&&c.data.profile)||{};
   state.bio={refs:(c.data&&c.data.bio_refs)||{},evaluations:b.data.map(r=>r.data)};
   for(const op of getQ()) applyLocal(op);
   saveCache(); state.ready=true; updStatus();
@@ -1247,7 +1292,10 @@ document.addEventListener('click',async e=>{
   if(t.id==='btnChangePw'){ $('#dlgConta').close(); state.recovery=true; state.recMsg=''; render(); }
   if(t.id==='btnAuthMode'){ state.authMode=state.authMode==='criar'?'entrar':'criar'; state.authMsg=''; render(); }
   if(t.id==='btnImport'){ $('#fileImport').click(); }
-  if(t.id==='btnMenu'){ $('#dlgConta').showModal(); listBackups(); }
+  if(t.id==='btnMenu'){ renderPerfilCard(); $('#dlgConta').showModal(); listBackups(); }
+  if(t.id==='btnPerfilEdit'){ openPerfil(); }
+  if(t.id==='btnPerfilSave'){ t.disabled=true; await salvarPerfil(); t.disabled=false; }
+  if(t.id==='btnFotoRm'){ state.fotoNova=null; const el=document.querySelector('.fotoedit .avatar'); if(el) el.outerHTML='<span class="avatar ini" style="width:80px;height:80px;font-size:32px">?</span>'; t.remove(); }
   if(t.dataset.restore){ restoreBackup(+t.dataset.restore, t.dataset.when); }
   if(t.id==='btnExport'){ exportFile(); }
   if(t.id==='btnImport2'){ $('#dlgConta').close(); $('#fileImport').click(); }
