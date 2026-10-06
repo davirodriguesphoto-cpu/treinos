@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>/*aplicaTemaInicial*/try{var t=localStorage.getItem("tema");if(t&&t!=="auto")document.documentElement.setAttribute("data-theme",t==="escuro"?"dark":"light")}catch(e){}</script>
 <meta name="theme-color" content="#121722">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>">
 <style>
@@ -138,6 +139,23 @@ textarea{width:100%;min-height:220px;border-radius:12px;border:1px solid var(--l
   nav.tabs button.tab{font-size:13px}
 }
 body.signed-out nav.tabs{display:none}
+.topr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.btn.small{padding:5px 10px;font-size:13px}
+.per{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
+.pernav{display:flex;align-items:center;gap:6px}
+.pernav b{font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:600;min-width:9ch;text-align:center}
+.pernav .btn{padding:4px 12px;font-size:18px;line-height:1}
+.pernav .btn:disabled{opacity:.3;cursor:default}
+.lifetime.four{grid-template-columns:repeat(4,1fr);gap:8px}
+.lifetime.four b{font-size:clamp(22px,6vw,34px)}
+.imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.imgrow label.btn{cursor:pointer}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px}
+.wgrid label{display:grid;gap:3px;font-size:12px;color:var(--muted)}
+.wgrid input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-size:15px;width:100%}
+.zchip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.zchip[aria-pressed="false"]{opacity:.55}
+.zchip[aria-pressed="true"]{background:var(--surface);color:var(--text);border-color:var(--text)}
 .lifetime{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin:10px 0 14px}
 .lifetime div{border-left:2px solid var(--z2);padding-left:10px}
 .lifetime.km div:first-child{border-left-color:var(--z3)}
@@ -154,7 +172,7 @@ body.signed-out nav.tabs{display:none}
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><h1>Treinos</h1><span class="who" id="status">Carregando seus dados…</span></div>
+  <div class="top"><h1>Treinos</h1><div class="topr"><button class="btn ghost small" id="btnTema">Tema: auto</button><span class="who" id="status">Carregando seus dados…</span></div></div>
   <main id="view"></main>
 </div>
 <nav class="tabs" aria-label="Seções"><div class="in">
@@ -170,6 +188,7 @@ body.signed-out nav.tabs{display:none}
   <div class="mb">
     <div id="regStep1">
       <p class="note" style="margin-top:0">Cole o texto do jeito que você manda no WhatsApp: treino, monitoramento do relógio e/ou corrida. Calendário, pré-treino e refeições são ignorados.</p>
+      <div class="imgrow"><label class="btn" for="regImg">Anexar print do relógio</label><input type="file" id="regImg" accept="image/*" hidden><span class="note" id="imgStatus">Opcional. O print é lido aqui no celular e não fica salvo.</span></div>
       <textarea id="regText" placeholder="Treino do Dia&#10;* TER - 06/10: Complex&#10;&#10;WARM UP&#10;12/12 Cross Body…"></textarea>
       <div class="actions"><button class="btn primary" id="btnParse">Ler texto</button></div>
     </div>
@@ -357,6 +376,25 @@ function canon(name,aliases){ const k=nkey(name); return (aliases&&aliases[k])||
 const api={nkey,parseLadder,parseMessage,parseWorkout,parseBand,parseRun,parseItem,parseLoad,cleanName,canon};
 if(typeof module!=='undefined') module.exports=api; else root.TreinoParser=api;
 })(this);
+function parseWatch(raw){
+  const t=raw.replace(/(\d)[Oo](?=\d|\s*kcal)/g,'$10').replace(/[Oo](?=\d)/g,'0').replace(/(\d)[Oo]\b/g,'$10');
+  const out={};
+  let m=/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{1,2}):(\d{2})/.exec(t);
+  if(m){ out.date=m[3]+'-'+m[2]+'-'+m[1]; out.time=m[4].padStart(2,'0')+':'+m[5]; }
+  const times=[...t.matchAll(/\b(\d{1,2})[:.\-](\d{2})[:.\-](\d{2})\b/g)].map(x=>(+x[1])*3600+(+x[2])*60+(+x[3]));
+  if(times.length) out.durSec=times[0];
+  if(times.length>=6){ const z=times.slice(-5); const k=['leve','intensivo','aerobico','anaerobico','vo2']; out.zones={}; k.forEach((q,i)=>out.zones[q]=z[i]); }
+  const kc=[...t.matchAll(/\b(\d{2,4})\s*(?:\.{2,}|…|k\s*cal)/gi)].map(x=>+x[1]);
+  if(kc.length){ out.kcal=kc[0]; if(kc.length>1) out.kcalTotal=kc[1]; }
+  m=/\b(\d{2,3})\s+(\d{2,3})\s+BPM\s+BPM\s*m/i.exec(t);
+  if(m){ out.bpmAvg=+m[1]; out.bpmMax=+m[2]; }
+  else { m=/(\d{2,3})\s*[be]?pm\b/i.exec(t); if(m) out.bpmAvg=+m[1]; m=/(\d{2,3})\s*\n?\s*BPM\s*m[áa]x/i.exec(t); if(m) out.bpmMax=+m[1]; }
+  if(/corrida|running/i.test(t)) out.tipo='corrida';
+  m=/(\d{1,2}[.,]\d{2})\s*km/i.exec(t); if(m){ out.distKm=parseFloat(m[1].replace(',','.')); out.tipo='corrida'; }
+  const tp=/^\s*(HIIT|Corrida[^\n]*|Treino[^\n]*|Caminhada[^\n]*)/im.exec(t); if(tp) out.tipoTexto=tp[1].trim();
+  return out;
+}
+if(typeof module!=='undefined') module.exports={parseWatch}; else window.parseWatch=parseWatch;
 </script><script>
 (function(){
 const P=window.TreinoParser;
@@ -453,24 +491,55 @@ function vResumo(){
   ${kmBlock()}
   <h2>Carga em alta</h2><p class="sub">Exercícios com maior ganho entre a primeira carga registrada e a melhor.</p>
   <div class="rows">${up.map(e=>`<button class="row" data-ex="${esc(e.name)}"><div class="trend"><div><div class="t">${esc(e.name)}</div><div class="m">${e.count} sessões · última em ${fmtD(e.lastDate)}</div></div><div class="r"><b>${fmtNum(e.first)} → ${fmtNum(e.best)} kg</b></div>${sparkSVG(e.loaded.map(r=>r.max),css('--load'))}</div><span></span></button>`).join('')||'<p class="sub">Ainda não há exercícios com carga suficiente para comparar.</p>'}</div>
-  <h2>Frequência</h2><p class="sub">Treinos por semana.</p>
-  <div class="panel"><div class="chart"><canvas id="cFreq" aria-label="Treinos por semana"></canvas></div></div>
-  <h2>Intensidade</h2><p class="sub">Média de minutos em cada zona de FC por treino, mês a mês.</p>
-  <div class="panel"><div class="chart"><canvas id="cZones" aria-label="Zonas de FC por mês"></canvas></div>${zoneLegend}</div>`;
+  ${vPeriodo()}`;
+}
+const ZL=[['leve','Leve','--z1','zl'],['intensivo','Intensivo','--z2','zi'],['aerobico','Aeróbico','--z3','za'],['anaerobico','Anaeróbico','--z4','zn'],['vo2','VO₂ máx','--z5','zv']];
+function perRange(){
+  const P=state.per||(state.per={mode:'mes',ref:todayISO()}); const r=d2(P.ref); let a,b,label,buckets=[];
+  const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  if(P.mode==='semana'){ a=new Date(r); a.setDate(a.getDate()-((a.getDay()+6)%7)); b=new Date(a); b.setDate(b.getDate()+6);
+    for(let i=0;i<7;i++){ const d=new Date(a); d.setDate(a.getDate()+i); buckets.push({key:iso(d),label:DIA[d.getDay()]+' '+d.getDate()}); }
+    label=a.getDate()+' '+MES[a.getMonth()]+' – '+b.getDate()+' '+MES[b.getMonth()]+' '+b.getFullYear(); }
+  else if(P.mode==='mes'){ a=new Date(r.getFullYear(),r.getMonth(),1); b=new Date(r.getFullYear(),r.getMonth()+1,0);
+    for(let i=1;i<=b.getDate();i++) buckets.push({key:iso(new Date(a.getFullYear(),a.getMonth(),i)),label:String(i)});
+    label=MES[a.getMonth()]+' '+a.getFullYear(); }
+  else if(P.mode==='ano'){ a=new Date(r.getFullYear(),0,1); b=new Date(r.getFullYear(),11,31);
+    for(let i=0;i<12;i++) buckets.push({key:r.getFullYear()+'-'+String(i+1).padStart(2,'0'),label:MES[i]});
+    label=String(r.getFullYear()); }
+  else { const ss=allSessions(); a=d2(ss.length?ss[0].date:todayISO()); a=new Date(a.getFullYear(),a.getMonth(),1); b=d2(todayISO()); label='Tudo';
+    for(const d=new Date(a); d<=b; d.setMonth(d.getMonth()+1)) buckets.push({key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),label:MES[d.getMonth()]+'/'+String(d.getFullYear()).slice(2)}); }
+  const daily=P.mode==='semana'||P.mode==='mes';
+  const canNext=P.mode!=='tudo'&&iso(b)<todayISO();
+  return {a:iso(a),b:iso(b),label,buckets,daily,canNext,mode:P.mode};
+}
+function vPeriodo(){
+  const R=perRange(); const ss=allSessions().filter(s=>s.date>=R.a&&s.date<=R.b);
+  const tr=ss.filter(s=>s.kind==='treino'), co=ss.filter(s=>s.kind==='corrida');
+  const km=co.reduce((x,s)=>x+(s.distKm||0),0)+tr.reduce((x,s)=>x+(s.blocks||[]).reduce((y,b)=>y+b.items.filter(i=>i.name==='Corrida').reduce((z,i)=>z+itemTotals(i).distM/1000,0),0),0);
+  const kc=ss.reduce((x,s)=>x+((s.band||s).kcalTotal||0),0);
+  const zon=state.zonesOn||(state.zonesOn={leve:1,intensivo:1,aerobico:1,anaerobico:1,vo2:1});
+  return `<h2>Frequência</h2>
+  <div class="per"><div class="chips" role="group" aria-label="Período">${[['semana','Semana'],['mes','Mês'],['ano','Ano'],['tudo','Tudo']].map(([k,l])=>`<button class="chip" data-per="${k}" aria-pressed="${R.mode===k}">${l}</button>`).join('')}</div>
+  ${R.mode!=='tudo'?`<div class="pernav"><button class="btn ghost" data-pnav="-1" aria-label="Período anterior">‹</button><b>${esc(R.label)}</b><button class="btn ghost" data-pnav="1" aria-label="Próximo período" ${R.canNext?'':'disabled'}>›</button></div>`:''}</div>
+  <div class="lifetime four"><div><b>${tr.length}</b><span>treinos</span></div><div><b>${co.length}</b><span>corridas</span></div><div><b>${fmtNum(km,1)}</b><span>km</span></div><div><b>${fmtNum(kc,0)}</b><span>kcal</span></div></div>
+  <div class="panel"><div class="chart"><canvas id="cFreq" aria-label="Atividades no período"></canvas></div><div class="legend"><span><i style="background:var(--z2)"></i>Treinos</span><span><i style="background:var(--z1)"></i>Corridas</span></div></div>
+  <h2>Intensidade</h2><p class="sub">${R.daily?'Minutos em cada zona de FC por dia, somando treinos e corridas.':'Média de minutos em cada zona de FC por sessão, mês a mês.'} Toque nas zonas para mostrar ou esconder.</p>
+  <div class="chips" role="group" aria-label="Zonas">${ZL.map(([k,l,c,cl])=>`<button class="chip zchip" data-zone="${k}" aria-pressed="${!!zon[k]}"><i class="${cl}"></i>${l}</button>`).join('')}</div>
+  <div class="panel"><div class="chart"><canvas id="cZones" aria-label="Zonas de FC no período"></canvas></div></div>`;
 }
 function drawResumo(){
-  const tr=allSessions().filter(s=>s.kind==='treino'); if(!tr.length) return;
-  // semanas
-  const wk={}; const monday=iso=>{const d=d2(iso);const k=(d.getDay()+6)%7;d.setDate(d.getDate()-k);return d.getTime()};
-  for(const s of tr){ const k=monday(s.date); wk[k]=(wk[k]||0)+1; }
-  const start=monday(tr[0].date), end=monday(todayISO()); const pts=[]; for(let t=start;t<=end;t+=7*864e5){ const k=monday(new Date(t).toISOString().slice(0,10)); pts.push({x:k,y:wk[k]||0}); }
-  mk('cFreq',{type:'bar',data:{datasets:[{data:pts,backgroundColor:css('--z2'),borderRadius:2,barPercentage:1,categoryPercentage:.85}]},
-    options:baseOpts({scales:{x:timeX(),y:{beginAtZero:true,ticks:{color:css('--muted'),stepSize:1},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>'Semana de '+fmtD(new Date(c[0].raw.x).toISOString().slice(0,10)),label:c=>c.raw.y+' treinos'}}}})});
-  const mo={}; for(const s of tr){ if(!s.band||!s.band.zones) continue; const k=s.date.slice(0,7); const m=mo[k]=mo[k]||{n:0,leve:0,intensivo:0,aerobico:0,anaerobico:0,vo2:0}; m.n++; for(const z of ['leve','intensivo','aerobico','anaerobico','vo2']) m[z]+=(s.band.zones[z]||0)/60; }
-  const ks=Object.keys(mo).sort(); const lab=ks.map(k=>MES[+k.slice(5)-1]+'/'+k.slice(2,4));
-  const Z=[['leve','Leve','--z1'],['intensivo','Intensivo','--z2'],['aerobico','Aeróbico','--z3'],['anaerobico','Anaeróbico','--z4'],['vo2','VO₂ máx','--z5']];
-  mk('cZones',{type:'bar',data:{labels:lab,datasets:Z.map(([k,l,c])=>({label:l,data:ks.map(m=>+(mo[m][k]/mo[m].n).toFixed(1)),backgroundColor:css(c),stack:'z'}))},
-    options:baseOpts({scales:{x:{stacked:true,grid:{display:false},ticks:{color:css('--muted')}},y:{stacked:true,ticks:{color:css('--muted'),callback:v=>v+' min'},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+' min'}}}})});
+  const R=perRange(); const ss=allSessions().filter(s=>s.date>=R.a&&s.date<=R.b);
+  const bk=s=>R.daily?s.date:s.date.slice(0,7);
+  const cT={},cC={},zs={};
+  for(const s of ss){ const k=bk(s); if(s.kind==='treino') cT[k]=(cT[k]||0)+1; else cC[k]=(cC[k]||0)+1;
+    const z=(s.band||s).zones; if(z&&typeof z==='object'){ const m=zs[k]=zs[k]||{n:0,leve:0,intensivo:0,aerobico:0,anaerobico:0,vo2:0}; m.n++; for(const [q] of ZL) m[q]+=(z[q]||0)/60; } }
+  const lab=R.buckets.map(b=>b.label), keys=R.buckets.map(b=>b.key);
+  const stackX={stacked:true,grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkipPadding:8}};
+  mk('cFreq',{type:'bar',data:{labels:lab,datasets:[{label:'Treinos',data:keys.map(k=>cT[k]||0),backgroundColor:css('--z2'),stack:'a',borderRadius:2},{label:'Corridas',data:keys.map(k=>cC[k]||0),backgroundColor:css('--z1'),stack:'a',borderRadius:2}]},
+    options:baseOpts({scales:{x:stackX,y:{stacked:true,beginAtZero:true,ticks:{color:css('--muted'),precision:0},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw}}}})});
+  const zon=state.zonesOn||(state.zonesOn={leve:1,intensivo:1,aerobico:1,anaerobico:1,vo2:1}); const on=ZL.filter(([k])=>zon[k]);
+  mk('cZones',{type:'bar',data:{labels:lab,datasets:on.map(([k,l,c])=>({label:l,data:keys.map(q=>zs[q]?+(R.daily?zs[q][k]:zs[q][k]/zs[q].n).toFixed(1):0),backgroundColor:css(c),stack:'z',borderRadius:2}))},
+    options:baseOpts({scales:{x:stackX,y:{stacked:true,beginAtZero:true,ticks:{color:css('--muted'),callback:v=>v+' min'},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtNum(c.raw,1)+' min'}}}})});
 }
 const ini=n=>{const c=n.normalize('NFD').replace(/[\u0300-\u036f]/g,'')[0].toUpperCase();return /[A-Z]/.test(c)?c:'#'};
 function vExercicios(){
@@ -564,7 +633,7 @@ function sessHTML(s){
   <div class="block"><h4>Relógio</h4><div class="item"><span>Ritmo mais rápido</span><span class="q">${pace(s.paceBest)}</span></div><div class="item"><span>BPM máximo</span><span class="q">${s.bpmMax||'–'}</span></div><div class="item"><span>Passos</span><span class="q">${s.steps?fmtNum(s.steps,0):'–'}</span></div><div class="item"><span>Cadência média</span><span class="q">${s.cadAvg||'–'}</span></div></div>
   <div class="actions"><button class="btn danger" data-del="${esc(s.id)}">Excluir corrida</button></div></div></div>`;
   const b=s.band||{}; const n=(s.blocks||[]).reduce((a,x)=>a+x.items.length,0);
-  return `<div class="sess ${open?'open':''}"><button data-sess="${esc(s.id)}" aria-expanded="${!!open}"><div class="date"><b>${d.getDate()}</b><span>${DIA[d.getDay()]}</span></div><div><div class="t">${esc(s.foco||'Treino')}${s.fase?` <span class="tag">fase ${s.fase} · sem ${s.semana}</span>`:''}</div><div class="meta"><span>${n} exercícios</span>${b.durSec?`<span>${mmss(b.durSec)}</span>`:''}${b.bpmAvg?`<span>${b.bpmAvg} bpm médio</span>`:''}</div>${zoneStrip(b.zones)}</div><span class="m">${b.kcalTotal?b.kcalTotal+' kcal':''}</span></button>
+  return `<div class="sess ${open?'open':''}"><button data-sess="${esc(s.id)}" aria-expanded="${!!open}"><div class="date"><b>${d.getDate()}</b><span>${DIA[d.getDay()]}</span></div><div><div class="t">${esc(s.foco||'Treino')}${s.fase?` <span class="tag">fase ${s.fase} · sem ${s.semana}</span>`:''}</div><div class="meta"><span>${s.soRelogio?'só relógio':n+' exercícios'}</span>${b.durSec?`<span>${mmss(b.durSec)}</span>`:''}${b.bpmAvg?`<span>${b.bpmAvg} bpm médio</span>`:''}</div>${zoneStrip(b.zones)}</div><span class="m">${b.kcalTotal?b.kcalTotal+' kcal':''}</span></button>
   <div class="detail">${(s.blocks||[]).map(bl=>`<div class="block"><h4>${esc(bl.name)}${bl.result?` <span class="res">${esc(bl.result)}</span>`:''}</h4>${bl.items.map(i=>`<div class="item"><span>${esc(i.name)}${i.note?` <span class="m">(${esc(i.note)})</span>`:''}</span><span><span class="q">${esc(qty(i))}</span>${i.loadKg!=null&&!i.ladder?` <span class="kg">${fmtNum(i.loadKg)} kg</span>`:''}</span></div>`).join('')}</div>`).join('')}
   ${b.bpmMax?`<div class="block"><h4>Relógio</h4><div class="item"><span>BPM máximo</span><span class="q">${b.bpmMax}</span></div><div class="item"><span>Calorias ativas / total</span><span class="q">${b.kcal||'–'} / ${b.kcalTotal||'–'} kcal</span></div>${b.zones?`<div class="item"><span>Leve · Intensivo · Aeróbico · Anaeróbico · VO₂</span><span class="q">${['leve','intensivo','aerobico','anaerobico','vo2'].map(k=>mmss(b.zones[k])).join(' · ')}</span></div>`:''}</div>`:''}
   <div class="actions"><button class="btn danger" data-del="${esc(s.id)}">Excluir treino</button></div></div></div>`;
@@ -599,6 +668,10 @@ document.addEventListener('click',e=>{
   if(t.dataset.ex!=null){ state.tab='exercicios'; state.ex=t.dataset.ex; render(); window.scrollTo(0,0); return; }
   if(t.id==='exBack'){ state.ex=null; render(); return; }
   if(t.dataset.mode){ state.exMode=t.dataset.mode; render(); return; }
+  if(t.dataset.per){ state.per={mode:t.dataset.per,ref:todayISO()}; render(); return; }
+  if(t.dataset.pnav){ const P=state.per, d=d2(P.ref), n=+t.dataset.pnav; if(P.mode==='semana') d.setDate(d.getDate()+7*n); else if(P.mode==='mes') d.setMonth(d.getMonth()+n,1); else d.setFullYear(d.getFullYear()+n); const y=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); P.ref=y; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
+  if(t.dataset.zone){ const z=state.zonesOn; z[t.dataset.zone]=!z[t.dataset.zone]; if(!Object.values(z).some(Boolean)) z[t.dataset.zone]=1; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
+  if(t.id==='btnTema'){ const ord=['auto','escuro','claro']; const cur=localStorage.getItem('tema')||'auto'; const nx=ord[(ord.indexOf(cur)+1)%3]; try{localStorage.setItem('tema',nx);}catch(e){} aplicaTema(); render(); return; }
   if(t.dataset.sf){ state.sessFilter=t.dataset.sf; render(); return; }
   if(t.dataset.sess){ state.openSess[t.dataset.sess]=!state.openSess[t.dataset.sess]; const box=t.parentElement; box.classList.toggle('open'); t.setAttribute('aria-expanded',box.classList.contains('open')); return; }
   if(t.dataset.del){ delSession(t.dataset.del); return; }
@@ -607,13 +680,47 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('input',e=>{ if(e.target.id==='exSearch'){ state.exFilter=e.target.value; const pos=e.target.selectionStart; render(); const s=$('#exSearch'); if(s){ s.focus(); s.setSelectionRange(pos,pos);} } });
 
+// ---------- print do relógio
+let tessP=null;
+function loadTess(){ if(window.Tesseract) return Promise.resolve(); if(tessP) return tessP;
+  tessP=new Promise((ok,no)=>{ const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'; s.onload=ok; s.onerror=()=>{tessP=null;no(new Error('load'))}; document.head.appendChild(s); }); return tessP; }
+async function prepImg(file){
+  const url=URL.createObjectURL(file); const img=await new Promise((ok,no)=>{const i=new Image(); i.onload=()=>ok(i); i.onerror=no; i.src=url;});
+  const sc=Math.max(1,1400/img.width); const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+  const g=c.getContext('2d'); g.drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url);
+  const d=g.getImageData(0,0,c.width,c.height), a=d.data;
+  for(let i=0;i<a.length;i+=4){ const y=0.299*a[i]+0.587*a[i+1]+0.114*a[i+2]; const v=y<230?0:255; a[i]=a[i+1]=a[i+2]=v; }
+  g.putImageData(d,0,0); return c; }
+document.getElementById('regImg').addEventListener('change',async e=>{
+  const f=e.target.files[0]; e.target.value=''; if(!f) return; const st=$('#imgStatus');
+  st.textContent='Lendo o print… (na primeira vez demora um pouco)';
+  try{ await loadTess(); const c=await prepImg(f);
+    const wk=await Tesseract.createWorker('eng'); await wk.setParameters({tessedit_pageseg_mode:'11'});
+    const r=await wk.recognize(c); await wk.terminate();
+    const w=parseWatch(r.data.text||'');
+    if(!w.durSec&&!w.kcal&&!w.bpmAvg){ st.textContent='Não consegui ler esse print. Tente outro ou digite os dados.'; state.watch=null; return; }
+    state.watch=w; st.textContent='Print lido: '+(w.date?fmtD(w.date)+' · ':'')+mmss(w.durSec)+' · '+(w.kcalTotal||w.kcal||'–')+' kcal · '+(w.bpmAvg||'–')+' bpm. Confira na próxima tela.';
+  }catch(err){ console.error(err); st.textContent='Não deu para ler o print agora. Confira a internet e tente de novo.'; state.watch=null; }
+});
+function watchBand(w,old){ const b={...(old||{})}; for(const k of ['date','time','durSec','kcal','kcalTotal','bpmAvg','bpmMax','zones']) if(w[k]!=null) b[k]=w[k]; b.fonteRelogio=true; if(!b.tipo) b.tipo=w.tipoTexto||'HIIT'; return b; }
+const tsec=v=>{ v=String(v||'').trim(); if(!v) return null; const p=v.split(':').map(Number); if(p.some(isNaN)) return null; return p.length===3?p[0]*3600+p[1]*60+p[2]:p.length===2?p[0]*60+p[1]:p[0]; };
+function hms(s){ if(s==null) return ''; const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60; return (h?h+':'+String(m).padStart(2,'0'):String(m))+':'+String(x).padStart(2,'0'); }
+function watchEditor(si,b){ const z=b.zones||{};
+  const f=(k,l,v,typ)=>`<label>${l}<input data-w="${si}.${k}" ${typ==='n'?'inputmode="numeric"':''} value="${esc(v==null?'':v)}"></label>`;
+  return `<div class="wgrid">${f('durSec','Tempo',hms(b.durSec))}${f('kcal','kcal',b.kcal,'n')}${f('kcalTotal','kcal total',b.kcalTotal,'n')}${f('bpmAvg','FC média',b.bpmAvg,'n')}${f('bpmMax','FC máx',b.bpmMax,'n')}${f('z.leve','Leve',hms(z.leve))}${f('z.intensivo','Intensivo',hms(z.intensivo))}${f('z.aerobico','Aeróbico',hms(z.aerobico))}${f('z.anaerobico','Anaeróbico',hms(z.anaerobico))}${f('z.vo2','VO₂ máx',hms(z.vo2))}</div>`; }
 // ---------- registrar
-$('#btnReg').onclick=()=>{ $('#regStep1').hidden=false; $('#regStep2').hidden=true; $('#dlgReg').showModal(); setTimeout(()=>$('#regText').focus(),50); };
+$('#btnReg').onclick=()=>{ state.watch=null; $('#imgStatus').textContent='Opcional. O print é lido aqui no celular e não fica salvo.'; $('#regStep1').hidden=false; $('#regStep2').hidden=true; $('#dlgReg').showModal(); setTimeout(()=>$('#regText').focus(),50); };
 $('#btnBack').onclick=()=>{ $('#regStep1').hidden=false; $('#regStep2').hidden=true; };
 function knownNames(){ return Object.keys(exerciseIndex()).sort((a,b)=>a.localeCompare(b,'pt')); }
 $('#btnParse').onclick=()=>{
-  const txt=$('#regText').value.trim(); if(!txt){ toast('Cole o texto do treino primeiro.'); return; }
-  const out=P.parseMessage(txt,todayISO());
+  const txt=$('#regText').value.trim(); const W=state.watch;
+  if(!txt&&!W){ toast('Cole o texto do treino ou anexe o print do relógio.'); return; }
+  const out=txt?P.parseMessage(txt,W&&W.date||todayISO()):[];
+  if(W){ let tgt=out.find(s=>W.tipo==='corrida'?s.kind==='corrida':s.kind==='treino');
+    if(!tgt){ tgt=W.tipo==='corrida'?{kind:'corrida'}:{kind:'treino',blocks:[],soRelogio:!out.length||undefined}; out.push(tgt); }
+    if(tgt.kind==='treino'){ tgt.band=watchBand(W,tgt.band); if(W.date) tgt.date=W.date; delete tgt.dateConflict; }
+    else { Object.assign(tgt,{distKm:tgt.distKm||W.distKm||null,pace:(W.distKm&&W.durSec)?Math.round(W.durSec/W.distKm):tgt.pace,durSec:W.durSec,kcal:W.kcal,kcalTotal:W.kcalTotal,bpmAvg:W.bpmAvg,bpmMax:W.bpmMax,zones:W.zones,time:W.time,fonteRelogio:true}); if(W.date) tgt.date=W.date; tgt.splits=tgt.splits||[]; }
+    if(!tgt.date) tgt.date=todayISO(); }
   if(!out.length){ toast('Não encontrei treino, monitoramento nem corrida nesse texto.'); return; }
   const known=new Set(knownNames()); const al=state.config.aliases||{};
   for(const s of out) if(s.kind==='treino') for(const b of s.blocks) for(const i of b.items){ const c=P.canon(i.name,al); if(c) i.name=c; else { const hit=[...known].find(k=>P.nkey(k)===P.nkey(i.name)); if(hit) i.name=hit; else i.isNew=true; } delete i.raw; }
@@ -629,12 +736,15 @@ function renderPreview(){
     ${dup?'<p class="note" style="color:var(--z3)">Já existe um treino nessa data; salvar vai substituir.</p>':''}
     ${s.dateConflict?`<p class="note" style="color:var(--z3)">O relógio diz ${fmtD(s.dateConflict)}. Confira a data acima.</p>`:''}
     ${s.blocks.map((b,bi)=>`<div class="block"><h4>${esc(b.name)}${b.result?` <span class="res">${esc(b.result)}</span>`:''}</h4>${b.items.map((i,ii)=>`<div class="item"><span>${esc(i.name)} ${i.isNew?`<span class="tag new">nome novo</span> <select data-map="${si}.${bi}.${ii}" aria-label="É o mesmo que"><option value="">É um exercício novo</option>${opts}</select>`:''}</span><span><span class="q">${esc(qty(i))}</span>${i.loadKg!=null&&!i.ladder?` <span class="kg">${fmtNum(i.loadKg)} kg</span>`:''}</span></div>`).join('')}</div>`).join('')}
-    ${s.band?`<p class="note">Relógio: ${mmss(s.band.durSec)} · ${s.band.kcalTotal||'–'} kcal · ${s.band.bpmAvg||'–'} bpm médio / ${s.band.bpmMax||'–'} máx</p>${zoneStrip(s.band.zones)}`:'<p class="note">Sem dados do relógio nesse texto.</p>'}</div>`;
+    ${s.band?`<p class="note">Relógio${s.band.fonteRelogio?' (lido do print — confira e corrija se precisar)':''}:</p>${s.band.fonteRelogio?watchEditor(si,s.band):`<p class="note">${mmss(s.band.durSec)} · ${s.band.kcalTotal||'–'} kcal · ${s.band.bpmAvg||'–'} bpm médio / ${s.band.bpmMax||'–'} máx</p>`}${zoneStrip(s.band.zones)}`:'<p class="note">Sem dados do relógio nesse texto.</p>'}</div>`;
   }).join('')+`<p class="note">Exercícios marcados como nome novo: escolha o nome existente se for o mesmo movimento escrito diferente, ou deixe como novo.</p>`;
 }
 document.addEventListener('change',e=>{
   const t=e.target;
   if(t.dataset.sd!=null && state.pending){ state.pending[+t.dataset.sd].date=t.value; }
+  if(t.dataset.w!=null && state.pending){ const [si,...kp]=t.dataset.w.split('.'); const s=state.pending[+si]; const b=s.kind==='treino'?(s.band=s.band||{}):s; const k=kp.join('.');
+    if(k.startsWith('z.')){ b.zones=b.zones||{}; b.zones[k.slice(2)]=tsec(t.value); }
+    else if(k==='durSec') b.durSec=tsec(t.value); else { const n=parseInt(t.value,10); b[k]=isNaN(n)?null:n; } }
   if(t.dataset.map!=null && state.pending){ const [a,b,c]=t.dataset.map.split('.').map(Number); const it=state.pending[a].blocks[b].items[c]; it.mapTo=t.value||null; }
 });
 function sid(s){ return s.date+'-'+(s.kind==='corrida'?'c':'t'); }
@@ -653,7 +763,7 @@ $('#btnSave').onclick=async()=>{
     const {error}=await sb.from('sessions').upsert(rows); if(error) throw error;
     if(alChanged){ const r=await sb.from('settings').upsert({aliases:al,bio_refs:state.bio?state.bio.refs:{}}); if(r.error) throw r.error; state.config.aliases=al; }
     await loadAll();
-    $('#dlgReg').close(); $('#regText').value=''; state.pending=null; toast('Treino salvo.'); state.tab='sessoes'; render();
+    $('#dlgReg').close(); $('#regText').value=''; state.pending=null; state.watch=null; toast('Treino salvo.'); state.tab='sessoes'; render();
   }catch(err){ console.error(err); toast('Não foi possível salvar agora. Confira a conexão e tente de novo.'); }
   finally{ btn.disabled=false; }
 };
@@ -735,6 +845,11 @@ document.addEventListener('click',async e=>{
 });
 document.getElementById('fileImport').addEventListener('change',e=>{ const f=e.target.files[0]; e.target.value=''; if(f) importFile(f); });
 
+// ---------- tema
+function aplicaTema(){ let t='auto'; try{ t=localStorage.getItem('tema')||'auto'; }catch(e){}
+  if(t==='auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme',t==='escuro'?'dark':'light');
+  const b=document.getElementById('btnTema'); if(b){ b.textContent=t==='auto'?'Tema: auto':t==='escuro'?'Tema: escuro':'Tema: claro'; } }
+aplicaTema();
 // ---------- conexão
 render();
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>render());
