@@ -338,6 +338,7 @@ details.sg summary{cursor:pointer}
 .catrow label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
 .catrow select,.catrow input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;color:var(--text);min-width:0}
 .cats .addblock{margin:0;font-size:13px}
+.fcgrid{margin-top:16px}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -415,7 +416,7 @@ details.sg summary{cursor:pointer}
 <dialog id="dlgAdd" aria-labelledby="addT" class="sheet">
   <div class="mh"><h3 id="addT">Adicionar treino</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb">
-    <button class="optbig" id="optWatch"><span class="oi">⌚</span><span><b>Dados do relógio</b><br><span class="m">Anexe o print do Mi Fitness</span></span></button>
+    <button class="optbig" id="optWatch"><span class="oi">⌚</span><span><b>Dados do relógio</b><br><span class="m">Anexe o print do Smart Watch</span></span></button>
     <div class="optgrid">
       <button class="opt" id="optManual"><b>Manual</b><span class="m">Colar o texto</span></button>
       <button class="opt" id="optHib"><b>Híbrido</b><span class="m">Warm up, skill, WOD</span></button>
@@ -846,6 +847,16 @@ function zoneTotals(ss){ const t={leve:0,intensivo:0,aerobico:0,anaerobico:0,vo2
   for(const s of ss){ const z=(s.band||s).zones; if(z&&typeof z==='object'){ n++; for(const [k] of ZL) t[k]+=z[k]||0; } }
   const all=Object.values(t).reduce((a,b)=>a+b,0); const solo=state.zoneSolo;
   return `<div class="ztot">${ZL.filter(([k])=>!solo||solo===k).map(([k,l,c])=>`<div style="border-color:var(${c})"><b>${hm(t[k])}</b><span>${l}${all?' · '+Math.round(100*t[k]/all)+'%':''}</span></div>`).join('')}${solo?'':`<div class="all"><b>${hm(all)}</b><span>total em ${n} sessões</span></div>`}</div>`; }
+function fcKcalHTML(ss,R){ const b=ss.map(s=>s.band||s); const comFc=b.filter(x=>x.bpmAvg); const avg=comFc.length?Math.round(comFc.reduce((a,x)=>a+x.bpmAvg,0)/comFc.length):null; const mx=b.reduce((m,x)=>Math.max(m,x.bpmMax||0),0)||null;
+  const kt=b.reduce((a,x)=>a+(x.kcalTotal||0),0), ka=b.reduce((a,x)=>a+(x.kcal||0),0); const nk=b.filter(x=>x.kcalTotal).length;
+  return `<div class="grid2 fcgrid">
+    <div class="panel"><h3>Frequência cardíaca</h3><p class="note" style="margin:2px 0 8px">${R.daily?'Por dia, nos treinos e corridas.':'Média de cada mês.'}</p><div class="chart"><canvas id="cFC" aria-label="Frequência cardíaca no período"></canvas></div>
+      <div class="legend"><span><i style="background:var(--z2)"></i>BPM médio</span><span><i style="background:var(--z5)"></i>BPM máximo</span></div>
+      <div class="ztot"><div style="border-color:var(--z2)"><b>${avg??'–'}</b><span>bpm médio no período</span></div><div style="border-color:var(--z5)"><b>${mx??'–'}</b><span>bpm máximo no período</span></div></div></div>
+    <div class="panel"><h3>Calorias</h3><p class="note" style="margin:2px 0 8px">${R.daily?'Por dia.':'Soma de cada mês.'} A parte forte é a caloria ativa.</p><div class="chart"><canvas id="cKcal" aria-label="Calorias no período"></canvas></div>
+      <div class="legend"><span><i style="background:var(--z4)"></i>kcal ativas</span><span><i style="background:var(--z4);opacity:.35"></i>kcal total</span></div>
+      <div class="ztot"><div style="border-color:var(--z4)"><b>${fmtNum(kt,0)}</b><span>kcal total (${fmtNum(ka,0)} ativas)</span></div><div style="border-color:var(--line)"><b>${nk?fmtNum(kt/nk,0):'–'}</b><span>kcal por sessão</span></div></div></div>
+  </div>`; }
 function vPeriodo(){
   const R=perRange(); const ss=allSessions().filter(s=>s.date>=R.a&&s.date<=R.b);
   const tr=ss.filter(s=>s.kind==='treino'), co=ss.filter(s=>s.kind==='corrida');
@@ -859,7 +870,8 @@ function vPeriodo(){
   <div class="panel"><div class="chart"><canvas id="cFreq" aria-label="Atividades no período"></canvas></div><div class="legend"><span><i style="background:var(--z2)"></i>Treinos</span><span><i style="background:var(--z1)"></i>Corridas</span></div></div>
   <h2>Intensidade</h2><p class="sub">${R.daily?'Minutos em cada zona de FC por dia, somando treinos e corridas.':'Média de minutos em cada zona de FC por sessão, mês a mês.'} Toque numa zona para ver só ela; toque de novo para ver todas.</p>
   <div class="chips" role="group" aria-label="Zonas">${ZL.map(([k,l,c,cl])=>`<button class="chip zchip" data-zone="${k}" aria-pressed="${!solo||solo===k}"><i class="${cl}"></i>${l}</button>`).join('')}</div>
-  <div class="panel"><div class="chart"><canvas id="cZones" aria-label="Zonas de FC no período"></canvas></div>${zoneTotals(ss)}</div>`;
+  <div class="panel"><div class="chart"><canvas id="cZones" aria-label="Zonas de FC no período"></canvas></div>${zoneTotals(ss)}</div>
+  ${fcKcalHTML(ss,R)}`;
 }
 function drawResumo(){
   const R=perRange(); const ss=allSessions().filter(s=>s.date>=R.a&&s.date<=R.b);
@@ -872,6 +884,17 @@ function drawResumo(){
   mk('cFreq',{type:'bar',data:{labels:lab,datasets:[{label:'Treinos',data:keys.map(k=>cT[k]||0),backgroundColor:css('--z2'),stack:'a',borderRadius:2},{label:'Corridas',data:keys.map(k=>cC[k]||0),backgroundColor:css('--z1'),stack:'a',borderRadius:2}]},
     options:baseOpts({scales:{x:stackX,y:{stacked:true,beginAtZero:true,ticks:{color:css('--muted'),precision:0},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw}}}})});
   const on=ZL.filter(([k])=>!state.zoneSolo||state.zoneSolo===k);
+  { const fa={},fm={},fn={},kt={},ka={};
+    for(const s of ss){ const k=bk(s), b=s.band||s; if(b.bpmAvg){ fa[k]=(fa[k]||0)+b.bpmAvg; fn[k]=(fn[k]||0)+1; } if(b.bpmMax) fm[k]=R.daily?Math.max(fm[k]||0,b.bpmMax):Math.max(fm[k]||0,b.bpmMax); if(b.kcalTotal) kt[k]=(kt[k]||0)+b.kcalTotal; if(b.kcal) ka[k]=(ka[k]||0)+b.kcal; }
+    const media={}; if(!R.daily){ const mm={}; for(const s of ss){ const k=bk(s), b=s.band||s; if(b.bpmMax){ (mm[k]=mm[k]||[]).push(b.bpmMax); } } for(const k in mm) media[k]=Math.round(mm[k].reduce((a,x)=>a+x,0)/mm[k].length); }
+    mk('cFC',{type:'line',data:{labels:lab,datasets:[
+      {label:'BPM médio',data:keys.map(k=>fn[k]?Math.round(fa[k]/fn[k]):null),borderColor:css('--z2'),backgroundColor:css('--z2'),spanGaps:true,pointRadius:3,tension:.25},
+      {label:'BPM máximo',data:keys.map(k=>R.daily?(fm[k]||null):(media[k]||null)),borderColor:css('--z5'),backgroundColor:css('--z5'),spanGaps:true,pointRadius:3,tension:.25}]},
+      options:baseOpts({scales:{x:{grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkipPadding:8}},y:{ticks:{color:css('--muted'),callback:v=>v+''},grid:{color:css('--line')},border:{display:false},suggestedMin:80}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+(R.daily?'':' (média do mês)')+': '+c.raw+' bpm'}}}})});
+    mk('cKcal',{type:'bar',data:{labels:lab,datasets:[
+      {label:'kcal ativas',data:keys.map(k=>ka[k]||0),backgroundColor:css('--z4'),borderRadius:2,grouped:false,order:1},
+      {label:'kcal total',data:keys.map(k=>kt[k]||0),backgroundColor:css('--z4')+'59',borderRadius:2,grouped:false,order:2}]},
+      options:baseOpts({scales:{x:{grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkipPadding:8}},y:{beginAtZero:true,ticks:{color:css('--muted')},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtNum(c.raw,0)}}}})}); }
   mk('cZones',{type:'bar',data:{labels:lab,datasets:on.map(([k,l,c])=>({label:l,data:keys.map(q=>zs[q]?+(R.daily?zs[q][k]:zs[q][k]/zs[q].n).toFixed(1):0),backgroundColor:css(c),stack:'z',borderRadius:2}))},
     options:baseOpts({scales:{x:stackX,y:{stacked:true,beginAtZero:true,ticks:{color:css('--muted'),callback:v=>v+' min'},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtNum(c.raw,1)+' min'}}}})});
 }
