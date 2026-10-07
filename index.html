@@ -360,6 +360,7 @@ body.scrolled .top.head .brandface svg{width:36px;height:34px}
 body.scrolled .top.head .wmh .wm{font-size:26px}
 body.scrolled .top.head .wmh small{opacity:0;max-height:0}
 body.scrolled #btnTema{opacity:0;width:0;margin-left:-10px;border-width:0;pointer-events:none;overflow:hidden}
+.sessacts{flex-wrap:wrap}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -1172,12 +1173,12 @@ function sessHTML(s){
   if(s.kind==='corrida') return `<div class="sess ${open?'open':''}"><button data-sess="${esc(s.id)}" aria-expanded="${!!open}"><div class="date"><b>${d.getDate()}</b><span>${DIA[d.getDay()]}</span></div><div><div><span class="tag run">${s.local==='box'?'corrida no box':'corrida'}</span>${s.source?` <span class="tag">${esc(s.source)}</span>`:''}${s.note?` <span class="m">${esc(s.note)}</span>`:''} <span class="t">${fmtNum(s.distKm,2)} km</span></div><div class="meta"><span>${mmss(s.durSec)}</span><span>ritmo ${pace(s.pace)}/km</span>${s.bpmAvg?`<span>${s.bpmAvg} bpm</span>`:''}</div>${zoneStrip(s.zones)}</div><span class="m">${s.kcalTotal?s.kcalTotal+' kcal':''}</span></button>
   <div class="detail">${s.splits&&s.splits.length?`<div class="block"><h4>Ritmo por km</h4>${s.splits.map(x=>`<div class="item"><span>Km ${x.km}${x.partial?' (parcial)':''}</span><span class="q">${pace(x.pace)}</span></div>`).join('')}</div>`:''}
   <div class="block"><h4>Relógio</h4><div class="item"><span>Ritmo mais rápido</span><span class="q">${pace(s.paceBest)}</span></div><div class="item"><span>BPM máximo</span><span class="q">${s.bpmMax||'–'}</span></div><div class="item"><span>Passos</span><span class="q">${s.steps?fmtNum(s.steps,0):'–'}</span></div><div class="item"><span>Cadência média</span><span class="q">${s.cadAvg||'–'}</span></div></div>
-  <div class="actions"><button class="btn" data-edit="${esc(s.id)}">Editar</button><button class="btn danger" data-del="${esc(s.id)}">Excluir corrida</button></div></div></div>`;
+  <div class="actions sessacts"><button class="btn ghost small" data-copy="${esc(s.id)}">Copiar treino</button><button class="btn ghost small" data-export="${esc(s.id)}">Exportar .txt</button><button class="btn" data-edit="${esc(s.id)}">Editar</button><button class="btn danger" data-del="${esc(s.id)}">Excluir corrida</button></div></div></div>`;
   const b=s.band||{}; const n=(s.blocks||[]).reduce((a,x)=>a+x.items.length,0);
   return `<div class="sess ${open?'open':''}"><button data-sess="${esc(s.id)}" aria-expanded="${!!open}"><div class="date"><b>${d.getDate()}</b><span>${DIA[d.getDay()]}</span></div><div><div class="t">${s.status==='andamento'?'<span class="pill">em andamento</span> ':''}${esc(s.focos?s.focos.join(' + '):(s.foco||'Treino'))}${s.focoExtra?` <span class="m">· ${esc(s.focoExtra)}</span>`:''}${s.fase?` <span class="tag">fase ${s.fase} · sem ${s.semana}</span>`:''}</div><div class="meta"><span>${s.soRelogio?'só relógio':n+' exercícios'}</span>${b.durSec?`<span>${mmss(b.durSec)}</span>`:''}${b.bpmAvg?`<span>${b.bpmAvg} bpm médio</span>`:''}</div>${zoneStrip(b.zones)}</div><span class="m">${b.kcalTotal?b.kcalTotal+' kcal':''}</span></button>
   <div class="detail">${(s.blocks||[]).map(bl=>`<div class="block"><h4>${esc(bl.name)}${bl.result?` <span class="res">${esc(bl.result)}</span>`:''}</h4>${bl.items.map(i=>`<div class="item"><span>${esc(i.name)}${i.note?` <span class="m">(${esc(i.note)})</span>`:''}</span><span><span class="q">${esc(qty(i))}</span>${i.loadKg!=null&&!i.ladder?` <span class="kg">${fmtNum(i.loadKg)} kg</span>`:''}</span></div>`).join('')}</div>`).join('')}
   ${b.bpmMax?`<div class="block"><h4>Relógio</h4><div class="item"><span>BPM máximo</span><span class="q">${b.bpmMax}</span></div><div class="item"><span>Calorias ativas / total</span><span class="q">${b.kcal||'–'} / ${b.kcalTotal||'–'} kcal</span></div>${b.zones?`<div class="item"><span>Leve · Intensivo · Aeróbico · Anaeróbico · VO₂</span><span class="q">${['leve','intensivo','aerobico','anaerobico','vo2'].map(k=>mmss(b.zones[k])).join(' · ')}</span></div>`:''}</div>`:''}
-  <div class="actions"><button class="btn" data-edit="${esc(s.id)}">Editar</button><button class="btn danger" data-del="${esc(s.id)}">Excluir treino</button></div></div></div>`;
+  <div class="actions sessacts"><button class="btn ghost small" data-copy="${esc(s.id)}">Copiar treino</button><button class="btn ghost small" data-export="${esc(s.id)}">Exportar .txt</button><button class="btn" data-edit="${esc(s.id)}">Editar</button><button class="btn danger" data-del="${esc(s.id)}">Excluir treino</button></div></div></div>`;
 }
 function focoKey(f){ return String(f||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9& ]+/g,' ').split(' ').filter(Boolean).map(w=>w.length>3?w.replace(/s$/,''):w).join(' '); }
 function vTipos(){
@@ -1255,6 +1256,8 @@ document.addEventListener('click',e=>{
   if(t.dataset.sess){ state.openSess[t.dataset.sess]=!state.openSess[t.dataset.sess]; const box=t.parentElement; box.classList.toggle('open'); t.setAttribute('aria-expanded',box.classList.contains('open')); return; }
   if(t.dataset.del){ delSession(t.dataset.del); return; }
   if(t.dataset.edit){ openEdit(t.dataset.edit); return; }
+  if(t.dataset.copy){ copiarTreino(t.dataset.copy); return; }
+  if(t.dataset.export){ exportarTreino(t.dataset.export); return; }
   if(t.dataset.close!=null){ t.closest('dialog').close(); return; }
   if(t.id==='btnBio'){ openBio(); return; }
 });
@@ -1900,6 +1903,50 @@ document.addEventListener('change',async e=>{ const t=e.target;
   if(t.dataset.md==='dt'&&state.mus){ const v=clampDT(t.value); state.mus.date=v.slice(0,10); state.mus.time=v.slice(11,16); if(v!==t.value){ t.value=v; toast('Não dá para registrar no futuro.'); } }
 });
 
+
+// ---------- copiar / exportar treino em texto
+const DSEM=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
+function brData(iso){ const [y,m,d]=iso.split('-'); return d+'/'+m+'/'+y; }
+function tempoTxt(s){ return s>=60?Math.floor(s/60)+"'"+(s%60?String(s%60).padStart(2,'0')+'"':''):s+'"'; }
+function linhaItem(i){ let t=''; if(i.sets) t+=i.sets+'x ';
+  if(i.reps!=null&&!i.ladder) t+=(i.perSide?i.reps+'/'+i.reps:i.reps)+' ';
+  if(i.timeSec&&i.reps==null) t+=(i.perSide?tempoTxt(i.timeSec)+'/'+tempoTxt(i.timeSec):tempoTxt(i.timeSec))+' ';
+  if(i.distM) t+=(i.distM>=1000?fmtNum(i.distM/1000,2).replace(',','.')+'km':i.distM+'m')+(i.perSide?'/'+i.distM+'m':'')+' ';
+  const nome=i.name==='Corrida Box'?'de corrida':i.name; t+=nome;
+  if(i.loadKg&&!i.ladder){ t+=i.count>1&&i.unitKg?` com ${i.count} kettlebells de ${fmtNum(i.unitKg)}kg`:` com ${fmtNum(i.loadKg)}kg`; if(i.eachSide) t+=' cada lado'; }
+  const out=[t.trim()];
+  if(i.ladder) out.push(i.ladder.map(x=>`${x.reps}r - ${fmtNum(x.loadKg)}kg`).join(' | '));
+  if(i.note&&!/^complex/.test(i.note)) out.push('('+i.note+')');
+  return out.join('\n'); }
+function blocoTxt(b){ const L=[b.name]; if(b.result) L.push('Resultado: '+b.result); L.push('');
+  const it=b.items; for(let k=0;k<it.length;k++){ const i=it[k];
+    if(i.complex){ const g=[i]; while(it[k+1]&&it[k+1].complex===i.complex){ g.push(it[++k]); } const r=i.reps; const mesmos=g.every(x=>x.reps===r);
+      let t=(i.sets?i.sets+'x ':'')+(mesmos&&r!=null?(i.perSide?r+'/'+r:r)+' ':'')+'Complex'+(i.cxModo&&i.cxModo!=='padrao'?' '+i.cxModo[0].toUpperCase()+i.cxModo.slice(1):'')+(i.loadKg?' com '+fmtNum(i.loadKg)+'kg':'');
+      L.push(t); L.push('('+g.map(x=>(mesmos?'':(x.reps?x.reps+' ':''))+x.name).join(' + ')+')'); continue; }
+    L.push(linhaItem(i)); }
+  return L.join('\n'); }
+function relogioTxt(b,data){ if(!b||!(b.durSec||b.kcalTotal||b.bpmAvg)) return ''; const z=b.zones||{};
+  const L=['Monitoramento do Treino','Fonte de dados: Smart Watch','',`Tipo de Treino: ${b.tipo||'HIIT'}`,`Data/Hora: ${brData(b.date||data)} - ${(b.time||'07:00')}h`];
+  if(b.kcal) L.push(`Calorias ${b.kcal} kcal`); if(b.kcalTotal) L.push(`Calorias total: ${b.kcalTotal} kcal`); if(b.durSec) L.push('Tempo: '+hms(b.durSec)); if(b.bpmAvg) L.push(`BPM médio: ${b.bpmAvg} bpm`); if(b.bpmMax) L.push(`BPM máximo: ${b.bpmMax} bpm`);
+  if(b.zones){ const f=s=>{ s=s||0; return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }; L.push('','Tempo total em cada Zona de FC',`Leve: ${f(z.leve)}`,`Intensivo: ${f(z.intensivo)}`,`Aeróbico: ${f(z.aerobico)}`,`Anaeróbico: ${f(z.anaerobico)}`,`VO₂ máximo: ${f(z.vo2)}`); }
+  return L.join('\n'); }
+function treinoTxt(s){ const d=d2(s.date); const dd=brData(s.date).slice(0,5);
+  if(s.kind==='corrida'){ const L=['Detalhes da Corrida',`Data/Hora: ${brData(s.date)} - ${(s.time||'05:00')}h`,`Distância Total: ${fmtNum(s.distKm,2).replace(',','.')} km`];
+    if(s.durSec) L.push('Duração: '+hms(s.durSec)); if(s.pace) L.push('Ritmo Médio: '+Math.floor(s.pace/60)+':'+String(s.pace%60).padStart(2,'0')); if(s.paceBest) L.push('Ritmo mais rápido: '+Math.floor(s.paceBest/60)+':'+String(s.paceBest%60).padStart(2,'0'));
+    if(s.kcal) L.push(`Calorias (ativa): ${s.kcal} kcal`); if(s.kcalTotal) L.push(`Calorias (total): ${s.kcalTotal} kcal`); if(s.bpmAvg) L.push(`Frequência Cardíaca Média: ${s.bpmAvg} bpm`); if(s.bpmMax) L.push(`Frequência Cardíaca Máxima: ${s.bpmMax} bpm`);
+    if(s.steps) L.push('Passos: '+fmtNum(s.steps,0)); if(s.cadAvg) L.push(`Cadência Média: ${s.cadAvg} passos/min`);
+    if(s.splits&&s.splits.length){ L.push('','Ritmo por km'); for(const x of s.splits) L.push(`Km ${x.km}${x.partial?' (parcial)':''}: ${Math.floor(x.pace/60)}:${String(x.pace%60).padStart(2,'0')}`); }
+    return L.join('\n'); }
+  const foco=(s.focos?s.focos.join(' & '):(s.foco||'Treino'))+(s.focoExtra?' · '+s.focoExtra:'');
+  const partes=['Treino do Dia\n* '+DSEM[d.getDay()]+' - '+dd+': '+foco];
+  for(const b of s.blocks||[]) if(b.items.length||b.result) partes.push(blocoTxt(b));
+  const rel=relogioTxt(s.band,s.date); if(rel) partes.push(rel);
+  return partes.join('\n\n---\n\n').replace('\n\n---\n\n','\n\n'); }
+async function copiarTreino(id){ const s=allSessions().find(x=>x.id===id); if(!s) return; const txt=treinoTxt(s);
+  try{ await navigator.clipboard.writeText(txt); toast('Treino copiado.'); }catch(e){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); toast('Treino copiado.'); }catch(_){ toast('Não consegui copiar.'); } ta.remove(); } }
+function exportarTreino(id){ const s=allSessions().find(x=>x.id===id); if(!s) return; const txt=treinoTxt(s);
+  const nome='wodio-'+s.date+'-'+((s.foco||s.kind)+'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'.txt';
+  const blob=new Blob([txt],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast('Arquivo salvo: '+nome); }
 // ---------- cabeçalho fixo que encolhe ao rolar
 let _scr=false; window.addEventListener('scroll',()=>{ const s=window.scrollY>40; if(s!==_scr){ _scr=s; document.body.classList.toggle('scrolled',s); } },{passive:true});
 // ---------- botão voltar
