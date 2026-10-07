@@ -361,6 +361,11 @@ body.scrolled .top.head .wmh .wm{font-size:26px}
 body.scrolled .top.head .wmh small{opacity:0;max-height:0}
 body.scrolled #btnTema{opacity:0;width:0;margin-left:-10px;border-width:0;pointer-events:none;overflow:hidden}
 .sessacts{flex-wrap:wrap}
+.btn.strava{background:#FC4C02;color:#fff;border-color:#FC4C02}
+.btn.strava.wide{width:100%;margin-top:6px;font-weight:700}
+.help .passos{padding-left:20px;margin:0 0 12px;display:grid;gap:10px;line-height:1.45}
+.help .passos ul{padding-left:16px;margin:6px 0 0;display:grid;gap:4px;font-size:14px;color:var(--muted)}
+.help .passos ul b{color:var(--text)}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -422,7 +427,7 @@ body.scrolled #btnTema{opacity:0;width:0;margin-left:-10px;border-width:0;pointe
   <div class="mb"><div id="perfilCard"></div><p class="note">Conectado como <b id="contaEmail"></b></p>
     <div class="actions" style="justify-content:flex-start"><button class="btn" id="btnExport">Baixar backup</button><button class="btn" id="btnImport2">Importar arquivo</button><button class="btn" id="btnChangePw">Trocar senha</button><button class="btn" id="btnTermos">Termos</button><button class="btn danger" id="btnLogout">Sair</button></div>
     <p class="note">O backup é um arquivo com todos os seus treinos, corridas e avaliações. Guarde de vez em quando no seu Drive.</p>
-    <h4 style="margin:16px 0 4px">Backups automáticos</h4><p class="note" style="margin-top:0">Todo dia de madrugada o sistema guarda uma cópia. Ficam os últimos 30 dias.</p><div id="bkList"></div><div id="membros"></div><p class="zion">Feito com 🧡 pro Zion</p></div>
+    <h4 style="margin:16px 0 4px">Backups automáticos</h4><p class="note" style="margin-top:0">Todo dia de madrugada o sistema guarda uma cópia. Ficam os últimos 30 dias.</p><div id="stravaBox"></div><div id="bkList"></div><div id="membros"></div><p class="zion">Feito com 🧡 pro Zion</p></div>
 </dialog>
 <input type="file" id="fileImport" accept="application/json,.json,text/plain,.txt" hidden>
 <dialog id="dlgEdit" aria-labelledby="edT">
@@ -473,6 +478,38 @@ body.scrolled #btnTema{opacity:0;width:0;margin-left:-10px;border-width:0;pointe
     <p><b>Mensalidade.</b> O acesso custa R$ 3,99 por mês, pago por Pix ou cartão. Sem fidelidade: se não renovar, você continua vendo o seu histórico, mas deixa de registrar novos treinos.</p>
     <p><b>Saúde.</b> O WÓD'IO não é orientação médica nem de educação física. Faixas de referência e estimativas (como FC máxima) são apenas informativas. Em caso de dúvida, procure um profissional.</p>
     <p class="note">Ao usar o app, você concorda com estes termos.</p>
+  </div>
+</dialog>
+<dialog id="dlgStravaHelp" aria-labelledby="shT">
+  <div class="mh"><h3 id="shT">Importar do Strava</h3><button class="btn ghost" data-close>Fechar</button></div>
+  <div class="mb help">
+    <ol class="passos">
+      <li><b>Ligue seu relógio ao Strava</b> (se ainda não estiver). O nome do menu pode variar com a versão do app:
+        <ul><li><b>Xiaomi:</b> Mi Fitness → Perfil → Dados de terceiros → Strava</li>
+        <li><b>Garmin:</b> Garmin Connect → Mais → Configurações → Aplicativos conectados → Strava</li>
+        <li><b>Samsung:</b> Samsung Health → Configurações → Serviços conectados → Strava</li>
+        <li><b>Apple Watch:</b> app do Strava no iPhone → Configurações → Aplicativos e dispositivos → Apple Saúde</li></ul></li>
+      <li><b>Confira no Strava</b> se seus treinos e corridas estão aparecendo lá.</li>
+      <li><b>Toque em Continuar.</b> Você vai para o site do Strava: entre na sua conta e toque em <b>Autorizar</b>.</li>
+      <li><b>Pronto.</b> Você volta para o WÓD'IO e ele busca seus treinos dos últimos 3 anos sozinho. Daí pra frente, os novos chegam automaticamente.</li>
+    </ol>
+    <p class="note"><b>O que vem do Strava:</b> data, hora, duração e, nas corridas, distância e ritmo. Batimentos e calorias dependem do relógio: alguns modelos (como os da Xiaomi) não mandam batimentos para o Strava. Nesses casos, anexe o print do relógio no treino para completar.</p>
+    <div class="actions"><button class="btn ghost" data-close>Agora não</button><button class="btn strava" id="btnStravaGo">Continuar para o Strava</button></div>
+  </div>
+</dialog>
+<dialog id="dlgWhatsHelp" aria-labelledby="whT">
+  <div class="mh"><h3 id="whT">Importar do WhatsApp</h3><button class="btn ghost" data-close>Fechar</button></div>
+  <div class="mb help">
+    <p class="note" style="margin-top:0">Se você anota seus treinos numa conversa ou grupo do WhatsApp, dá pra trazer tudo de uma vez:</p>
+    <ol class="passos">
+      <li>Abra a <b>conversa</b> onde estão os treinos.</li>
+      <li>Toque nos <b>três pontinhos</b> → <b>Mais</b> → <b>Exportar conversa</b> (no iPhone: toque no nome da conversa → <b>Exportar conversa</b>).</li>
+      <li>Escolha <b>Sem mídia</b> e salve o arquivo no celular (ou mande pra você mesmo e baixe).</li>
+      <li>Se vier um <b>.zip</b>, abra e pegue o arquivo <b>.txt</b> que está dentro.</li>
+      <li>Toque em <b>Escolher arquivo</b> abaixo e selecione o .txt. O app lê cada mensagem e mostra quantos treinos encontrou antes de importar.</li>
+    </ol>
+    <p class="note">Também aceita o <b>backup do WÓD'IO</b> (.json), aquele de Conta → Baixar backup.</p>
+    <div class="actions"><button class="btn ghost" data-close>Agora não</button><button class="btn primary" id="btnWhatsGo">Escolher arquivo</button></div>
   </div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
@@ -1545,8 +1582,10 @@ async function forgot(){ const email=String(new FormData($('#authForm')).get('em
 function vEmpty(){ return `<section class="welcome"><div class="authface">${CARINHA}</div><div class="wm">WÓD<span class="ap">'</span>IO</div><small>seu treino diário</small>
   <p class="wtxt">${state.profile&&state.profile.nome?'Bem-vindo, '+esc(state.profile.nome)+'!':'Bem-vindo!'} Seu app está pronto. Registre o primeiro treino ou traga o que você já tem anotado.</p>
   <button class="btn bora" id="btnBora">BORA TREINAR!</button>
-  <button class="btn ghost" id="btnImportHist">IMPORTAR HISTÓRICO</button>
-  <p class="note">Aceita a conversa do WhatsApp exportada (.txt) ou um backup do WÓD'IO (.json).</p>
+  <button class="btn strava wide" id="btnWelcomeStrava">CONECTAR STRAVA</button>
+  <p class="note">Puxa seus treinos e corridas dos últimos anos direto do Strava (Xiaomi, Garmin, Samsung e Apple sincronizam com ele).</p>
+  <button class="btn ghost" id="btnImportHist">IMPORTAR DO WHATSAPP</button>
+  <p class="note">Traz os treinos anotados numa conversa do WhatsApp (ou um backup do WÓD'IO).</p>
   <p class="note">Ao usar o app você concorda com os <button class="linkbtn" id="btnTermos">termos de uso e privacidade</button>.</p></section>`; }
 async function doAuth(){
   const f=new FormData($('#authForm')); const email=String(f.get('email')||'').trim(), password=String(f.get('password')||'');
@@ -1638,19 +1677,26 @@ document.addEventListener('click',async e=>{
   if(t.id==='btnChangePw'){ $('#dlgConta').close(); state.recovery=true; state.recMsg=''; render(); }
   if(t.id==='btnAuthMode'){ state.authMode=state.authMode==='criar'?'entrar':'criar'; state.authMsg=''; render(); }
   if(t.id==='btnImport'){ $('#fileImport').click(); }
-  if(t.id==='btnMenu'){ renderPerfilCard(); $('#dlgConta').showModal(); listBackups(); renderMembros(); }
+  if(t.id==='btnMenu'){ renderPerfilCard(); $('#dlgConta').showModal(); listBackups(); renderMembros(); renderStrava(); }
+  if(t.id==='btnStravaOn'){ state.stravaHistAoConectar=false; $('#dlgStravaHelp').showModal(); }
+  if(t.id==='btnStravaHist'){ t.disabled=true; await stravaSync(false,true); t.disabled=false; }
+  if(t.id==='btnWelcomeStrava'){ state.stravaHistAoConectar=true; $('#dlgStravaHelp').showModal(); }
+  if(t.id==='btnStravaGo'){ $('#dlgStravaHelp').close(); stravaConectar(!!state.stravaHistAoConectar); }
+  if(t.id==='btnStravaSync'){ t.disabled=true; await stravaSync(false); t.disabled=false; }
+  if(t.id==='btnStravaOff'){ if(confirm('Desconectar o Strava? Os treinos que já entraram continuam no app.')){ try{ await stravaCall({action:'disconnect'}); toast('Strava desconectado.'); }catch(e){ toast('Não deu para desconectar.'); } renderStrava(); } }
   if(t.id==='btnConvidar'){ t.disabled=true; await convidar(); t.disabled=false; }
   if(t.dataset.unconv){ await desconvidar(t.dataset.unconv); }
   if(t.dataset.mais30){ const inp=document.querySelector(`input[data-ativo="${t.dataset.mais30}"]`); const base=inp&&inp.value&&inp.value>todayISO()?d2(inp.value):d2(todayISO()); base.setDate(base.getDate()+30); await setAtivo(t.dataset.mais30,base.getFullYear()+'-'+String(base.getMonth()+1).padStart(2,'0')+'-'+String(base.getDate()).padStart(2,'0')); }
   if(t.id==='btnBora'){ openAdd(); }
-  if(t.id==='btnImportHist'){ $('#fileImport').click(); }
+  if(t.id==='btnImportHist'){ $('#dlgWhatsHelp').showModal(); }
+  if(t.id==='btnWhatsGo'){ $('#dlgWhatsHelp').close(); $('#fileImport').click(); }
   if(t.id==='btnTermos'){ $('#dlgTermos').showModal(); }
   if(t.id==='btnPerfilEdit'){ openPerfil(); }
   if(t.id==='btnPerfilSave'){ t.disabled=true; await salvarPerfil(); t.disabled=false; }
   if(t.id==='btnFotoRm'){ state.fotoNova=null; const el=document.querySelector('.fotoedit .avatar'); if(el) el.outerHTML='<span class="avatar ini" style="width:80px;height:80px;font-size:32px">?</span>'; t.remove(); }
   if(t.dataset.restore){ restoreBackup(+t.dataset.restore, t.dataset.when); }
   if(t.id==='btnExport'){ exportFile(); }
-  if(t.id==='btnImport2'){ $('#dlgConta').close(); $('#fileImport').click(); }
+  if(t.id==='btnImport2'){ $('#dlgConta').close(); $('#dlgWhatsHelp').showModal(); }
   if(t.id==='btnLogout'){ $('#dlgConta').close(); await sb.auth.signOut(); }
 });
 document.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.ativo) setAtivo(e.target.dataset.ativo,e.target.value); });
@@ -1947,6 +1993,37 @@ async function copiarTreino(id){ const s=allSessions().find(x=>x.id===id); if(!s
 function exportarTreino(id){ const s=allSessions().find(x=>x.id===id); if(!s) return; const txt=treinoTxt(s);
   const nome='wodio-'+s.date+'-'+((s.foco||s.kind)+'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'.txt';
   const blob=new Blob([txt],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast('Arquivo salvo: '+nome); }
+
+// ---------- Strava
+async function stravaCall(body){ const r=await sb.functions.invoke('strava',{body}); if(r.error){ let msg=r.error.message; try{ const j=await r.error.context.json(); msg=j.error||msg; }catch(e){} throw new Error(msg); } return r.data; }
+async function renderStrava(){ const el=$('#stravaBox'); if(!el) return; el.innerHTML='<p class="note">Verificando Strava…</p>';
+  try{ const st=(await sb.rpc('strava_status')).data||{};
+    el.innerHTML=`<h4 style="margin:18px 0 4px">Strava</h4>`+(st.conectado?`<p class="note" style="margin-top:0">Conectado${st.atleta?' como <b>'+esc(st.atleta)+'</b>':''}. Os treinos do relógio chegam sozinhos; o print continua completando calorias totais, batimentos e zonas quando o Strava não manda.</p><div class="actions" style="justify-content:flex-start"><button class="btn" id="btnStravaSync">Sincronizar agora</button><button class="btn ghost" id="btnStravaHist">Puxar histórico completo</button><button class="btn ghost" id="btnStravaOff">Desconectar</button></div>`
+      :`<p class="note" style="margin-top:0">Conecte o Strava para os treinos do relógio entrarem automaticamente (Xiaomi, Garmin, Samsung e Apple sincronizam com ele).</p><div class="actions" style="justify-content:flex-start"><button class="btn strava" id="btnStravaOn">Conectar Strava</button></div>`);
+  }catch(e){ el.innerHTML=''; } }
+async function stravaConectar(hist){ try{ try{ if(hist) localStorage.setItem('wodio:stravaHist','1'); else localStorage.removeItem('wodio:stravaHist'); }catch(e){} const c=await stravaCall({action:'config'}); if(!c.client_id){ toast('O Strava ainda não foi configurado.'); return; }
+  const red=location.origin+'/?strava=1'; location.href=`https://www.strava.com/oauth/authorize?client_id=${c.client_id}&redirect_uri=${encodeURIComponent(red)}&response_type=code&approval_prompt=auto&scope=activity:read_all&state=wodio`; }catch(e){ toast('Não deu para abrir o Strava: '+e.message); } }
+function stravaMerge(atvs){ const ops=[]; const sess=allSessions(); let novos=0, completos=0;
+  const usados=new Set(); for(const s of sess) for(const id of (s.stravaIds||[])) usados.add(String(id));
+  for(const a of atvs){ if(usados.has(String(a.id))) continue;
+    const corrida=/run|walk|hike/i.test(a.tipo); const km=a.distancia?+(a.distancia/1000).toFixed(2):null;
+    if(corrida&&km){ let s=sess.find(x=>x.kind==='corrida'&&x.date===a.data&&Math.abs((x.distKm||0)-km)<0.4);
+      if(s){ s=JSON.parse(JSON.stringify(s)); for(const [k,v] of [['bpmAvg',a.bpmAvg],['bpmMax',a.bpmMax],['kcal',a.kcal],['durSec',a.elapsed],['time',a.hora]]) if(v!=null&&s[k]==null) s[k]=v; s.stravaIds=[...(s.stravaIds||[]),a.id]; ops.push({id:s.id,date:s.date,kind:'corrida',data:s}); completos++; }
+      else { const id=idLivre(a.data+'-c'); const n={id,date:a.data,kind:'corrida',time:a.hora,distKm:km,durSec:a.elapsed,pace:a.moving&&km?Math.round(a.moving/km):null,kcal:a.kcal,bpmAvg:a.bpmAvg,bpmMax:a.bpmMax,source:'Strava',local:'livre',splits:[],zones:null,stravaIds:[a.id]}; ops.push({id,date:a.data,kind:'corrida',data:n}); sess.push(n); novos++; }
+      continue; }
+    let s=sess.filter(x=>x.kind==='treino'&&x.date===a.data).sort((x,y)=>(x.band&&x.band.durSec?1:0)-(y.band&&y.band.durSec?1:0))[0];
+    if(s){ s=JSON.parse(JSON.stringify(s)); const b=s.band=s.band||{date:a.data}; for(const [k,v] of [['durSec',a.elapsed],['kcal',a.kcal],['bpmAvg',a.bpmAvg],['bpmMax',a.bpmMax],['time',a.hora]]) if(v!=null&&b[k]==null) b[k]=v; if(!b.tipo) b.tipo='HIIT'; s.stravaIds=[...(s.stravaIds||[]),a.id]; ops.push({id:s.id,date:s.date,kind:'treino',data:s}); completos++; }
+    else { const id=idLivre(a.data+'-t'); const n={id,date:a.data,kind:'treino',foco:null,blocks:[],soRelogio:true,source:'Strava',band:{date:a.data,time:a.hora,tipo:a.tipo||'Treino',durSec:a.elapsed,kcal:a.kcal,bpmAvg:a.bpmAvg,bpmMax:a.bpmMax,zones:null},stravaIds:[a.id]}; ops.push({id,date:a.data,kind:'treino',data:n}); sess.push(n); novos++; } }
+  return {rows:ops,novos,completos}; }
+async function stravaSync(silencioso,historico){ if(!navigator.onLine) return; try{ if(historico) toast('Buscando seu histórico no Strava… pode levar um minutinho.'); const r=await stravaCall({action:'sync',historico:!!historico}); const m=stravaMerge(r.atividades||[]);
+    if(m.rows.length){ await write([{t:'sessions',k:'upsert',rows:m.rows}]); }
+    try{ localStorage.setItem(ukey('wodio:stravaAt'),String(Date.now())); }catch(e){}
+    if(!silencioso||m.rows.length) toast(m.rows.length?`Strava: ${m.novos} novo(s), ${m.completos} completado(s).`:'Strava: nada novo.'); }
+  catch(e){ if(!silencioso) toast('Strava: '+e.message); } }
+async function stravaRetorno(){ const q=new URLSearchParams(location.search); if(!q.get('strava')) return; history.replaceState(null,'',location.pathname);
+  if(q.get('error')){ toast('Conexão com o Strava cancelada.'); return; } const code=q.get('code'); if(!code) return;
+  try{ const r=await stravaCall({action:'connect',code}); let hist=false; try{ hist=localStorage.getItem('wodio:stravaHist')==='1'||!allSessions().length; localStorage.removeItem('wodio:stravaHist'); }catch(e){} toast('Strava conectado'+(r.atleta?' ('+r.atleta+')':'')+'. Buscando treinos…'); await stravaSync(false,hist); }catch(e){ toast('Não deu para conectar o Strava: '+e.message); } }
+async function stravaAuto(){ try{ const at=+localStorage.getItem(ukey('wodio:stravaAt'))||0; if(Date.now()-at<30*60*1000) return; const st=(await sb.rpc('strava_status')).data; if(st&&st.conectado) stravaSync(true); }catch(e){} }
 // ---------- cabeçalho fixo que encolhe ao rolar
 let _scr=false; window.addEventListener('scroll',()=>{ const s=window.scrollY>40; if(s!==_scr){ _scr=s; document.body.classList.toggle('scrolled',s); } },{passive:true});
 // ---------- botão voltar
@@ -1973,7 +2050,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{aplica
     const was=user&&user.id; user=session?session.user:null;
     if(!user){ state.auth=true; state.ready=false; state.sessions=[]; $('#status').textContent=''; render(); return; }
     state.auth=false; $('#contaEmail').textContent=user.email||'';
-    if(was!==user.id){ if(loadCache()){ for(const op of getQ()) applyLocal(op); state.ready=true; updStatus(); render(); } setTimeout(async()=>{ await loadAll(); flushQ(); },0); }
+    if(was!==user.id){ setTimeout(async()=>{ await stravaRetorno(); stravaAuto(); },1500); if(loadCache()){ for(const op of getQ()) applyLocal(op); state.ready=true; updStatus(); render(); } setTimeout(async()=>{ await loadAll(); flushQ(); },0); }
   });
 })();
 })();
