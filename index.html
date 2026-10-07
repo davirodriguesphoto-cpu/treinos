@@ -350,6 +350,16 @@ details.sg summary{cursor:pointer}
 .ativo.off{color:var(--bad)}
 .ativo input{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 6px;color:var(--text);font-size:12px}
 .termos p{margin:0 0 10px;line-height:1.5}
+.top.head{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;margin:-20px -18px 6px;padding:14px 18px 10px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:padding .25s ease,box-shadow .25s ease}
+.top.head .brandface svg{transition:width .25s ease,height .25s ease}
+.top.head .wmh .wm{transition:font-size .25s ease}
+.top.head .wmh small{transition:opacity .2s ease,max-height .25s ease;max-height:20px;overflow:hidden}
+#btnTema{transition:opacity .2s ease,width .25s ease,margin .25s ease,border-width .25s ease}
+body.scrolled .top.head{padding:8px 18px;box-shadow:0 1px 0 var(--line)}
+body.scrolled .top.head .brandface svg{width:36px;height:34px}
+body.scrolled .top.head .wmh .wm{font-size:26px}
+body.scrolled .top.head .wmh small{opacity:0;max-height:0}
+body.scrolled #btnTema{opacity:0;width:0;margin-left:-10px;border-width:0;pointer-events:none;overflow:hidden}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -1890,6 +1900,8 @@ document.addEventListener('change',async e=>{ const t=e.target;
   if(t.dataset.md==='dt'&&state.mus){ const v=clampDT(t.value); state.mus.date=v.slice(0,10); state.mus.time=v.slice(11,16); if(v!==t.value){ t.value=v; toast('Não dá para registrar no futuro.'); } }
 });
 
+// ---------- cabeçalho fixo que encolhe ao rolar
+let _scr=false; window.addEventListener('scroll',()=>{ const s=window.scrollY>40; if(s!==_scr){ _scr=s; document.body.classList.toggle('scrolled',s); } },{passive:true});
 // ---------- botão voltar
 let ultimoVoltar=0;
 function navPush(){ try{ history.pushState({w:1},''); }catch(e){} }
