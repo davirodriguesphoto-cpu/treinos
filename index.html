@@ -315,6 +315,29 @@ details.sg summary{cursor:pointer}
 .andamento{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--z3);border-radius:12px;padding:10px 12px;margin:10px 0}
 .cxlist{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .cxchip{background:var(--surface);border:1px solid var(--z4);border-radius:999px;padding:3px 10px;font-size:13px}
+.addblock{width:100%;background:none;border:1.5px dashed var(--line);color:var(--muted);border-radius:12px;padding:10px;font-weight:600;margin:-4px 0 4px}
+.addblock:hover{border-color:var(--z4);color:var(--z4)}
+.hbh-r{display:flex;align-items:center;gap:8px}
+.herohead{justify-content:space-between;align-items:center}
+.herohead .sub{flex-basis:100%}
+.semana{display:grid;gap:6px;justify-items:end;margin-left:auto}
+.wk-t{font-size:12px;color:var(--muted)}
+.wk-row{display:flex;gap:4px}
+.wk{display:grid;justify-items:center;gap:3px}
+.wk i{font-style:normal;font-size:11px;color:var(--muted);font-weight:600}
+.wk b{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line)}
+.wk.ok b{background:var(--z4);border-color:var(--z4);color:#1A1405}
+.wk.hoje b{border-color:var(--z2)}
+.wk.hoje i{color:var(--z2)}
+.wk.fut b{border-style:dashed;opacity:.5}
+@media (max-width:420px){.herohead .big{font-size:58px}.herohead .big small{font-size:18px}}
+.cats{display:grid;gap:8px;margin-bottom:10px}
+.catrow{display:flex;gap:8px;align-items:end}
+.catrow label{flex:1}
+.catrow .btn{flex:0 0 auto}
+.catrow label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.catrow select,.catrow input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;color:var(--text);min-width:0}
+.cats .addblock{margin:0;font-size:13px}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -762,6 +785,12 @@ function kmStats(){ const ss=allSessions(); let livre=0,treino=0,nT=0;
 function kmBlock(){ const k=kmStats(); if(!k.total) return '';
   return `<h2>Quilômetros</h2><p class="sub">Tudo o que você correu, somando as corridas livres e a corrida dentro dos treinos.</p>
   <div class="lifetime km"><div><b>${fmtNum(k.total,1)}</b><span>km total</span></div><div><b>${fmtNum(k.treino,1)}</b><span>km em treino · ${k.nT} treinos</span></div><div><b>${fmtNum(k.livre,1)}</b><span>km livre · ${k.nL} corridas</span></div></div>`; }
+function semanaHTML(){ const hoje=d2(todayISO()); const ini=new Date(hoje); ini.setDate(hoje.getDate()-hoje.getDay());
+  const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const feitos=new Set(allSessions().filter(s=>s.kind==='treino'||s.kind==='corrida').map(s=>s.date)); const L=['D','S','T','Q','Q','S','S']; let n=0, dias='';
+  for(let k=0;k<7;k++){ const d=new Date(ini); d.setDate(ini.getDate()+k); const di=iso(d); const ok=feitos.has(di); if(ok) n++; const st=ok?'ok':di===iso(hoje)?'hoje':di<iso(hoje)?'falta':'fut';
+    dias+=`<span class="wk ${st}" title="${fmtD(di)}"><i>${L[k]}</i><b>${ok?'<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}</b></span>`; }
+  return `<div class="semana" aria-label="${n} de 7 dias com treino nesta semana"><div class="wk-t">${n} ${n===1?'dia':'dias'} nesta semana${n>=5?' 🔥':''}</div><div class="wk-row">${dias}</div></div>`; }
 function vResumo(){
   const ss=allSessions(); const tr=ss.filter(s=>s.kind==='treino'); const runs=ss.filter(s=>s.kind==='corrida');
   if(!tr.length) return `<div class="empty">Nenhum treino ainda. Toque em Registrar e cole o texto do seu treino.</div>`;
@@ -776,7 +805,7 @@ function vResumo(){
   ${state.profile&&state.profile.nome?`<p class="hello">Bom treino, ${esc(state.profile.nome)}.</p>`:''}
   ${allSessions().filter(s=>s.status==='andamento').map(s=>`<div class="andamento"><div><span class="pill">em andamento</span> <b>${esc(s.focoExtra?s.foco+' · '+s.focoExtra:(s.foco||'Treino'))}</b><br><span class="m">${fmtD(s.date)}${s.time?' · '+s.time:''} · ${(s.blocks||[]).reduce((a,b)=>a+b.items.length,0)} exercícios</span></div><button class="btn primary small" data-continuar="${esc(s.id)}">Continuar</button></div>`).join('')}
   <section class="hero2">
-    <div class="herohead"><div class="big">${tr.length}<small>treinos</small></div>
+    <div class="herohead"><div class="big">${tr.length}<small>treinos</small></div>${semanaHTML()}
       <p class="sub">Desde ${fmtD(first.date)}. Último: ${DIA[d2(last.date).getDay()]}, ${fmtD(last.date)}${last.foco?' · '+esc(last.foco):''}.</p>
     </div>
     ${last.band?zoneStrip(last.band.zones):''}
@@ -1576,7 +1605,9 @@ function novoHibrido(){ const dt=dtEscolhida(); $('#dlgAdd').close();
   state.draft={kind:'treino',modalidade:'hibrido',status:'andamento',date:dt.date,time:dt.time,foco:null,blocks:[{name:'WARM UP',items:[]},{name:'SKILL',items:[]},{name:'WOD',items:[]}],band:null,_new:true};
   state.hibWatchEdit=false; renderHib(); $('#dlgHib').showModal(); }
 function abrirHibrido(s){ state.draft=JSON.parse(JSON.stringify(s)); state.draft._orig=s.id; state.hibWatchEdit=false;
+  for(const b of state.draft.blocks) if(/\s+[IVX]+$/.test(b.name)) b.extra=true;
   const nomes=['WARM UP','SKILL','WOD']; for(const n of nomes) if(!state.draft.blocks.some(b=>b.name===n)) state.draft.blocks.push({name:n,items:[],nenhum:true});
+  const ord=n=>{ const k=['WARM UP','SKILL','WOD'].indexOf(n.replace(/\s+[IVX]+$/,'')); return k<0?9:k; }; state.draft.blocks.sort((a,b)=>ord(a.name)-ord(b.name));
   renderHib(); $('#dlgHib').showModal(); }
 function resumoItem(i){ const p=[]; if(i.sets) p.push(i.sets+'×'); if(i.reps!=null) p.push(i.reps+(i.perSide?'/lado':'')); if(i.timeSec) p.push(i.timeSec+'"'); if(i.distM) p.push(i.distM+' m'); if(i.loadKg) p.push(fmtNum(i.loadKg)+' kg'); if(i.modo&&i.modo!=='padrao') p.push(i.modo); return p.join(' · ')||'toque para preencher'; }
 function compoeResultado(b){ const f=b.formato; if(!f||!f.tipo) return b.resultLivre||null; const n=FORMATOS.find(x=>x[0]===f.tipo)[1]; const p=[n];
@@ -1588,13 +1619,15 @@ function compoeResultado(b){ const f=b.formato; if(!f||!f.tipo) return b.resultL
   if(f.tipo==='chipper'&&f.resultado) p.push(f.resultado);
   if(f.tipo==='tabata'&&f.reps) p.push(f.reps+' reps');
   return p.join(' · '); }
-function renderHib(){ const d=state.draft; const tipos=tiposTreino().map(t=>t.label); const cat=d.foco&&!tipos.includes(d.foco)?'__outros':(d.foco||'__outros');
+function renderHib(){ const d=state.draft; const tipos=tiposTreino().map(t=>t.label);
+  if(!d.cats) d.cats=(d.focos&&d.focos.length?d.focos:[d.foco||'']).map(f=>({sel:f&&tipos.includes(f)?f:'__outros',livre:f&&!tipos.includes(f)?f:''}));
   const fx=(bi,k,lab,v,ph)=>`<label>${lab}<input data-hf="${bi}.${k}" value="${esc(v==null?'':v)}" placeholder="${ph||''}" inputmode="${k==='resultado'?'text':'numeric'}"></label>`;
-  let h=`<div class="form"><label>Categoria<select data-hd="cat"><option value="__outros" ${cat==='__outros'?'selected':''}>Outros</option>${tipos.map(t=>`<option ${cat===t?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
-    ${cat==='__outros'?`<label>Nome do treino<input data-hd="focoLivre" value="${esc(d.foco||'')}" placeholder="Ex.: Death Burpee"></label>`:''}
-    <label>Data e hora<input type="datetime-local" data-hd="dt" value="${d.date}T${d.time||'07:00'}" max="${nowLocal()}"></label></div>`;
+  let h=`<div class="cats">${d.cats.map((c,k)=>`<div class="catrow"><label>${k?'E também':'Categoria'}<select data-hc="${k}"><option value="__outros" ${c.sel==='__outros'?'selected':''}>Outros</option>${tipos.map(t=>`<option ${c.sel===t?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+      ${c.sel==='__outros'?`<label>Nome do treino<input data-hcl="${k}" value="${esc(c.livre||'')}" placeholder="Ex.: Death Burpee"></label>`:''}${k?`<button class="btn ghost small" data-hcrm="${k}" aria-label="Tirar categoria">✕</button>`:''}</div>`).join('')}
+    <button class="addblock" data-hcadd="1">+ outra categoria (ex.: Push &amp; Pull = Puxadores + Empurradores)</button></div>
+    <div class="form"><label>Data e hora<input type="datetime-local" data-hd="dt" value="${d.date}T${d.time||'07:00'}" max="${nowLocal()}"></label></div>`;
   d.blocks.forEach((b,bi)=>{ const f=b.formato||{};
-    h+=`<div class="hblock" data-bi="${bi}"><div class="hbh"><b>${esc(b.name)}</b><label class="chk"><input type="checkbox" data-hn="${bi}" ${b.nenhum?'checked':''}> Nenhum</label></div>`;
+    h+=`<div class="hblock" data-bi="${bi}"><div class="hbh"><b>${esc(b.name)}</b><span class="hbh-r">${b.extra?`<button class="linkbtn" data-hbrm="${bi}" aria-label="Remover bloco">remover bloco</button>`:`<label class="chk"><input type="checkbox" data-hn="${bi}" ${b.nenhum?'checked':''}> Nenhum</label>`}</span></div>`;
     if(!b.nenhum){
       h+=`<div class="hfmt"><label>Formato do bloco<select data-hf="${bi}.tipo">${FORMATOS.map(([k,l])=>`<option value="${k}" ${f.tipo===k||(!f.tipo&&!k)?'selected':''}>${l}</option>`).join('')}</select></label>
         ${f.tipo==='amrap'?fx(bi,'tempo','Tempo (min)',f.tempo)+fx(bi,'rounds','Rounds',f.rounds)+fx(bi,'reps','Reps extras',f.reps):''}
@@ -1607,13 +1640,16 @@ function renderHib(){ const d=state.draft; const tipos=tiposTreino().map(t=>t.la
       <div class="hitems" data-drop="${bi}">${b.items.map((it,ii)=>`<div class="hitem" data-bi="${bi}" data-ii="${ii}"><button class="hi-main" data-hedit="${bi}.${ii}"><span class="t">${esc(it.name)}</span><span class="m">${esc(resumoItem(it))}</span></button><span class="grip" data-grip="${bi}.${ii}" aria-label="Segure e arraste para outro bloco">≡</span></div>`).join('')||'<p class="note empty-b">Nenhum exercício ainda.</p>'}</div>
       <button class="btn ghost small" data-hadd="${bi}">+ exercício</button>`;
     }
-    h+=`</div>`; });
+    h+=`</div>`;
+    const base=b.name.replace(/\s+[IVX]+$/,''); const prox=d.blocks[bi+1]; if(!prox||prox.name.replace(/\s+[IVX]+$/,'')!==base) h+=`<button class="addblock" data-hbadd="${bi}">+ ${esc(base)} ${romano(d.blocks.filter(x=>x.name.replace(/\s+[IVX]+$/,'')===base).length+1)}</button>`; });
   const bd=d.band;
   h+=`<div class="hblock"><div class="hbh"><b>Dados do relógio</b></div>${bd&&(bd.durSec||bd.kcalTotal)?`<p class="note">${mmss(bd.durSec)} · ${bd.kcalTotal||'–'} kcal · ${bd.bpmAvg||'–'} bpm médio</p>${zoneStrip(bd.zones)}`:'<p class="note">Ainda sem dados. Dá pra adicionar agora ou depois.</p>'}
     <div class="actions" style="justify-content:flex-start;margin-top:8px"><label class="btn ghost small" for="hibImg">Adicionar print</label><input type="file" id="hibImg" accept="image/*" hidden><button class="btn ghost small" data-hwatch="1">${state.hibWatchEdit?'Ocultar campos':'Digitar dados'}</button></div>
     ${state.hibWatchEdit?watchEditor('h',bd||{}):''}<p class="note" id="hibImgSt"></p></div>`;
   $('#hibBody').innerHTML=h; guardaRascunho(); }
+function romano(n){ return ['','I','II','III','IV','V','VI','VII','VIII'][n]||String(n); }
 function hibCompoe(){ const d=JSON.parse(JSON.stringify(state.draft));
+  if(d.cats){ const fs=d.cats.map(c=>c.sel==='__outros'?(c.livre||'').trim():c.sel).filter(Boolean); const uniq=[...new Set(fs)]; d.foco=uniq[0]||null; if(uniq.length>1) d.focos=uniq; else delete d.focos; delete d.cats; }
   d.blocks=d.blocks.filter(b=>!b.nenhum&&(b.items.length||b.formato&&b.formato.tipo)).map(b=>({...b,result:compoeResultado(b)}));
   for(const b of d.blocks) for(const i of b.items){ if(i.modo&&i.modo!=='padrao'){ i.perSide=true; i.note=i.modo+(i.note&&i.note!==i.modo?' · '+i.note:''); } }
   if(d.band&&!d.band.date) d.band.date=d.date; delete d._new; return d; }
@@ -1725,6 +1761,10 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
   if(t.id==='optHib'){ novoHibrido(); return; } if(t.id==='optMus'){ openMusPick(); return; }
   if(t.dataset.hadd!=null){ abrirPicker({tipo:'hib',bi:+t.dataset.hadd}); return; }
   if(t.dataset.hedit){ const [bi,ii]=t.dataset.hedit.split('.').map(Number); abrirPicker({tipo:'hib',bi,ii},state.draft.blocks[bi].items[ii]); return; }
+  if(t.dataset.hbadd!=null){ const bi=+t.dataset.hbadd; const B=state.draft.blocks; const base=B[bi].name.replace(/\s+[IVX]+$/,''); const n=B.filter(x=>x.name.replace(/\s+[IVX]+$/,'')===base).length+1; B.splice(bi+1,0,{name:base+' '+romano(n),items:[],extra:true}); renderHib(); return; }
+  if(t.dataset.hbrm!=null){ const bi=+t.dataset.hbrm; const b=state.draft.blocks[bi]; if(b.items.length&&!confirm('Remover '+b.name+' e os exercícios dele?')) return; state.draft.blocks.splice(bi,1); renderHib(); return; }
+  if(t.dataset.hcadd){ state.draft.cats.push({sel:'__outros',livre:''}); renderHib(); return; }
+  if(t.dataset.hcrm!=null){ state.draft.cats.splice(+t.dataset.hcrm,1); renderHib(); return; }
   if(t.dataset.hwatch){ state.hibWatchEdit=!state.hibWatchEdit; renderHib(); return; }
   if(t.dataset.hsave!=null){ t.disabled=true; await salvarHib(t.dataset.hsave==='1'); t.disabled=false; return; }
   if(t.dataset.hdel){ const o=state.draft&&state.draft._orig; $('#dlgHib').close(); state.draft=null; limpaRascunho(); if(o) await delSession(o); else render(); return; }
@@ -1757,10 +1797,12 @@ document.addEventListener('input',e=>{ const t=e.target;
   if(t.dataset.nm&&state.novoModelo){ state.novoModelo[t.dataset.nm]=t.value; } });
 document.addEventListener('change',async e=>{ const t=e.target;
   if(t.dataset.hd&&state.draft){ const d=state.draft;
-    if(t.dataset.hd==='cat'){ d.foco=t.value==='__outros'?'':t.value; renderHib(); }
-    if(t.dataset.hd==='focoLivre') d.foco=t.value.trim();
+
+
     if(t.dataset.hd==='dt'){ const v=clampDT(t.value); d.date=v.slice(0,10); d.time=v.slice(11,16); if(v!==t.value){ t.value=v; toast('Não dá para registrar no futuro.'); } }
     guardaRascunho(); }
+  if(t.dataset.hc!=null&&state.draft){ state.draft.cats[+t.dataset.hc].sel=t.value; renderHib(); }
+  if(t.dataset.hcl!=null&&state.draft){ state.draft.cats[+t.dataset.hcl].livre=t.value; guardaRascunho(); }
   if(t.dataset.hn!=null&&state.draft){ state.draft.blocks[+t.dataset.hn].nenhum=t.checked; renderHib(); }
   if(t.dataset.hf&&state.draft){ const [bi,k]=t.dataset.hf.split('.'); const b=state.draft.blocks[+bi]; b.formato=b.formato||{}; b.formato[k]=t.value; if(k==='tipo'){ if(t.value==='intervalo'){ if(b.formato.on==null) b.formato.on='40'; if(b.formato.off==null) b.formato.off='20'; } renderHib(); } else guardaRascunho(); }
   if(t.dataset.w!=null&&String(t.dataset.w).startsWith('h.')&&state.draft){ const k=t.dataset.w.slice(2); const b=state.draft.band=state.draft.band||{};
