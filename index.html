@@ -116,10 +116,10 @@ th:first-child,td:first-child{text-align:left}
 th{color:var(--muted);font-weight:500}
 /* nav */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
-nav.tabs .in{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr) auto;align-items:center;gap:4px;padding:8px 12px}
-nav.tabs button.tab{background:none;border:0;padding:8px 4px;color:var(--muted);font-weight:600;font-size:14px;border-radius:8px}
-nav.tabs button.tab[aria-current="page"]{color:var(--text);background:var(--surface)}
-.fab{border:0;background:var(--z2);color:#06221F;border-radius:14px;width:52px;height:44px;padding:0;display:grid;place-items:center;font-weight:700}
+nav.tabs .in{max-width:980px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr auto 1fr 1fr;align-items:end;gap:2px;padding:6px 10px 8px}
+nav.tabs button.tab{background:none;border:0;padding:6px 2px 2px;color:var(--muted);font-weight:600;font-size:11.5px;border-radius:10px;display:grid;justify-items:center;gap:3px}
+nav.tabs button.tab[aria-current="page"]{color:var(--z4)}
+.fab{border:0;background:var(--z2);color:#06221F;border-radius:50%;width:62px;height:62px;padding:0;display:grid;place-items:center;margin:0 8px;transform:translateY(-18px);box-shadow:0 6px 18px rgba(0,0,0,.35),0 0 0 5px var(--bg)}
 /* modal */
 dialog{border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:16px;padding:0;width:min(720px,94vw);max-height:90vh}
 dialog::backdrop{background:rgba(5,8,14,.6)}
@@ -147,7 +147,7 @@ textarea{width:100%;min-height:220px;border-radius:12px;border:1px solid var(--l
   .detail{padding-left:4px}
   .trend{grid-template-columns:1fr auto}
   .trend .spark{display:none}
-  nav.tabs button.tab{font-size:13px}
+  nav.tabs button.tab{background:none;border:0;padding:6px 2px 2px;color:var(--muted);font-weight:600;font-size:11.5px;border-radius:10px;display:grid;justify-items:center;gap:3px}
 }
 body.signed-out nav.tabs{display:none}
 .iconbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--text);display:grid;place-items:center;padding:0}
@@ -247,6 +247,9 @@ details.sg summary{cursor:pointer}
 .cropzoom{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);width:260px}
 .cropzoom input{flex:1;accent-color:var(--z4)}
 .hello{margin:6px 0 0;color:var(--muted);font-size:15px}
+.convform{display:grid;grid-template-columns:1fr 1.4fr auto;gap:8px;margin-top:8px}
+.convform input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;min-width:0}
+@media (max-width:520px){.convform{grid-template-columns:1fr}}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -275,13 +278,7 @@ details.sg summary{cursor:pointer}
   <div class="top head"><div class="brand"><span class="brandface" aria-hidden="true"></span><div class="wmh"><h1 class="wm">WÓD<span class="ap">'</span>IO</h1><small>seu treino diário</small></div></div><div class="topright"><div class="who" id="status"></div><button class="iconbtn" id="btnTema" aria-label="Mudar tema"></button></div></div>
   <main id="view"></main>
 </div>
-<nav class="tabs" aria-label="Seções"><div class="in">
-  <button class="tab" data-tab="resumo" aria-current="page">Resumo</button>
-  <button class="tab" data-tab="exercicios">Exercícios</button>
-  <button class="tab" data-tab="corpo">Corpo</button>
-  <button class="tab" data-tab="sessoes">Sessões</button>
-  <button class="fab" id="btnReg" aria-label="Registrar treino" title="Registrar treino"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
-</div></nav>
+<nav class="tabs" aria-label="Seções"><div class="in"><button class="tab" data-tab="resumo" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h5v-5.5h3v5.5h5V10"/></svg><span>Resumo</span></button><button class="tab" data-tab="exercicios"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 9V7.5a3.5 3.5 0 0 1 7 0V9"/><path d="M6 13.5a6 6 0 0 1 12 0c0 3.2-1.6 6-6 6s-6-2.8-6-6Z"/><path d="M9 19.5h6"/></svg><span>Exercícios</span></button><button class="fab" id="btnReg" aria-label="Registrar treino" title="Registrar treino"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg></button><button class="tab" data-tab="corpo"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5.5" r="2.5"/><path d="M5 10.5h14M12 10.5v5M12 15.5l-3.5 5M12 15.5l3.5 5"/></svg><span>Corpo</span></button><button class="tab" data-tab="sessoes"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.8" r="2.3"/></svg><span>Sessões</span></button></div></nav>
 
 <dialog id="dlgReg" aria-labelledby="regT">
   <div class="mh"><h3 id="regT">Registrar treino</h3><button class="btn ghost" data-close>Fechar</button></div>
@@ -311,7 +308,7 @@ details.sg summary{cursor:pointer}
   <div class="mb"><div id="perfilCard"></div><p class="note">Conectado como <b id="contaEmail"></b></p>
     <div class="actions" style="justify-content:flex-start"><button class="btn" id="btnExport">Baixar backup</button><button class="btn" id="btnImport2">Importar arquivo</button><button class="btn" id="btnChangePw">Trocar senha</button><button class="btn danger" id="btnLogout">Sair</button></div>
     <p class="note">O backup é um arquivo com todos os seus treinos, corridas e avaliações. Guarde de vez em quando no seu Drive.</p>
-    <h4 style="margin:16px 0 4px">Backups automáticos</h4><p class="note" style="margin-top:0">Todo dia de madrugada o sistema guarda uma cópia. Ficam os últimos 30 dias.</p><div id="bkList"></div><p class="zion">Feito com 🧡 pro Zion</p></div>
+    <h4 style="margin:16px 0 4px">Backups automáticos</h4><p class="note" style="margin-top:0">Todo dia de madrugada o sistema guarda uma cópia. Ficam os últimos 30 dias.</p><div id="bkList"></div><div id="membros"></div><p class="zion">Feito com 🧡 pro Zion</p></div>
 </dialog>
 <input type="file" id="fileImport" accept="application/json,.json" hidden>
 <dialog id="dlgEdit" aria-labelledby="edT">
@@ -622,6 +619,10 @@ function exerciseIndex(){
       r.vol+=itemVolume(i); r.items.push({...i,block:b.name});
     }
   }
+  const livres=allSessions().filter(s=>s.kind==='corrida'&&s.local!=='box');
+  if(livres.length){ ex['Corrida Livre']={name:'Corrida Livre',sessions:livres.map(s=>({date:s.date,id:s.id,max:null,vol:0,items:[]})),count:livres.length,tot:{reps:0,timeSec:livres.reduce((a,s)=>a+(s.durSec||0),0),distM:livres.reduce((a,s)=>a+(s.distKm||0)*1000,0)},virtual:true}; }
+  const boxes=allSessions().filter(s=>s.kind==='corrida'&&s.local==='box');
+  if(boxes.length){ const e=ex['Corrida Box']=ex['Corrida Box']||{name:'Corrida Box',sessions:[],count:0,tot:{reps:0,timeSec:0,distM:0}}; for(const s of boxes){ e.sessions.push({date:s.date,id:s.id,max:null,vol:0,items:[{name:'Corrida Box',distM:(s.distKm||0)*1000,block:'box'}]}); e.count++; e.tot.distM+=(s.distKm||0)*1000; } e.sessions.sort((a,b)=>a.date.localeCompare(b.date)); }
   for(const e of Object.values(ex)){ const L=e.sessions.filter(r=>r.max!=null); e.loaded=L; e.best=L.length?Math.max(...L.map(r=>r.max)):null; e.first=L.length?L[0].max:null; e.last=L.length?L[L.length-1].max:null; e.lastDate=e.sessions[e.sessions.length-1].date;
     let pr=0; for(const r of L){ if(r.max>pr){ if(pr>0) r.pr=true; pr=r.max; } } }
   return ex;
@@ -648,7 +649,7 @@ function mk(id,cfg){ kill(id); const el=document.getElementById(id); if(!el||!wi
 // ---------- views
 function kmStats(){ const ss=allSessions(); let livre=0,treino=0,nT=0;
   for(const s of ss){ if(s.kind==='corrida'){ if(s.local==='box'){ treino+=(s.distKm||0)*1000; nT++; } else livre+=(s.distKm||0)*1000; continue; }
-    let had=false; for(const b of s.blocks||[]) for(const i of b.items||[]) if(i.name==='Corrida'){ const d=itemTotals(i).distM; if(d){ treino+=d; had=true; } } if(had) nT++; }
+    let had=false; for(const b of s.blocks||[]) for(const i of b.items||[]) if(i.name==='Corrida Box'){ const d=itemTotals(i).distM; if(d){ treino+=d; had=true; } } if(had) nT++; }
   return {livre:livre/1000,treino:treino/1000,total:(livre+treino)/1000,nL:ss.filter(s=>s.kind==='corrida'&&s.local!=='box').length,nT}; }
 function kmBlock(){ const k=kmStats(); if(!k.total) return '';
   return `<h2>Quilômetros</h2><p class="sub">Tudo o que você correu, somando as corridas livres e a corrida dentro dos treinos.</p>
@@ -710,7 +711,7 @@ function zoneTotals(ss){ const t={leve:0,intensivo:0,aerobico:0,anaerobico:0,vo2
 function vPeriodo(){
   const R=perRange(); const ss=allSessions().filter(s=>s.date>=R.a&&s.date<=R.b);
   const tr=ss.filter(s=>s.kind==='treino'), co=ss.filter(s=>s.kind==='corrida');
-  const km=co.reduce((x,s)=>x+(s.distKm||0),0)+tr.reduce((x,s)=>x+(s.blocks||[]).reduce((y,b)=>y+b.items.filter(i=>i.name==='Corrida').reduce((z,i)=>z+itemTotals(i).distM/1000,0),0),0);
+  const km=co.reduce((x,s)=>x+(s.distKm||0),0)+tr.reduce((x,s)=>x+(s.blocks||[]).reduce((y,b)=>y+b.items.filter(i=>i.name==='Corrida Box').reduce((z,i)=>z+itemTotals(i).distM/1000,0),0),0);
   const kc=ss.reduce((x,s)=>x+((s.band||s).kcalTotal||0),0);
   const solo=state.zoneSolo||null;
   return `<h2>Frequência</h2>
@@ -736,11 +737,18 @@ function drawResumo(){
   mk('cZones',{type:'bar',data:{labels:lab,datasets:on.map(([k,l,c])=>({label:l,data:keys.map(q=>zs[q]?+(R.daily?zs[q][k]:zs[q][k]/zs[q].n).toFixed(1):0),backgroundColor:css(c),stack:'z',borderRadius:2}))},
     options:baseOpts({scales:{x:stackX,y:{stacked:true,beginAtZero:true,ticks:{color:css('--muted'),callback:v=>v+' min'},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtNum(c.raw,1)+' min'}}}})});
 }
+function destaque(e){ if(e.name==='Corrida Livre'){ const b=allSessions().filter(s=>s.kind==='corrida'&&s.local!=='box'&&s.pace&&s.distKm>=1).reduce((m,r)=>!m||r.pace<m.pace?r:m,null); return b?`<b>${pace(b.pace)}</b><span class="m">/km</span>`:''; }
+  if(e.name==='Corrida Box') return `<b>${fmtNum(e.tot.distM/1000,1)}</b><span class="m"> km</span>`;
+  if(e.best!=null) return `<b>${fmtNum(e.best)} kg</b>`;
+  if(e.tot.reps) return `<b>${fmtNum(e.tot.reps,0)}</b><span class="m"> reps</span>`;
+  if(e.tot.distM) return `<b>${e.tot.distM>=1000?fmtNum(e.tot.distM/1000,1)+'</b><span class="m"> km':fmtNum(e.tot.distM,0)+'</b><span class="m"> m'}</span>`;
+  if(e.tot.timeSec) return `<b>${Math.round(e.tot.timeSec/60)}</b><span class="m"> min</span>`;
+  return '<span class="m">–</span>'; }
 const ini=n=>{const c=n.normalize('NFD').replace(/[\u0300-\u036f]/g,'')[0].toUpperCase();return /[A-Z]/.test(c)?c:'#'};
 function vExercicios(){
   const ex=exerciseIndex();
   if(state.ex&&ex[state.ex]) return vExDetail(ex[state.ex]);
-  const f=state.exFilter.toLowerCase(); const mode=state.exMode||'freq';
+  const f=state.exFilter.toLowerCase(); const mode=state.exMode||'az';
   let list=Object.values(ex).filter(e=>!f||e.name.toLowerCase().includes(f));
   if(mode==='carga') list=list.filter(e=>e.best!=null).sort((a,b)=>b.best-a.best);
   else if(mode==='az') list.sort((a,b)=>a.name.localeCompare(b.name,'pt',{sensitivity:'base'}));
@@ -749,28 +757,44 @@ function vExercicios(){
   else list.sort((a,b)=>b.count-a.count);
   return `<h2 style="margin-top:12px">Exercícios</h2><p class="sub">${Object.keys(ex).length} movimentos diferentes registrados.</p>
   <input class="search" id="exSearch" type="search" placeholder="Buscar exercício" value="${esc(state.exFilter)}" aria-label="Buscar exercício">
-  <div class="chips" role="group" aria-label="Ordenar">${[['freq','Mais feitos'],['total','Mais repetições'],['carga','Maior carga'],['recente','Mais recentes'],['az','A–Z']].map(([k,l])=>`<button class="chip" data-mode="${k}" aria-pressed="${mode===k}">${l}</button>`).join('')}</div>
-  <div class="rows">${(mode==='az'?list:list.slice(0,200)).map((e,k,arr)=>`${mode==='az'&&(k===0||ini(e.name)!==ini(arr[k-1].name))?`<div class="month">${esc(ini(e.name))}</div>`:''}<button class="row" data-ex="${esc(e.name)}"><div><div class="t">${esc(e.name)}</div><div class="m">${e.count} ${e.count>1?'sessões':'sessão'}${e.name==='Corrida'?' · '+fmtNum(kmStats().total,1)+' km no total':fmtTotals(e.tot).map(x=>' · '+x).join('')} · última em ${fmtD(e.lastDate)}</div></div><div class="r">${e.best!=null?`<b>${fmtNum(e.best)} kg</b>`:'<span class="m">sem carga</span>'}</div></button>`).join('')}</div>`;
+  <div class="chips" role="group" aria-label="Ordenar">${[['az','A–Z'],['freq','Mais feitos'],['total','Mais repetições'],['carga','Maior carga'],['recente','Mais recentes']].map(([k,l])=>`<button class="chip" data-mode="${k}" aria-pressed="${mode===k}">${l}</button>`).join('')}</div>
+  <div class="rows">${(mode==='az'?list:list.slice(0,200)).map((e,k,arr)=>`${mode==='az'&&(k===0||ini(e.name)!==ini(arr[k-1].name))?`<div class="month">${esc(ini(e.name))}</div>`:''}<button class="row" data-ex="${esc(e.name)}"><div><div class="t">${esc(e.name)}</div><div class="m">${e.count} ${e.count>1?'sessões':'sessão'}${e.virtual||e.name==='Corrida Box'?'':fmtTotals(e.tot).map(x=>' · '+x).join('')} · última em ${fmtD(e.lastDate)}</div></div><div class="r">${destaque(e)}</div></button>`).join('')}</div>`;
 }
-function vCorrida(e){
-  const K=kmStats(); const runs=allSessions().filter(s=>s.kind==='corrida');
-  const rows=[...e.sessions.map(r=>({date:r.date,feito:r.items.map(i=>esc(qty(i))).join('<br>'),bloco:esc([...new Set(r.items.map(i=>i.block))].join(', ')),extra:''})),
-    ...runs.map(s=>({date:s.date,feito:fmtNum(s.distKm,2)+' km',bloco:s.local==='box'?'<span class="tag">box</span>':'<span class="tag run">corrida livre</span>',extra:`${mmss(s.durSec)} · ${pace(s.pace)}/km`}))].sort((a,b)=>b.date.localeCompare(a.date));
+function vCorridaLivre(){
+  const runs=allSessions().filter(s=>s.kind==='corrida'&&s.local!=='box').reverse(); const K=kmStats();
+  const ok=runs.filter(r=>r.pace&&r.distKm>=1); const best=ok.reduce((m,r)=>!m||r.pace<m.pace?r:m,null); const longe=runs.reduce((m,r)=>!m||(r.distKm||0)>(m.distKm||0)?r:m,null);
+  const tempo=runs.reduce((a,r)=>a+(r.durSec||0),0);
   return `<p style="margin:10px 0 0"><button class="btn accent" id="exBack">‹ Todos os exercícios</button></p>
-  <h2>Corrida</h2>
-  <div class="lifetime km"><div><b>${fmtNum(K.total,1)}</b><span>km total</span></div><div><b>${fmtNum(K.treino,1)}</b><span>km em treino · ${K.nT} treinos</span></div><div><b>${fmtNum(K.livre,1)}</b><span>km livre · ${K.nL} corridas</span></div></div>
-  <div class="panel"><h3>Quilômetros por mês</h3><div class="chart"><canvas id="cKm" aria-label="Quilômetros por mês"></canvas></div><div class="legend"><span><i style="background:var(--z3)"></i>Em treino</span><span><i style="background:var(--z2)"></i>Livre</span></div></div>
-  <h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Feito</th><th>Tempo · ritmo</th><th>Tipo</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${fmtD(r.date)}</td><td>${r.feito}</td><td>${r.extra||'–'}</td><td>${r.bloco}</td></tr>`).join('')}</tbody></table></div>`;
+  <h2>Corrida Livre</h2><p class="sub">Treinos de corrida fora do box.</p>
+  <div class="lifetime km"><div><b>${best?pace(best.pace):'–'}</b><span>melhor ritmo /km${best?' · '+fmtNum(best.distKm,2)+' km em '+fmtD(best.date):''}</span></div><div><b>${fmtNum(K.livre,1)}</b><span>km · ${K.nL} corridas</span></div><div><b>${fmtNum(tempo/3600,1)}</b><span>horas correndo</span></div></div>
+  ${longe?`<p class="note">Maior distância: ${fmtNum(longe.distKm,2)} km em ${fmtD(longe.date)}.</p>`:''}
+  <div class="panel"><h3>Ritmo médio por corrida</h3><div class="chart"><canvas id="cPace" aria-label="Ritmo por corrida"></canvas></div><p class="note" style="margin:6px 0 0">Quanto mais baixo, mais rápido.</p></div>
+  <div class="panel" style="margin-top:14px"><h3>Quilômetros por mês</h3><div class="chart"><canvas id="cKm" aria-label="Quilômetros por mês"></canvas></div></div>
+  <h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Distância</th><th>Tempo</th><th>Ritmo</th><th>Origem</th></tr></thead><tbody>${runs.map(r=>`<tr><td>${fmtD(r.date)}${best&&r.id===best.id?' <span class="tag new">melhor ritmo</span>':''}</td><td>${fmtNum(r.distKm,2)} km</td><td>${mmss(r.durSec)}</td><td>${pace(r.pace)}/km</td><td>${esc(r.source||'Relógio')}</td></tr>`).join('')}</tbody></table></div>`;
 }
-function drawKm(){
+function vCorridaBox(e){
+  const K=kmStats(); let maior=null;
+  for(const r of e.sessions) for(const i of r.items){ const d=itemTotals(i).distM||i.distM||0; if(!maior||d>maior.d) maior={d,date:r.date,i}; }
+  const rows=[...e.sessions].reverse().map(r=>`<tr><td>${fmtD(r.date)}${maior&&r.date===maior.date?' <span class="tag new">maior distância</span>':''}</td><td>${r.items.map(i=>i.block==='box'?fmtNum((i.distM||0)/1000,2)+' km':esc(qty(i))).join('<br>')}</td><td>${esc([...new Set(r.items.map(i=>i.block==='box'?'registrado no adidas':i.block))].join(', '))}</td></tr>`).join('');
+  return `<p style="margin:10px 0 0"><button class="btn accent" id="exBack">‹ Todos os exercícios</button></p>
+  <h2>Corrida Box</h2><p class="sub">Corrida dentro dos treinos na academia.</p>
+  <div class="lifetime km"><div><b>${maior?(maior.d>=1000?fmtNum(maior.d/1000,2)+' km':fmtNum(maior.d,0)+' m'):'–'}</b><span>maior distância${maior?' · '+fmtD(maior.date):''}</span></div><div><b>${fmtNum(K.treino,1)}</b><span>km no box</span></div><div><b>${e.count}</b><span>treinos com corrida</span></div></div>
+  <div class="panel"><h3>Quilômetros por mês</h3><div class="chart"><canvas id="cKm" aria-label="Quilômetros por mês"></canvas></div></div>
+  <h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Feito</th><th>Bloco</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function drawPace(){ const runs=allSessions().filter(s=>s.kind==='corrida'&&s.local!=='box'&&s.pace&&s.distKm>=1);
+  mk('cPace',{type:'line',data:{datasets:[{data:runs.map(r=>({x:d2(r.date).getTime(),y:r.pace/60})),borderColor:css('--z2'),backgroundColor:css('--z2'),pointRadius:2.5,tension:.25}]},
+    options:baseOpts({scales:{x:timeX(),y:{reverse:true,ticks:{color:css('--muted'),callback:v=>Math.floor(v)+"'"+String(Math.round((v%1)*60)).padStart(2,'0')+'"'},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>fmtD(new Date(c[0].raw.x).toISOString().slice(0,10)),label:c=>pace(Math.round(c.raw.y*60))+'/km'}}}})}); }
+function drawKm(only){
   const mo={}; const add=(d,k,v)=>{const m=d.slice(0,7);(mo[m]=mo[m]||{t:0,l:0})[k]+=v;};
-  for(const s of allSessions()){ if(s.kind==='corrida') add(s.date,s.local==='box'?'t':'l',s.distKm||0); else for(const b of s.blocks||[]) for(const i of b.items||[]) if(i.name==='Corrida') add(s.date,'t',itemTotals(i).distM/1000); }
+  for(const s of allSessions()){ if(s.kind==='corrida') add(s.date,s.local==='box'?'t':'l',s.distKm||0); else for(const b of s.blocks||[]) for(const i of b.items||[]) if(i.name==='Corrida Box') add(s.date,'t',itemTotals(i).distM/1000); }
   const ks=Object.keys(mo).sort(); const lab=ks.map(k=>MES[+k.slice(5)-1]+'/'+k.slice(2,4));
-  mk('cKm',{type:'bar',data:{labels:lab,datasets:[{label:'Em treino',data:ks.map(k=>+mo[k].t.toFixed(2)),backgroundColor:css('--z3'),stack:'k'},{label:'Livre',data:ks.map(k=>+mo[k].l.toFixed(2)),backgroundColor:css('--z2'),stack:'k'}]},
+  const dsAll=[{label:'Box',data:ks.map(k=>+mo[k].t.toFixed(2)),backgroundColor:css('--z3'),stack:'k',_k:'t'},{label:'Livre',data:ks.map(k=>+mo[k].l.toFixed(2)),backgroundColor:css('--z2'),stack:'k',_k:'l'}];
+  mk('cKm',{type:'bar',data:{labels:lab,datasets:only?dsAll.filter(d=>d._k===only):dsAll},
     options:baseOpts({scales:{x:{stacked:true,grid:{display:false},ticks:{color:css('--muted')}},y:{stacked:true,ticks:{color:css('--muted'),callback:v=>v+' km'},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtNum(c.raw,1)+' km'}}}})});
 }
 function vExDetail(e){
-  if(e.name==='Corrida') return vCorrida(e);
+  if(e.name==='Corrida Box') return vCorridaBox(e); if(e.name==='Corrida Livre') return vCorridaLivre();
   const hasLoad=e.loaded.length>0;
   const rows=[...e.sessions].reverse().map(r=>`<tr><td>${fmtD(r.date)}${r.pr?' <span class="tag new">recorde</span>':''}</td><td>${r.items.map(i=>esc(qty(i))).join('<br>')}</td><td>${r.max!=null?fmtNum(r.max)+' kg':'–'}</td><td>${r.vol?fmtNum(r.vol,0)+' kg':'–'}</td><td>${esc([...new Set(r.items.map(i=>i.block))].join(', '))}</td></tr>`).join('');
   return `<p style="margin:10px 0 0"><button class="btn accent" id="exBack">‹ Todos os exercícios</button></p>
@@ -779,7 +803,7 @@ function vExDetail(e){
   <h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Feito</th><th>Carga máx.</th><th>Volume</th><th>Bloco</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function drawEx(){
-  const ex=exerciseIndex(); const e=state.ex&&ex[state.ex]; if(e&&e.name==='Corrida'){ drawKm(); return; } if(!e||!e.loaded.length) return;
+  const ex=exerciseIndex(); const e=state.ex&&ex[state.ex]; if(e&&(e.name==='Corrida Box'||e.name==='Corrida Livre')){ drawKm(e.name==='Corrida Livre'?'l':'t'); if(e.name==='Corrida Livre') drawPace(); return; } if(!e||!e.loaded.length) return;
   const T=r=>d2(r.date).getTime();
   mk('cEx',{data:{datasets:[
     {type:'line',label:'Carga',data:e.loaded.map(r=>({x:T(r),y:r.max})),borderColor:css('--load'),backgroundColor:css('--load'),pointRadius:e.loaded.map(r=>r.pr?6:3),pointBackgroundColor:e.loaded.map(r=>r.pr?css('--text'):css('--load')),tension:.15,yAxisID:'y',stepped:false},
@@ -863,7 +887,7 @@ function vCorpo(){
   if(!ev.length) return vMusculos()+`<h2>Corpo</h2><div class="empty">Nenhuma avaliação ainda.<br><br>${add}</div>`;
   const a=ev[0],z=ev[ev.length-1];
   const card=(k,l,u)=>{ if(z[k]==null) return ''; const d=a[k]!=null?z[k]-a[k]:null; const neutral=LOWER_GOOD[k]==null; const good=LOWER_GOOD[k]?d<0:d>0; const r=refs[k];
-    return `<div class="metric"><div class="l">${l}${u&&u!=='nível'?' ('+u+')':''}</div><div class="v">${fmtNum(z[k],2)}</div>${d!=null&&ev.length>1?`<div class="delta ${d===0||neutral?'':good?'good':'bad'}" style="margin:0">${d>0?'+':''}${fmtNum(d,2)} desde ${fmtD(a.date)}</div>`:''}${r?`<div class="f">Referência ${fmtNum(r[0],2)}–${fmtNum(r[1],2)}</div>`:''}</div>`; };
+    return `<div class="metric"><div class="l">${l}${u&&u!=='nível'?' ('+u+')':''}</div><div class="v">${fmtNum(z[k],2)}</div>${d!=null&&ev.length>1?`<div class="delta ${d===0||neutral?'':good?'good':'bad'}" style="margin:0">${d>0?'+':''}${fmtNum(d,2)} desde ${fmtD(a.date)}</div>`:''}${k==='gorduraPct'?(()=>{const f=faixaGord(z[k]); return `<div class="f">Faixa: <b style="color:var(${f.cor})">${f.nome}</b> (${f.txt})</div>`;})():r?`<div class="f">Referência ${fmtNum(r[0],2)}–${fmtNum(r[1],2)}</div>`:''}</div>`; };
   const medRows=MED.map(([k,l])=>`<tr><td>${l}</td>${ev.map(e=>`<td>${e.medidas&&e.medidas[k]!=null?e.medidas[k]:'–'}</td>`).join('')}<td>${(()=>{const d=(z.medidas||{})[k]-(a.medidas||{})[k];return isNaN(d)?'–':`<span class="delta ${d<0?'good':d>0?'bad':''}" style="margin:0">${d>0?'+':''}${d} cm</span>`})()}</td></tr>`).join('');
   return vMusculos()+`<div class="top" style="margin-top:34px"><h2 style="margin:0">Bioimpedância</h2>${add}</div>
   <p class="sub">${ev.length} avaliações, de ${fmtD(a.date)} a ${fmtD(z.date)}. Valores da mais recente, com a variação desde a primeira.</p>
@@ -872,7 +896,7 @@ function vCorpo(){
   <h2>Peso e composição</h2><p class="sub">A faixa clara marca a referência da avaliação.</p>
   <div class="grid2">
     <div class="panel"><h3>Peso</h3><div class="chart"><canvas id="cPeso"></canvas></div></div>
-    <div class="panel"><h3>Gordura corporal (%)</h3><div class="chart"><canvas id="cGord"></canvas></div></div>
+    <div class="panel"><h3>Gordura corporal (%)</h3><div class="chart"><canvas id="cGord"></canvas></div><div class="legend">${FAIXAS_GORD[sexoPerfil()].map(([a,b,n,c],k)=>`<span><i style="background:var(${c})"></i>${n} ${FAIXAS_TXT[sexoPerfil()][k]}</span>`).join('')}</div></div>
     <div class="panel"><h3>Músculo esquelético (%)</h3><div class="chart"><canvas id="cMusc"></canvas></div></div>
     <div class="panel"><h3>Gordura visceral</h3><div class="chart"><canvas id="cVisc"></canvas></div></div>
   </div>
@@ -881,9 +905,20 @@ function vCorpo(){
   ${ev.length>1&&refs.peso?`<h2>Visão geral</h2><p class="sub">Peso, gordura corporal, músculo e gordura visceral comparados à faixa de referência (100 = limite da referência). Na gordura e no peso, quanto mais perto de 100, melhor; no músculo, a meta é chegar a 100.</p>
   <div class="panel"><div class="chart tall"><canvas id="cRadar" aria-label="Comparação da primeira e da última avaliação"></canvas></div><div class="legend"><span><i style="background:var(--muted)"></i>${fmtD(a.date)}</span><span><i style="background:var(--z2)"></i>${fmtD(z.date)}</span><span><i style="background:var(--z3)"></i>Referência</span></div></div>`:''}`;
 }
+const FAIXAS_GORD={M:[[2,6,'Essencial','--z1'],[6,14,'Atleta','--z2'],[14,18,'Ativo','--good'],[18,25,'Aceitável','--z3'],[25,60,'Obesidade','--z5']],F:[[10,14,'Essencial','--z1'],[14,21,'Atleta','--z2'],[21,25,'Ativo','--good'],[25,32,'Aceitável','--z3'],[32,60,'Obesidade','--z5']]};
+const FAIXAS_TXT={M:['2–5%','6–13%','14–17%','18–24%','25%+'],F:['10–13%','14–20%','21–24%','25–31%','32%+']};
+function sexoPerfil(){ return (state.profile||{}).sexo==='F'?'F':'M'; }
+function faixaGord(v){ const sx=sexoPerfil(); const F=FAIXAS_GORD[sx]; for(let k=F.length-1;k>=0;k--) if(v>=F[k][0]) return {nome:F[k][2],txt:FAIXAS_TXT[sx][k],cor:F[k][3]}; return {nome:'Abaixo do essencial',txt:'',cor:'--z1'}; }
 function bioChart(id,k,color){
   const ev=(state.bio&&state.bio.evaluations)||[]; const r=(state.bio.refs||{})[k]; const T=e=>d2(e.date).getTime();
   const xs=ev.map(T); const ds=[];
+  if(k==='gorduraPct'){ const x0=xs[0]-20*864e5,x1=xs[xs.length-1]+20*864e5; const F=FAIXAS_GORD[sexoPerfil()]; const hi=Math.max(50,...ev.map(e=>e[k]||0))+3;
+    ds.push({type:'line',data:[{x:x0,y:F[0][0]},{x:x1,y:F[0][0]}],borderWidth:0,pointRadius:0,fill:false});
+    F.forEach(([a,b,n,c])=>ds.push({type:'line',label:n,data:[{x:x0,y:Math.min(b,hi)},{x:x1,y:Math.min(b,hi)}],borderWidth:0,pointRadius:0,fill:'-1',backgroundColor:css(c)+'26'}));
+    ds.push({type:'line',data:ev.filter(e=>e[k]!=null).map(e=>({x:T(e),y:e[k]})),borderColor:css(color),backgroundColor:css(color),pointRadius:4,tension:.2});
+    mk(id,{data:{datasets:ds},options:baseOpts({scales:{x:timeX(),y:{min:0,max:Math.ceil(hi/5)*5,ticks:{color:css('--muted'),callback:v=>v+'%'},grid:{color:css('--line')},border:{display:false}}},
+      plugins:{legend:{display:false},tooltip:{filter:c=>c.datasetIndex===ds.length-1,callbacks:{title:c=>fmtD(new Date(c[0].raw.x).toISOString().slice(0,10)),label:c=>fmtNum(c.raw.y,1)+'% · '+faixaGord(c.raw.y).nome}}}})});
+    return; }
   if(r){ const x0=xs[0]-20*864e5,x1=xs[xs.length-1]+20*864e5; ds.push({type:'line',data:[{x:x0,y:r[0]},{x:x1,y:r[0]}],borderWidth:0,pointRadius:0,fill:false},{type:'line',data:[{x:x0,y:r[1]},{x:x1,y:r[1]}],borderWidth:0,pointRadius:0,fill:'-1',backgroundColor:css('--body')+'22'}); }
   ds.push({type:'line',data:ev.filter(e=>e[k]!=null).map(e=>({x:T(e),y:e[k]})),borderColor:css(color),backgroundColor:css(color),pointRadius:4,tension:.2});
   const vals=ev.map(e=>e[k]).filter(v=>v!=null).concat(r||[]);
@@ -892,7 +927,7 @@ function bioChart(id,k,color){
 }
 function drawRadar(){
   const ev=state.bio.evaluations, R=state.bio.refs||{}; if(ev.length<2||!R.peso) return; const a=ev[0], z=ev[ev.length-1];
-  const AX=[['peso','Peso','kg',R.peso[1]],['gorduraPct','Gordura corporal','%',R.gorduraPct[1]],['musculoPct','Músculo esquelético','%',R.musculoPct[0]],['visceral','Gordura visceral','',R.visceral[1]]];
+  const AX=[['peso','Peso','kg',R.peso[1]],['gorduraPct','Gordura corporal','%',sexoPerfil()==='F'?31:24],['musculoPct','Músculo esquelético','%',R.musculoPct[0]],['visceral','Gordura visceral','',R.visceral[1]]];
   const val=(e,[k,,,ref])=>e[k]!=null?Math.round(1000*e[k]/ref)/10:null;
   const ds=(e,c,dash)=>({label:fmtD(e.date),data:AX.map(x=>val(e,x)),borderColor:css(c),backgroundColor:css(c)+'22',pointBackgroundColor:css(c),borderWidth:2,borderDash:dash||[],raw:AX.map(([k,,u])=>e[k]!=null?fmtNum(e[k],1)+(u?' '+u:''):'–')});
   const grid=css('--line'),tick=css('--muted');
@@ -942,7 +977,7 @@ function vSessoes(){
   const f=state.sessFilter||'todos';
   const inP=all.filter(s=>s.date.startsWith(a)); const list=inP.filter(s=>f==='todos'||s.kind===f).reverse();
   const tr=inP.filter(s=>s.kind==='treino'), co=inP.filter(s=>s.kind==='corrida');
-  const km=co.reduce((x,s)=>x+(s.distKm||0),0)+tr.reduce((x,s)=>x+(s.blocks||[]).reduce((y,b)=>y+b.items.filter(i=>i.name==='Corrida').reduce((z,i)=>z+itemTotals(i).distM/1000,0),0),0);
+  const km=co.reduce((x,s)=>x+(s.distKm||0),0)+tr.reduce((x,s)=>x+(s.blocks||[]).reduce((y,b)=>y+b.items.filter(i=>i.name==='Corrida Box').reduce((z,i)=>z+itemTotals(i).distM/1000,0),0),0);
   const kc=inP.reduce((x,s)=>x+((s.band||s).kcalTotal||0),0);
   let html=`<h2 style="margin-top:12px">Sessões</h2>${viewChips}
   <div class="per"><div class="chips" role="group" aria-label="Período">${[['mes','Mês'],['ano','Ano']].map(([k,l])=>`<button class="chip" data-sper="${k}" aria-pressed="${SP.mode===k}">${l}</button>`).join('')}</div>
@@ -1167,7 +1202,11 @@ $('#btnParse').onclick=()=>{
     if(!tgt.date) tgt.date=todayISO(); }
   if(!out.length){ toast('Não encontrei treino, monitoramento nem corrida nesse texto.'); return; }
   const known=new Set(knownNames()); const al=state.config.aliases||{};
-  for(const s of out) if(s.kind==='treino') for(const b of s.blocks) for(const i of b.items){ const c=P.canon(i.name,al); if(c) i.name=c; else { const hit=[...known].find(k=>P.nkey(k)===P.nkey(i.name)); if(hit) i.name=hit; else i.isNew=true; } delete i.raw; }
+  for(const s of out) if(s.kind==='treino') for(const b of s.blocks) for(const i of b.items){
+    const sh=/^shuttle run de ([\d.,]+)\s*m/i.exec(i.name); if(sh){ const tr=parseFloat(sh[1].replace(',','.')); i.name='Shuttle Run'; if(i.reps){ i.distM=Math.round(tr*i.reps*(i.sets||1)); } i.note=(i.note?i.note+' · ':'')+'trechos de '+sh[1]+'m'; }
+    const c=P.canon(i.name,al); if(c) i.name=c; else { const hit=[...known].find(k=>P.nkey(k)===P.nkey(i.name)); if(hit) i.name=hit; else i.isNew=true; }
+    if(i.loadKg){ const LR={'Abdominal':'Abdominal com Carga','Squat':'Front Squat','Jump Squat':'Jump Front Squat','Isometria no Squat':'Isometria no Front Squat','Prancha':'Prancha com Passagem','Remada':'Gorila Row'}; if(LR[i.name]){ i.name=LR[i.name]; i.isNew=false; } }
+    delete i.raw; }
   for(const s of out) if(s.kind==='treino'&&s.foco){
     const tm=/^\s*t[ée]cnica\s*:?\s*(.*)$/i.exec(s.foco); if(tm){ s.focoOriginal=s.foco; s.foco='Técnica'; const x=tm[1].split('/')[0].trim(); if(x) s.focoExtra=x; continue; }
     if(/push\s*(&|e|and)\s*pull/i.test(s.foco)){ s.focoOriginal=s.foco; s.foco='Puxadores'; s.focos=['Puxadores','Empurradores']; continue; }
@@ -1284,6 +1323,21 @@ async function loadAll(){
   saveCache(); state.ready=true; updStatus();
   if(!$('#dlgReg').open) render();
 }
+// ---------- membros (só admin)
+async function checaAdmin(){ if(state.isAdmin!=null||!navigator.onLine) return state.isAdmin; const r=await sb.from('app_admins').select('email').limit(1); state.isAdmin=!!(r.data&&r.data.length); return state.isAdmin; }
+async function renderMembros(){ const el=$('#membros'); if(!el) return; let adm=false; try{ adm=await checaAdmin(); }catch(e){} if(!adm){ el.innerHTML=''; return; }
+  const r=await sb.rpc('convites_status'); const L=r.data||[];
+  el.innerHTML=`<h4 style="margin:18px 0 4px">Membros</h4><p class="note" style="margin-top:0">Só entra quem estiver nesta lista. A pessoa cria a conta no site com o mesmo e-mail; qualquer outro e-mail é recusado.</p>
+  <div class="memlist">${L.map(m=>`<div class="item"><span>${esc(m.nome||m.email)}<br><span class="m">${esc(m.email)} · ${m.tem_conta?'conta criada':'aguardando cadastro'}</span></span>${m.email.toLowerCase()===(user.email||'').toLowerCase()?'<span class="m">você</span>':`<button class="btn ghost small" data-unconv="${esc(m.email)}">Remover</button>`}</div>`).join('')}</div>
+  <form id="convForm" class="convform" onsubmit="return false"><input name="nome" placeholder="Nome" autocomplete="off"><input name="email" type="email" placeholder="E-mail" autocomplete="off"><button class="btn" id="btnConvidar">Convidar</button></form>`; }
+async function convidar(){ const f=new FormData($('#convForm')); const email=String(f.get('email')||'').trim().toLowerCase(), nome=String(f.get('nome')||'').trim();
+  if(!/^\S+@\S+\.\S+$/.test(email)){ toast('Digite um e-mail válido.'); return; }
+  const r=await sb.from('allowed_emails').upsert({email,nome:nome||null}); if(r.error){ toast('Não foi possível convidar agora.'); return; }
+  const msg=`Oi${nome?' '+nome:''}! Te convidei pro WÓD'IO, meu app de treinos. Entra em ${location.origin}, toca em "Ainda não tenho conta" e cria com este e-mail: ${email}`;
+  try{ await navigator.clipboard.writeText(msg); toast('Convite criado. Mensagem copiada para enviar.'); }catch(e){ toast('Convite criado.'); }
+  renderMembros(); }
+async function desconvidar(email){ if(!confirm('Remover '+email+' da lista? A pessoa não conseguirá mais criar conta. (Se já tiver conta, os dados dela continuam guardados.)')) return;
+  const r=await sb.from('allowed_emails').delete().eq('email',email); if(r.error){ toast('Não foi possível remover.'); return; } renderMembros(); }
 async function listBackups(){ const el=$('#bkList'); el.innerHTML='<p class="note">Carregando…</p>';
   const r=await sb.from('backups').select('id,created_at,sessions').order('created_at',{ascending:false}).limit(30);
   if(r.error||!r.data.length){ el.innerHTML='<p class="note">Nenhum backup automático ainda. Ele roda todo dia de madrugada.</p>'; return; }
@@ -1324,7 +1378,9 @@ document.addEventListener('click',async e=>{
   if(t.id==='btnChangePw'){ $('#dlgConta').close(); state.recovery=true; state.recMsg=''; render(); }
   if(t.id==='btnAuthMode'){ state.authMode=state.authMode==='criar'?'entrar':'criar'; state.authMsg=''; render(); }
   if(t.id==='btnImport'){ $('#fileImport').click(); }
-  if(t.id==='btnMenu'){ renderPerfilCard(); $('#dlgConta').showModal(); listBackups(); }
+  if(t.id==='btnMenu'){ renderPerfilCard(); $('#dlgConta').showModal(); listBackups(); renderMembros(); }
+  if(t.id==='btnConvidar'){ t.disabled=true; await convidar(); t.disabled=false; }
+  if(t.dataset.unconv){ await desconvidar(t.dataset.unconv); }
   if(t.id==='btnPerfilEdit'){ openPerfil(); }
   if(t.id==='btnPerfilSave'){ t.disabled=true; await salvarPerfil(); t.disabled=false; }
   if(t.id==='btnFotoRm'){ state.fotoNova=null; const el=document.querySelector('.fotoedit .avatar'); if(el) el.outerHTML='<span class="avatar ini" style="width:80px;height:80px;font-size:32px">?</span>'; t.remove(); }
@@ -1344,6 +1400,18 @@ function aplicaTema(){ let t='auto'; try{ t=localStorage.getItem('tema')||'auto'
   const b=document.getElementById('btnTema'); if(b){ const esc=temaAtual()==='escuro'; b.innerHTML=esc?LUA:SOL; b.setAttribute('aria-label',esc?'Modo escuro ativo. Mudar para claro':'Modo claro ativo. Mudar para escuro'); b.title=esc?'Mudar para modo claro':'Mudar para modo escuro'; } }
 aplicaTema();
 if('serviceWorker' in navigator && location.protocol==='https:'){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+// ---------- botão voltar
+let ultimoVoltar=0;
+function navPush(){ try{ history.pushState({w:1},''); }catch(e){} }
+function emHome(){ return state.tab==='resumo'&&!state.ex&&!document.querySelector('dialog[open]'); }
+window.addEventListener('popstate',()=>{
+  const dlg=[...document.querySelectorAll('dialog[open]')].pop();
+  if(dlg){ dlg.close(); navPush(); return; }
+  if(state.ex){ state.ex=null; render(); navPush(); return; }
+  if(state.tab!=='resumo'){ state.tab='resumo'; render(); window.scrollTo(0,0); navPush(); return; }
+  const agora=Date.now(); if(agora-ultimoVoltar<2200){ history.back(); return; }
+  ultimoVoltar=agora; toast('Toque novamente para sair'); navPush(); });
+navPush();
 // ---------- conexão
 render();
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{aplicaTema();render();});
@@ -1351,6 +1419,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{aplica
   if(!window.supabase){ state.msg='Não foi possível carregar o app. Confira a internet e recarregue.'; render(); return; }
   sb=window.supabase.createClient(SB_URL,SB_KEY);
   sb.auth.onAuthStateChange((ev,session)=>{
+    state.isAdmin=null;
     if(ev==='PASSWORD_RECOVERY'){ state.recovery=true; }
     const was=user&&user.id; user=session?session.user:null;
     if(!user){ state.auth=true; state.ready=false; state.sessions=[]; $('#status').textContent=''; render(); return; }
