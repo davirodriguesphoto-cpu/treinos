@@ -339,6 +339,17 @@ details.sg summary{cursor:pointer}
 .catrow select,.catrow input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;color:var(--text);min-width:0}
 .cats .addblock{margin:0;font-size:13px}
 .fcgrid{margin-top:16px}
+.welcome{text-align:center;max-width:420px;margin:24px auto 0;display:grid;justify-items:center;gap:6px}
+.welcome .wm{font-size:60px}.welcome small{font-size:13px;letter-spacing:.22em;color:var(--muted)}
+.wtxt{margin:16px 0 8px;color:var(--text)}
+.bora{background:var(--z4);color:#1A1405;border:0;font-family:"Barlow Condensed",sans-serif;font-size:24px;font-weight:700;font-style:italic;padding:14px 26px;border-radius:14px;width:100%}
+.welcome .btn.ghost{width:100%;margin-top:6px}
+.vencido{border:1px solid var(--bad);border-radius:12px;padding:10px 12px;margin:10px 0}
+.vencido.aviso{border-color:var(--z3)}
+.ativo{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:4px;flex-wrap:wrap}
+.ativo.off{color:var(--bad)}
+.ativo input{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 6px;color:var(--text);font-size:12px}
+.termos p{margin:0 0 10px;line-height:1.5}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -398,11 +409,11 @@ details.sg summary{cursor:pointer}
 <dialog id="dlgConta" aria-labelledby="contaT">
   <div class="mh"><h3 id="contaT">Conta</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb"><div id="perfilCard"></div><p class="note">Conectado como <b id="contaEmail"></b></p>
-    <div class="actions" style="justify-content:flex-start"><button class="btn" id="btnExport">Baixar backup</button><button class="btn" id="btnImport2">Importar arquivo</button><button class="btn" id="btnChangePw">Trocar senha</button><button class="btn danger" id="btnLogout">Sair</button></div>
+    <div class="actions" style="justify-content:flex-start"><button class="btn" id="btnExport">Baixar backup</button><button class="btn" id="btnImport2">Importar arquivo</button><button class="btn" id="btnChangePw">Trocar senha</button><button class="btn" id="btnTermos">Termos</button><button class="btn danger" id="btnLogout">Sair</button></div>
     <p class="note">O backup é um arquivo com todos os seus treinos, corridas e avaliações. Guarde de vez em quando no seu Drive.</p>
     <h4 style="margin:16px 0 4px">Backups automáticos</h4><p class="note" style="margin-top:0">Todo dia de madrugada o sistema guarda uma cópia. Ficam os últimos 30 dias.</p><div id="bkList"></div><div id="membros"></div><p class="zion">Feito com 🧡 pro Zion</p></div>
 </dialog>
-<input type="file" id="fileImport" accept="application/json,.json" hidden>
+<input type="file" id="fileImport" accept="application/json,.json,text/plain,.txt" hidden>
 <dialog id="dlgEdit" aria-labelledby="edT">
   <div class="mh"><h3 id="edT">Editar sessão</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb"><div id="edForm"></div><datalist id="exNames"></datalist>
@@ -438,6 +449,20 @@ details.sg summary{cursor:pointer}
 <dialog id="dlgMus" aria-labelledby="musTitle">
   <div class="mh"><h3 id="musTitle">Musculação</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb"><div id="musBody"></div><div class="actions" id="musActions"></div></div>
+</dialog>
+<dialog id="dlgTermos" aria-labelledby="tmT">
+  <div class="mh"><h3 id="tmT">Termos de uso e privacidade</h3><button class="btn ghost" data-close>Fechar</button></div>
+  <div class="mb termos">
+    <p><b>O que é.</b> O WÓD'IO é um app pessoal para registrar treinos, corridas e avaliações corporais, mantido pelo Davi Rodrigues para um grupo de amigos que treinam juntos.</p>
+    <p><b>Quem acessa.</b> Só entra quem foi convidado pelo e-mail. Seus treinos, medidas, fotos e batimentos ficam na sua conta e só você vê. Nem o administrador tem acesso aos seus registros pelo app.</p>
+    <p><b>Que dados guardamos.</b> Nome, e-mail, data de nascimento, sexo, altura e foto (se você colocar), os treinos que você registra, os dados do relógio que você informa e as avaliações de bioimpedância. Prints do relógio são lidos no próprio celular e não são guardados.</p>
+    <p><b>Para que usamos.</b> Apenas para mostrar seu histórico, gráficos e evolução dentro do app. Nada é vendido, compartilhado ou usado para publicidade.</p>
+    <p><b>Onde fica.</b> Os dados ficam no Supabase, um serviço de banco de dados na nuvem, com cópias de segurança diárias guardadas por 30 dias.</p>
+    <p><b>Seus direitos.</b> Você pode baixar uma cópia dos seus dados a qualquer momento em Conta → Baixar backup, e pedir ao Davi para apagar sua conta e todos os dados, quando quiser.</p>
+    <p><b>Mensalidade.</b> O acesso custa R$ 3,99 por mês, pago por Pix ou cartão. Sem fidelidade: se não renovar, você continua vendo o seu histórico, mas deixa de registrar novos treinos.</p>
+    <p><b>Saúde.</b> O WÓD'IO não é orientação médica nem de educação física. Faixas de referência e estimativas (como FC máxima) são apenas informativas. Em caso de dúvida, procure um profissional.</p>
+    <p class="note">Ao usar o app, você concorda com estes termos.</p>
+  </div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
 <script>
@@ -804,6 +829,7 @@ function vResumo(){
     return `<div class="kpi"><span>${lab}</span><b>${fmtNum(b1[k])}${u}</b><span class="delta ${good?'good':'bad'}">${d>0?'+':''}${fmtNum(d)}${u} desde jan/25</span></div>`; };
   return `
   ${state.profile&&state.profile.nome?`<p class="hello">Bom treino, ${esc(state.profile.nome)}.</p>`:''}
+  ${acessoVencido()?`<div class="vencido"><b>Seu acesso venceu em ${fmtD(state.acesso.ativo_ate)}.</b><br><span class="m">Você ainda vê seu histórico, mas para registrar treinos é preciso renovar a mensalidade. Fale com o Davi.</span></div>`:state.acesso&&!state.acesso.admin&&state.acesso.ativo_ate&&state.acesso.ativo_ate<=(()=>{const d=new Date(); d.setDate(d.getDate()+3); return d.toISOString().slice(0,10);})()?`<div class="vencido aviso"><span class="m">Seu acesso vence em ${fmtD(state.acesso.ativo_ate)}.</span></div>`:''}
   ${allSessions().filter(s=>s.status==='andamento').map(s=>`<div class="andamento"><div><span class="pill">em andamento</span> <b>${esc(s.focoExtra?s.foco+' · '+s.focoExtra:(s.foco||'Treino'))}</b><br><span class="m">${fmtD(s.date)}${s.time?' · '+s.time:''} · ${(s.blocks||[]).reduce((a,b)=>a+b.items.length,0)} exercícios</span></div><button class="btn primary small" data-continuar="${esc(s.id)}">Continuar</button></div>`).join('')}
   <section class="hero2">
     <div class="herohead"><div class="big">${tr.length}<small>treinos</small></div>${semanaHTML()}
@@ -850,9 +876,9 @@ function zoneTotals(ss){ const t={leve:0,intensivo:0,aerobico:0,anaerobico:0,vo2
 function fcKcalHTML(ss,R){ const b=ss.map(s=>s.band||s); const comFc=b.filter(x=>x.bpmAvg); const avg=comFc.length?Math.round(comFc.reduce((a,x)=>a+x.bpmAvg,0)/comFc.length):null; const mx=b.reduce((m,x)=>Math.max(m,x.bpmMax||0),0)||null;
   const kt=b.reduce((a,x)=>a+(x.kcalTotal||0),0), ka=b.reduce((a,x)=>a+(x.kcal||0),0); const nk=b.filter(x=>x.kcalTotal).length;
   return `<div class="grid2 fcgrid">
-    <div class="panel"><h3>Frequência cardíaca</h3><p class="note" style="margin:2px 0 8px">${R.daily?'Por dia, nos treinos e corridas.':'Média de cada mês.'}</p><div class="chart"><canvas id="cFC" aria-label="Frequência cardíaca no período"></canvas></div>
-      <div class="legend"><span><i style="background:var(--z2)"></i>BPM médio</span><span><i style="background:var(--z5)"></i>BPM máximo</span></div>
-      <div class="ztot"><div style="border-color:var(--z2)"><b>${avg??'–'}</b><span>bpm médio no período</span></div><div style="border-color:var(--z5)"><b>${mx??'–'}</b><span>bpm máximo no período</span></div></div></div>
+    <div class="panel"><h3>Frequência cardíaca</h3><p class="note" style="margin:2px 0 8px">${R.daily?'Por dia, nos treinos e corridas. A parte clara é a média; a barra inteira, o máximo.':'Média de cada mês.'}</p><div class="chart"><canvas id="cFC" aria-label="Frequência cardíaca no período"></canvas></div>
+      <div class="legend"><span><i style="background:#F5A3A6"></i>BPM médio</span><span><i style="background:#E5484D"></i>BPM máximo</span></div>
+      <div class="ztot"><div style="border-color:#F5A3A6"><b>${avg??'–'}</b><span>bpm médio no período</span></div><div style="border-color:#E5484D"><b>${mx??'–'}</b><span>bpm máximo no período</span></div></div></div>
     <div class="panel"><h3>Calorias</h3><p class="note" style="margin:2px 0 8px">${R.daily?'Por dia.':'Soma de cada mês.'} A parte forte é a caloria ativa.</p><div class="chart"><canvas id="cKcal" aria-label="Calorias no período"></canvas></div>
       <div class="legend"><span><i style="background:var(--z4)"></i>kcal ativas</span><span><i style="background:var(--z4);opacity:.35"></i>kcal total</span></div>
       <div class="ztot"><div style="border-color:var(--z4)"><b>${fmtNum(kt,0)}</b><span>kcal total (${fmtNum(ka,0)} ativas)</span></div><div style="border-color:var(--line)"><b>${nk?fmtNum(kt/nk,0):'–'}</b><span>kcal por sessão</span></div></div></div>
@@ -887,10 +913,10 @@ function drawResumo(){
   { const fa={},fm={},fn={},kt={},ka={};
     for(const s of ss){ const k=bk(s), b=s.band||s; if(b.bpmAvg){ fa[k]=(fa[k]||0)+b.bpmAvg; fn[k]=(fn[k]||0)+1; } if(b.bpmMax) fm[k]=R.daily?Math.max(fm[k]||0,b.bpmMax):Math.max(fm[k]||0,b.bpmMax); if(b.kcalTotal) kt[k]=(kt[k]||0)+b.kcalTotal; if(b.kcal) ka[k]=(ka[k]||0)+b.kcal; }
     const media={}; if(!R.daily){ const mm={}; for(const s of ss){ const k=bk(s), b=s.band||s; if(b.bpmMax){ (mm[k]=mm[k]||[]).push(b.bpmMax); } } for(const k in mm) media[k]=Math.round(mm[k].reduce((a,x)=>a+x,0)/mm[k].length); }
-    mk('cFC',{type:'line',data:{labels:lab,datasets:[
-      {label:'BPM médio',data:keys.map(k=>fn[k]?Math.round(fa[k]/fn[k]):null),borderColor:css('--z2'),backgroundColor:css('--z2'),spanGaps:true,pointRadius:3,tension:.25},
-      {label:'BPM máximo',data:keys.map(k=>R.daily?(fm[k]||null):(media[k]||null)),borderColor:css('--z5'),backgroundColor:css('--z5'),spanGaps:true,pointRadius:3,tension:.25}]},
-      options:baseOpts({scales:{x:{grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkipPadding:8}},y:{ticks:{color:css('--muted'),callback:v=>v+''},grid:{color:css('--line')},border:{display:false},suggestedMin:80}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+(R.daily?'':' (média do mês)')+': '+c.raw+' bpm'}}}})});
+    mk('cFC',{type:'bar',data:{labels:lab,datasets:[
+      {label:'BPM médio',data:keys.map(k=>fn[k]?Math.round(fa[k]/fn[k]):null),backgroundColor:'#F5A3A6',borderRadius:2,grouped:false,order:1},
+      {label:'BPM máximo',data:keys.map(k=>R.daily?(fm[k]||null):(media[k]||null)),backgroundColor:'#E5484D',borderRadius:2,grouped:false,order:2}]},
+      options:baseOpts({scales:{x:{grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkipPadding:8}},y:{beginAtZero:true,ticks:{color:css('--muted')},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+(R.daily?'':' (média do mês)')+': '+c.raw+' bpm'}}}})});
     mk('cKcal',{type:'bar',data:{labels:lab,datasets:[
       {label:'kcal ativas',data:keys.map(k=>ka[k]||0),backgroundColor:css('--z4'),borderRadius:2,grouped:false,order:1},
       {label:'kcal total',data:keys.map(k=>kt[k]||0),backgroundColor:css('--z4')+'59',borderRadius:2,grouped:false,order:2}]},
@@ -1301,11 +1327,13 @@ $('#btnEdSave').onclick=async()=>{ const s=state.edit; if(!s) return; const btn=
   }catch(err){ console.error(err); toast('Não foi possível salvar agora.'); } finally{ btn.disabled=false; } };
 document.getElementById('dlgEdit').addEventListener('close',()=>{ state.edit=null; });
 
+function mesclaCatalogo(){ const c=state.catalogo; if(!c||!c.aliases) return; state.config=state.config||{aliases:{}}; state.config.aliases={...c.aliases,...(state.config.aliases||{})}; }
+function acessoVencido(){ const a=state.acesso; if(!a||a.admin||!a.ativo_ate) return false; return a.ativo_ate<todayISO(); }
 // ---------- offline: cache local + fila de sincronização
 const LSD='wodio:data:', LSQ='wodio:fila:';
 function ukey(k){ return k+(user?user.id:''); }
 function saveCache(){ try{ localStorage.setItem(ukey(LSD), JSON.stringify({sessions:state.sessions,bio:state.bio,config:state.config,profile:state.profile,modelos:state.modelos,at:Date.now()})); }catch(e){} }
-function loadCache(){ try{ const j=JSON.parse(localStorage.getItem(ukey(LSD))||'null'); if(j){ state.sessions=j.sessions||[]; state.bio=j.bio; state.config=j.config||{aliases:{}}; state.profile=j.profile||{}; state.modelos=j.modelos||[]; state.cacheAt=j.at; return true; } }catch(e){} return false; }
+function loadCache(){ try{ const x=JSON.parse(localStorage.getItem(ukey('wodio:extra:'))||'null'); if(x){ state.acesso=x.acesso; state.catalogo=x.catalogo; } }catch(e){} try{ const j=JSON.parse(localStorage.getItem(ukey(LSD))||'null'); if(j){ state.sessions=j.sessions||[]; state.bio=j.bio; state.config=j.config||{aliases:{}}; state.profile=j.profile||{}; state.modelos=j.modelos||[]; state.cacheAt=j.at; mesclaCatalogo(); return true; } }catch(e){} return false; }
 function getQ(){ try{ return JSON.parse(localStorage.getItem(ukey(LSQ))||'[]'); }catch(e){ return []; } }
 function setQ(q){ try{ localStorage.setItem(ukey(LSQ),JSON.stringify(q)); }catch(e){} updStatus(); }
 const isNet=e=>!navigator.onLine || /fetch|network|failed|load failed|timeout/i.test(String((e&&(e.message||e.details))||e));
@@ -1384,7 +1412,7 @@ async function salvarPerfil(){ const f=new FormData($('#perfilForm')); const P={
   if(state.fotoNova!==undefined){ if(state.fotoNova) P.foto=state.fotoNova; else delete P.foto; }
   try{ const mode=await write([{t:'settings',row:{profile:P}}]); state.profile=P; saveCache(); $('#dlgPerfil').close(); updStatus(); renderPerfilCard(); render(); toast(mode==='offline'?OFFMSG:'Perfil salvo.'); }catch(e){ console.error(e); toast('Não foi possível salvar agora.'); } }
 // ---------- registrar
-$('#btnReg').onclick=()=>openAdd();
+$('#btnReg').onclick=()=>{ if(acessoVencido()){ toast('Seu acesso venceu em '+fmtD(state.acesso.ativo_ate)+'. Fale com o Davi para renovar.'); return; } openAdd(); };
 const abrirRegistrarAntigo=()=>{ state.watch=null; $('#imgStatus').textContent='Opcional. O print é lido aqui no celular e não fica salvo.'; $('#regStep1').hidden=false; $('#regStep2').hidden=true; $('#dlgReg').showModal(); setTimeout(()=>$('#regText').focus(),50); };
 $('#btnBack').onclick=()=>{ $('#regStep1').hidden=false; $('#regStep2').hidden=true; };
 function knownNames(){ return Object.keys(exerciseIndex()).sort((a,b)=>a.localeCompare(b,'pt')); }
@@ -1501,7 +1529,12 @@ async function forgot(){ const email=String(new FormData($('#authForm')).get('em
   if(!email){ state.authMsg='Digite seu e-mail acima e toque de novo em "Esqueci minha senha".'; render(); return; }
   const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
   state.authMsg=r.error?('Não deu certo: '+r.error.message):'Se esse e-mail tiver conta, chegou um link para criar uma senha nova. Confira também o spam.'; render(); }
-function vEmpty(){ return `<div class="empty"><p>Sua conta está pronta, mas ainda sem dados.</p><p>Importe o arquivo de histórico para trazer os treinos, corridas e avaliações, ou registre o treino de hoje.</p><p><button class="btn primary" id="btnImport">Importar histórico</button></p></div>`; }
+function vEmpty(){ return `<section class="welcome"><div class="authface">${CARINHA}</div><div class="wm">WÓD<span class="ap">'</span>IO</div><small>seu treino diário</small>
+  <p class="wtxt">${state.profile&&state.profile.nome?'Bem-vindo, '+esc(state.profile.nome)+'!':'Bem-vindo!'} Seu app está pronto. Registre o primeiro treino ou traga o que você já tem anotado.</p>
+  <button class="btn bora" id="btnBora">BORA TREINAR!</button>
+  <button class="btn ghost" id="btnImportHist">IMPORTAR HISTÓRICO</button>
+  <p class="note">Aceita a conversa do WhatsApp exportada (.txt) ou um backup do WÓD'IO (.json).</p>
+  <p class="note">Ao usar o app você concorda com os <button class="linkbtn" id="btnTermos">termos de uso e privacidade</button>.</p></section>`; }
 async function doAuth(){
   const f=new FormData($('#authForm')); const email=String(f.get('email')||'').trim(), password=String(f.get('password')||'');
   if(!email||password.length<6){ state.authMsg='Informe o e-mail e uma senha com pelo menos 6 caracteres.'; render(); return; }
@@ -1515,6 +1548,8 @@ async function loadAll(){
     state.msg=navigator.onLine?'Não foi possível carregar seus dados. Recarregue a página.':'Sem internet e sem dados salvos neste aparelho ainda. Abra o app uma vez com internet.'; state.ready=false; render(); return; }
   state.sessions=s.data.map(r=>r.data);
   state.config={aliases:(c.data&&c.data.aliases)||{}}; state.profile=(c.data&&c.data.profile)||{}; state.modelos=(c.data&&c.data.modelos)||[];
+  try{ const [ac,ct]=await Promise.all([sb.rpc('meu_acesso'),sb.rpc('catalogo')]); if(ac.data) state.acesso=ac.data; if(ct.data) state.catalogo=ct.data; try{ localStorage.setItem(ukey('wodio:extra:'),JSON.stringify({acesso:state.acesso,catalogo:state.catalogo})); }catch(e){} }catch(e){}
+  mesclaCatalogo();
   state.bio={refs:(c.data&&c.data.bio_refs)||{},evaluations:b.data.map(r=>r.data)};
   for(const op of getQ()) applyLocal(op);
   saveCache(); state.ready=true; updStatus();
@@ -1525,14 +1560,15 @@ async function checaAdmin(){ if(state.isAdmin!=null||!navigator.onLine) return s
 async function renderMembros(){ const el=$('#membros'); if(!el) return; let adm=false; try{ adm=await checaAdmin(); }catch(e){} if(!adm){ el.innerHTML=''; return; }
   const r=await sb.rpc('convites_status'); const L=r.data||[];
   el.innerHTML=`<h4 style="margin:18px 0 4px">Membros</h4><p class="note" style="margin-top:0">Só entra quem estiver nesta lista. A pessoa cria a conta no site com o mesmo e-mail; qualquer outro e-mail é recusado.</p>
-  <div class="memlist">${L.map(m=>`<div class="item"><span>${esc(m.nome||m.email)}<br><span class="m">${esc(m.email)} · ${m.tem_conta?'conta criada':'aguardando cadastro'}</span></span>${m.email.toLowerCase()===(user.email||'').toLowerCase()?'<span class="m">você</span>':`<button class="btn ghost small" data-unconv="${esc(m.email)}">Remover</button>`}</div>`).join('')}</div>
+  <div class="memlist">${L.map(m=>`<div class="item"><span>${esc(m.nome||m.email)}<br><span class="m">${esc(m.email)} · ${m.tem_conta?'conta criada':'aguardando cadastro'}</span>${m.email.toLowerCase()===(user.email||'').toLowerCase()?'':`<span class="ativo ${m.ativo_ate&&m.ativo_ate<todayISO()?'off':''}">ativo até <input type="date" data-ativo="${esc(m.email)}" value="${m.ativo_ate||''}"> <button class="linkbtn" data-mais30="${esc(m.email)}">+30 dias</button></span>`}</span>${m.email.toLowerCase()===(user.email||'').toLowerCase()?'<span class="m">você</span>':`<button class="btn ghost small" data-unconv="${esc(m.email)}">Remover</button>`}</div>`).join('')}</div>
   <form id="convForm" class="convform" onsubmit="return false"><input name="nome" placeholder="Nome" autocomplete="off"><input name="email" type="email" placeholder="E-mail" autocomplete="off"><button class="btn" id="btnConvidar">Convidar</button></form>`; }
 async function convidar(){ const f=new FormData($('#convForm')); const email=String(f.get('email')||'').trim().toLowerCase(), nome=String(f.get('nome')||'').trim();
   if(!/^\S+@\S+\.\S+$/.test(email)){ toast('Digite um e-mail válido.'); return; }
-  const r=await sb.from('allowed_emails').upsert({email,nome:nome||null}); if(r.error){ toast('Não foi possível convidar agora.'); return; }
+  const d30=new Date(); d30.setDate(d30.getDate()+30); const r=await sb.from('allowed_emails').upsert({email,nome:nome||null,ativo_ate:d30.toISOString().slice(0,10)}); if(r.error){ toast('Não foi possível convidar agora.'); return; }
   const msg=`Oi${nome?' '+nome:''}! Te convidei pro WÓD'IO, meu app de treinos. Entra em ${location.origin}, toca em "Ainda não tenho conta" e cria com este e-mail: ${email}`;
   try{ await navigator.clipboard.writeText(msg); toast('Convite criado. Mensagem copiada para enviar.'); }catch(e){ toast('Convite criado.'); }
   renderMembros(); }
+async function setAtivo(email,data){ const r=await sb.from('allowed_emails').update({ativo_ate:data||null}).eq('email',email); if(r.error){ toast('Não foi possível salvar.'); return; } toast(data?'Ativo até '+fmtD(data)+'.':'Data removida.'); renderMembros(); }
 async function desconvidar(email){ if(!confirm('Remover '+email+' da lista? A pessoa não conseguirá mais criar conta. (Se já tiver conta, os dados dela continuam guardados.)')) return;
   const r=await sb.from('allowed_emails').delete().eq('email',email); if(r.error){ toast('Não foi possível remover.'); return; } renderMembros(); }
 async function listBackups(){ const el=$('#bkList'); el.innerHTML='<p class="note">Carregando…</p>';
@@ -1551,7 +1587,21 @@ async function restoreBackup(id,when){
     x=await sb.from('settings').upsert({aliases:j.aliases||{},bio_refs:(j.bio||{}).refs||{}}); if(x.error) throw x.error;
     $('#dlgConta').close(); await loadAll(); toast('Backup restaurado: '+rows.length+' sessões.');
   }catch(e){ console.error(e); toast('Não foi possível restaurar agora. Tente de novo.'); } }
+async function importWhats(text){
+  const msgs=text.split(/\n(?=\d{1,2}\/\d{1,2}\/\d{2,4},? \d{1,2}:\d{2})/); const al=state.config.aliases||{}; const out={};
+  for(const m of msgs){ const h=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4}),? (\d{1,2}:\d{2})(?::\d{2})?\s*-?\s*[^:]+:\s?/.exec(m); if(!h) continue;
+    let y=+h[3]; if(y<100) y+=2000; const md=y+'-'+String(h[2]).padStart(2,'0')+'-'+String(h[1]).padStart(2,'0');
+    let ss=[]; try{ ss=P.parseMessage(m.slice(h[0].length),md); }catch(e){ continue; }
+    for(const s of ss){ if(s.kind==='treino') for(const b of s.blocks) for(const i of b.items){ const c=P.canon(i.name,al); if(c) i.name=c; delete i.raw; }
+      delete s.dateConflict; delete s.orphanBand; s.source='WhatsApp'; const k=s.date+'|'+s.kind+(s.kind==='corrida'?'|'+s.distKm:''); out[k]=s; } }
+  const L=Object.values(out).sort((a,b)=>a.date.localeCompare(b.date)); if(!L.length){ toast('Não encontrei treinos nesse arquivo.'); return; }
+  const tr=L.filter(s=>s.kind==='treino').length, co=L.length-tr;
+  if(!confirm(`Encontrei ${tr} treinos e ${co} corridas, de ${fmtD(L[0].date)} a ${fmtD(L[L.length-1].date)}. Importar?`)) return;
+  const taken=new Set(allSessions().map(x=>x.id)); const rows=L.map(s=>{ const base=s.date+'-'+(s.kind==='corrida'?'c':'t'); let id=base,n=1; while(taken.has(id)){ n++; id=base+'-'+n; } taken.add(id); s.id=id; return {id,date:s.date,kind:s.kind,data:s}; });
+  try{ for(let k=0;k<rows.length;k+=100){ const {error}=await sb.from('sessions').upsert(rows.slice(k,k+100)); if(error) throw error; toast('Importando… '+Math.min(k+100,rows.length)+' de '+rows.length); }
+    await loadAll(); toast('Histórico importado: '+rows.length+' sessões.'); }catch(e){ console.error(e); toast('Não foi possível importar agora.'); } }
 async function importFile(file){
+  if(/\.txt$/i.test(file.name)||file.type==='text/plain'){ if(!navigator.onLine){ toast('Para importar, conecte à internet.'); return; } return importWhats(await file.text()); }
   if(!navigator.onLine){ toast('Para importar, conecte à internet.'); return; }
   try{
     const j=JSON.parse(await file.text());
@@ -1578,6 +1628,10 @@ document.addEventListener('click',async e=>{
   if(t.id==='btnMenu'){ renderPerfilCard(); $('#dlgConta').showModal(); listBackups(); renderMembros(); }
   if(t.id==='btnConvidar'){ t.disabled=true; await convidar(); t.disabled=false; }
   if(t.dataset.unconv){ await desconvidar(t.dataset.unconv); }
+  if(t.dataset.mais30){ const inp=document.querySelector(`input[data-ativo="${t.dataset.mais30}"]`); const base=inp&&inp.value&&inp.value>todayISO()?d2(inp.value):d2(todayISO()); base.setDate(base.getDate()+30); await setAtivo(t.dataset.mais30,base.getFullYear()+'-'+String(base.getMonth()+1).padStart(2,'0')+'-'+String(base.getDate()).padStart(2,'0')); }
+  if(t.id==='btnBora'){ openAdd(); }
+  if(t.id==='btnImportHist'){ $('#fileImport').click(); }
+  if(t.id==='btnTermos'){ $('#dlgTermos').showModal(); }
   if(t.id==='btnPerfilEdit'){ openPerfil(); }
   if(t.id==='btnPerfilSave'){ t.disabled=true; await salvarPerfil(); t.disabled=false; }
   if(t.id==='btnFotoRm'){ state.fotoNova=null; const el=document.querySelector('.fotoedit .avatar'); if(el) el.outerHTML='<span class="avatar ini" style="width:80px;height:80px;font-size:32px">?</span>'; t.remove(); }
@@ -1586,6 +1640,7 @@ document.addEventListener('click',async e=>{
   if(t.id==='btnImport2'){ $('#dlgConta').close(); $('#fileImport').click(); }
   if(t.id==='btnLogout'){ $('#dlgConta').close(); await sb.auth.signOut(); }
 });
+document.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.ativo) setAtivo(e.target.dataset.ativo,e.target.value); });
 document.getElementById('fileImport').addEventListener('change',e=>{ const f=e.target.files[0]; e.target.value=''; if(f) importFile(f); });
 
 // ---------- tema
@@ -1610,7 +1665,7 @@ function buscaExercicios(q,nomes,lim){ const qn=nrm(q); if(!qn) return nomes.sli
   for(const n of nomes){ if(nrm(n).includes(qn)){ out.push({name:n,via:null}); vistos.add(n); } }
   for(const [canon,ks] of Object.entries(rev)){ if(vistos.has(canon)) continue; const k=ks.find(x=>x.includes(qn)); if(k){ out.push({name:canon,via:k.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1):w).join(' ')}); vistos.add(canon); } }
   return out.slice(0,lim||60); }
-function nomesConhecidos(){ const s=new Set(Object.keys(exerciseIndex())); for(const m of state.modelos||[]) for(const n of m.exercicios||[]) s.add(n); s.delete('Corrida Livre'); return [...s].sort((a,b)=>a.localeCompare(b,'pt',{sensitivity:'base'})); }
+function nomesConhecidos(){ const s=new Set(Object.keys(exerciseIndex())); for(const n of (state.catalogo&&state.catalogo.nomes)||[]) if(n) s.add(n); for(const m of state.modelos||[]) for(const n of m.exercicios||[]) s.add(n); s.delete('Corrida Livre'); return [...s].sort((a,b)=>a.localeCompare(b,'pt',{sensitivity:'base'})); }
 function idLivre(base){ const taken=new Set(allSessions().map(x=>x.id)); let id=base,n=1; while(taken.has(id)){ n++; id=base+'-'+n; } return id; }
 const DRAFTKEY=()=>'wodio:rascunho:'+(user?user.id:'');
 function guardaRascunho(){ try{ if(state.draft) localStorage.setItem(DRAFTKEY(),JSON.stringify(state.draft)); }catch(e){} }
