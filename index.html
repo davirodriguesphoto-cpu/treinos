@@ -471,6 +471,7 @@ body[data-dir="esq"] #view{animation:vEsq .22s ease}
 body[data-dir="dir"] #view{animation:vDir .22s ease}
 @keyframes vEsq{from{transform:translateX(24px);opacity:.4}to{transform:none;opacity:1}}
 @keyframes vDir{from{transform:translateX(-24px);opacity:.4}to{transform:none;opacity:1}}
+.pushconv .btn.ghost.wide{width:100%}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -538,7 +539,7 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
       <h5>Backups automáticos</h5><p class="note" style="margin-top:0">Todo dia de madrugada o sistema guarda uma cópia. Ficam os últimos 30 dias.</p><div id="bkList"></div></div></details>
     <details class="acc"><summary>Notificações</summary><div class="accb"><div id="notifBox"></div></div></details>
     <details class="acc" id="accMembros" hidden><summary>Membros</summary><div class="accb"><div id="membros"></div></div></details>
-    <div id="stravaBox"></div>
+    <details class="acc"><summary><span>Strava <span id="stravaPill"></span></span></summary><div class="accb"><div id="stravaBox"></div></div></details>
     <button class="accitem solto" id="btnTermos">Termos de uso e privacidade</button>
     <button class="btn danger sair" id="btnLogout">Sair</button>
     <p class="zion">Feito com 🧡 pro Zion</p>
@@ -646,7 +647,7 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
   <div class="mb pushconv"><div class="pushface"></div><h3 id="puT">O chamado das 5h</h3>
     <p>Todo dia, às <b>5h da manhã</b>, o horário dos guerreiros, o WÓD'IO te manda uma cutucada pra treinar. Uma frase diferente por dia, sem repetir.</p>
     <p class="note">Você pode desligar quando quiser em Conta → Notificações.</p>
-    <button class="btn fin wide" id="btnPushSim">ATIVAR</button><button class="linkbtn" id="btnPushNao">Agora não</button></div>
+    <button class="btn fin wide" id="btnPushSim">ATIVAR</button><button class="btn ghost wide" id="btnPushNao">Agora não</button><button class="linkbtn" id="btnPushNunca">Nunca permitir</button></div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
 <script>
@@ -2270,7 +2271,8 @@ function exportarTreino(id){ const s=allSessions().find(x=>x.id===id); if(!s) re
 async function stravaCall(body){ const r=await sb.functions.invoke('strava',{body}); if(r.error){ let msg=r.error.message; try{ const j=await r.error.context.json(); msg=j.error||msg; }catch(e){} throw new Error(msg); } return r.data; }
 async function renderStrava(){ const el=$('#stravaBox'); if(!el) return; el.innerHTML='<p class="note">Verificando Strava…</p>';
   try{ const st=(await sb.rpc('strava_status')).data||{};
-    el.innerHTML=`<div class="stravacard"><div class="sth"><b>Strava</b>${st.conectado?'<span class="pill ok">conectado</span>':''}</div>`+(st.conectado?`<p class="note" style="margin-top:0">Conectado${st.atleta?' como <b>'+esc(st.atleta)+'</b>':''}. Os treinos do relógio chegam sozinhos; o print continua completando calorias totais, batimentos e zonas quando o Strava não manda.</p><div class="actions" style="justify-content:flex-start"><button class="btn" id="btnStravaSync">Sincronizar agora</button><button class="btn ghost" id="btnStravaHist">Puxar histórico completo</button><button class="btn ghost" id="btnStravaOff">Desconectar</button></div><p class="pw-card">Powered by Strava</p>`
+    const pl=$('#stravaPill'); if(pl) pl.innerHTML=st.conectado?'<span class="pill ok">conectado</span>':'';
+    el.innerHTML=`<div>`+(st.conectado?`<p class="note" style="margin-top:0">Conectado${st.atleta?' como <b>'+esc(st.atleta)+'</b>':''}. Os treinos do relógio chegam sozinhos; o print continua completando calorias totais, batimentos e zonas quando o Strava não manda.</p><div class="actions" style="justify-content:flex-start"><button class="btn" id="btnStravaSync">Sincronizar agora</button><button class="btn ghost" id="btnStravaHist">Puxar histórico completo</button><button class="btn ghost" id="btnStravaOff">Desconectar</button></div><p class="pw-card">Powered by Strava</p>`
       :`<p class="note" style="margin-top:0">Conecte o Strava para os treinos do relógio entrarem automaticamente (Xiaomi, Garmin, Samsung e Apple sincronizam com ele).</p><div class="actions" style="justify-content:flex-start"><button class="btn strava" id="btnStravaOn">Conectar com Strava</button></div>`)+'<p class="pw-card">Powered by Strava</p></div>';
   }catch(e){ el.innerHTML=''; } }
 async function stravaConectar(hist){ try{ try{ if(hist) localStorage.setItem('wodio:stravaHist','1'); else localStorage.removeItem('wodio:stravaHist'); }catch(e){} const c=await stravaCall({action:'config'}); if(!c.client_id){ toast('O Strava ainda não foi configurado.'); return; }
@@ -2383,18 +2385,22 @@ function b64u(s){ const pad='='.repeat((4-s.length%4)%4); const b=atob((s+pad).r
 async function pushAssinatura(){ if(!pushSuportado()) return null; const reg=await navigator.serviceWorker.ready; return reg.pushManager.getSubscription(); }
 async function ativarPush(){ if(!pushSuportado()){ toast('Este celular/navegador não aceita notificações. No iPhone, instale o app na Tela de Início.'); return false; }
   const perm=await Notification.requestPermission(); if(perm!=='granted'){ toast('Notificações bloqueadas. Dá pra liberar nas configurações do app no celular.'); return false; }
-  const reg=await navigator.serviceWorker.ready; let sub=await reg.pushManager.getSubscription(); if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)});
+  const reg=await navigator.serviceWorker.ready; let sub=await reg.pushManager.getSubscription(); if(!sub){ try{ sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)}); }catch(e){ await new Promise(r=>setTimeout(r,1500)); sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)}); } }
   const j=sub.toJSON(); const r=await sb.from('push_subs').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth}); if(r.error){ console.error(r.error); toast('Não deu para ativar agora.'); return false; }
-  try{ localStorage.setItem(ukey('wodio:pushOff'),''); }catch(e){} toast('Chamado das 5h ativado! 💪'); return true; }
+  try{ localStorage.setItem(ukey('wodio:pushOff'),''); localStorage.removeItem(ukey('wodio:pushNunca')); }catch(e){} toast('Chamado das 5h ativado! 💪'); return true; }
 async function desativarPush(){ try{ const sub=await pushAssinatura(); if(sub){ await sb.from('push_subs').delete().eq('endpoint',sub.endpoint); await sub.unsubscribe(); } localStorage.setItem(ukey('wodio:pushOff'),'1'); toast('Chamado das 5h desativado.'); }catch(e){ toast('Não deu para desativar agora.'); } }
 async function renderNotif(){ const el=$('#notifBox'); if(!el) return; if(!pushSuportado()){ el.innerHTML='<p class="note">Este celular ou navegador não recebe notificações. No iPhone, instale o WÓD\'IO pela opção "Adicionar à Tela de Início".</p>'; return; }
   const sub=await pushAssinatura(); const on=!!sub&&Notification.permission==='granted';
   el.innerHTML=`<label class="switch"><input type="checkbox" id="pushToggle" ${on?'checked':''}><span class="sl"></span><span>Chamado das 5h <span class="m">· uma cutucada motivacional todo dia de manhã</span></span></label>${on?'<button class="accitem" id="btnPushTeste">Enviar uma de teste agora</button>':''}`; }
-async function convitePush(){ if(!pushSuportado()||Notification.permission!=='default') return; try{ const off=localStorage.getItem(ukey('wodio:pushOff')); const ult=+localStorage.getItem(ukey('wodio:pushConvite'))||0; if(off==='1'||Date.now()-ult<5*864e5) return; if(await pushAssinatura()) return; }catch(e){ return; }
+async function autoPush(){ try{ if(!pushSuportado()||Notification.permission!=='granted'||localStorage.getItem(ukey('wodio:pushOff'))==='1') return; const reg=await navigator.serviceWorker.ready; let sub=await reg.pushManager.getSubscription();
+    if(!sub){ try{ sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)}); }catch(e){ await new Promise(r=>setTimeout(r,1500)); sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)}); } }
+    const j=sub.toJSON(); await sb.from('push_subs').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth}); }catch(e){ console.error('autoPush',e); } }
+async function convitePush(){ if(!pushSuportado()||Notification.permission!=='default') return; try{ const off=localStorage.getItem(ukey('wodio:pushOff')); const ult=+localStorage.getItem(ukey('wodio:pushConvite'))||0; if(off==='1'||localStorage.getItem(ukey('wodio:pushNunca'))==='1'||Date.now()-ult<864e5) return; if(await pushAssinatura()) return; }catch(e){ return; }
   if(document.querySelector('dialog[open]')) return; $('#dlgPush').showModal(); }
 document.addEventListener('click',async e=>{ const t=e.target.closest('button'); if(!t) return;
   if(t.id==='btnPushSim'){ $('#dlgPush').close(); await ativarPush(); }
-  if(t.id==='btnPushNao'){ $('#dlgPush').close(); try{ localStorage.setItem(ukey('wodio:pushConvite'),String(Date.now())); }catch(_){} }
+  if(t.id==='btnPushNao'){ $('#dlgPush').close(); try{ localStorage.setItem(ukey('wodio:pushConvite'),String(Date.now())); }catch(_){} toast('Tudo bem, pergunto de novo amanhã.'); }
+  if(t.id==='btnPushNunca'){ $('#dlgPush').close(); try{ localStorage.setItem(ukey('wodio:pushNunca'),'1'); }catch(_){} toast('Combinado, não pergunto mais. Dá pra ativar em Conta → Notificações.'); }
   if(t.id==='btnPushTeste'){ t.disabled=true; try{ const r=await sb.functions.invoke('push',{body:{action:'teste'}}); toast(r.error?'Não deu para enviar o teste.':'Enviado! Deve chegar em instantes.'); }catch(_){ toast('Não deu para enviar o teste.'); } t.disabled=false; } });
 document.addEventListener('change',async e=>{ if(e.target.id!=='pushToggle') return; const t=e.target; t.disabled=true; if(t.checked){ const ok=await ativarPush(); if(!ok) t.checked=false; } else await desativarPush(); t.disabled=false; renderNotif(); });
 // ---------- arrastar para trocar de aba
@@ -2430,7 +2436,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{aplica
     const was=user&&user.id; user=session?session.user:null;
     if(!user){ state.auth=true; state.ready=false; state.sessions=[]; $('#status').textContent=''; render(); return; }
     state.auth=false; $('#contaEmail').textContent=user.email||'';
-    if(was!==user.id){ setTimeout(async()=>{ await stravaRetorno(); stravaAuto(); },1500); setTimeout(lembreteBackup,5200); setTimeout(convitePush,9000); if(loadCache()){ for(const op of getQ()) applyLocal(op); state.ready=true; updStatus(); render(); } setTimeout(async()=>{ await loadAll(); flushQ(); },0); }
+    if(was!==user.id){ setTimeout(async()=>{ await stravaRetorno(); stravaAuto(); },1500); setTimeout(lembreteBackup,5200); setTimeout(convitePush,9000); setTimeout(autoPush,3000); if(loadCache()){ for(const op of getQ()) applyLocal(op); state.ready=true; updStatus(); render(); } setTimeout(async()=>{ await loadAll(); flushQ(); },0); }
   });
 })();
 })();
