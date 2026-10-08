@@ -406,6 +406,8 @@ dialog.painel .mh h3{text-align:center}
 .relh{display:flex;gap:12px;align-items:center}
 .relh .oi{font-size:30px}
 .relbtns{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+.relstrava{grid-column:1/-1;font-weight:700;padding:12px}
+.stravaopts .row{width:100%;border:1px solid var(--line);border-radius:10px;margin:4px 0;background:var(--surface)}
 .relprint{background:var(--z2);color:#06221F;border-color:var(--z2);font-weight:700;padding:14px;text-align:center;cursor:pointer}
 .mus-ex.pulado{opacity:.6}
 .mus-ex.pulado b{text-decoration:line-through}
@@ -2023,7 +2025,7 @@ function iniciarMus(id,sess){ const m=(state.modelos||[]).find(x=>x.id===id); if
   if(ult) for(const b of ult.blocks||[]) for(const i of b.items){ if(i.series) prev[i.name]=i.series.map(x=>({...x})); else prev[i.name]=(i.ladder||[]).map(x=>({kg:x.loadKg??'',reps:x.reps??'',tempo:''})); prevT[i.name]=i.modoTempo?'tempo':'carga'; }
   const nomes=sess?[...(sess.blocks[0]||{items:[]}).items.map(i=>i.name),...(sess.naoRealizados||[])]:m.exercicios;
   const vazio=()=>[{kg:'',reps:'',tempo:''},{kg:'',reps:'',tempo:''},{kg:'',reps:'',tempo:''}];
-  state.mus={id,nome:m?m.nome:(sess.focoExtra||'Treino'),orig:sess?sess.id:null,date:sess?sess.date:state.musDT.date,time:sess?(sess.time||'07:00'):state.musDT.time,band:sess?sess.band:null,watchEdit:false,
+  state.mus={id,stravaIds:sess?sess.stravaIds:undefined,nome:m?m.nome:(sess.focoExtra||'Treino'),orig:sess?sess.id:null,date:sess?sess.date:state.musDT.date,time:sess?(sess.time||'07:00'):state.musDT.time,band:sess?sess.band:null,watchEdit:false,
     ex:nomes.map(n=>({name:n,tipo:prevT[n]||(POR_TEMPO.test(n)?'tempo':'carga'),pulado:pulados.has(n),series:(prev[n]&&prev[n].length?prev[n]:vazio()).map(x=>({kg:x.kg??'',reps:x.reps??'',tempo:x.tempo??''}))})),base:m?[...m.exercicios]:null};
   renderMus(); if(!$('#dlgMus').open) $('#dlgMus').showModal(); }
 function renderMus(){ const M=state.mus; $('#musTitle').textContent='Musculação · '+M.nome;
@@ -2046,7 +2048,7 @@ async function salvarMus(final){ const M=state.mus; const items=[], pulados=[], 
     const it={name:e.name}; it.ladder=L; it.reps=L.reduce((a,x)=>a+x.reps,0); const mx=Math.max(...L.map(x=>x.loadKg)); if(mx>0) it.loadKg=mx; items.push(it); }
   if(final&&vazios.length){ toast('Preencha ou marque como "não realizado": '+vazios.join(', ')); return; }
   if(!items.length&&!(M.band&&(M.band.durSec||M.band.kcalTotal))){ toast('Preencha pelo menos um exercício (carga, repetições ou tempo).'); return; }
-  const d={kind:'treino',modalidade:'musculacao',modelo:M.id,status:final?'concluido':'andamento',date:M.date,time:M.time,foco:'Musculação',focoExtra:M.nome,blocks:[{name:'MUSCULAÇÃO',result:null,items}],band:M.band||null};
+  const d={kind:'treino',modalidade:'musculacao',modelo:M.id,status:final?'concluido':'andamento',date:M.date,time:M.time,foco:'Musculação',focoExtra:M.nome,blocks:[{name:'MUSCULAÇÃO',result:null,items}],band:M.band||null}; if(M.stravaIds) d.stravaIds=M.stravaIds;
   if(pulados.length) d.naoRealizados=pulados;
   if(d.band&&!d.band.date) d.band.date=d.date;
   d.id=M.orig&&M.orig.slice(0,10)===d.date?M.orig:idLivre(d.date+'-t');
@@ -2057,11 +2059,30 @@ async function salvarMus(final){ const M=state.mus; const items=[], pulados=[], 
 // ---- campos de data e hora grandes
 function dtCampos(pre,date,time){ return `<div class="dtbig"><label><span>Data</span><input type="date" data-${pre}="date" value="${date}" max="${todayISO()}"></label><label><span>Horário</span><input type="time" data-${pre}="time" value="${time||'07:00'}"></label></div>`; }
 function aplicaDT(obj,campo,valor){ if(campo==='date'){ obj.date=valor>todayISO()?todayISO():valor; } else obj.time=valor; const v=obj.date+'T'+(obj.time||'00:00'); if(v>nowLocal()){ obj.date=todayISO(); obj.time=nowLocal().slice(11,16); toast('Não dá para registrar no futuro.'); return true; } return false; }
+// ---- Strava dentro do treino
+function relAlvo(pre){ return pre==='h'?state.draft:pre==='m'?state.mus:state.outro; }
+function relRender(pre){ if(pre==='h') renderHib(); else if(pre==='m') renderMus(); else renderOutro(); }
+function relAplica(pre,a){ const O=relAlvo(pre); if(!O) return; const B=O.band=O.band||{};
+  for(const [k,v] of [['durSec',a.elapsed],['kcal',a.kcal],['bpmAvg',a.bpmAvg],['bpmMax',a.bpmMax],['time',a.hora]]) if(v!=null&&(B[k]==null||B[k]==='')) B[k]=v;
+  if(!B.tipo) B.tipo=a.tipo||'Treino'; B.date=O.date; O.stravaIds=[...new Set([...(O.stravaIds||[]),a.id])];
+  if(pre==='o'){ if(!O.durSec&&a.elapsed) O.durSec=a.elapsed; if(!O.distKm&&a.distancia) O.distKm=+(a.distancia/1000).toFixed(2); }
+  state.stravaOpts=state.stravaOpts||{}; state.stravaOpts[pre]=[]; relRender(pre); toast('Dados do Strava adicionados.'); }
+async function relStrava(pre){ const O=relAlvo(pre); if(!O) return; if(!navigator.onLine){ toast('Sem internet agora.'); return; }
+  try{ toast('Buscando no Strava…'); const r=await stravaCall({action:'dia',data:O.date}); const L=(r.atividades||[]).filter(a=>!allSessions().some(s=>(s.stravaIds||[]).map(String).includes(String(a.id))&&s.id!==(O._orig||O.orig)));
+    if(!L.length){ toast('Nenhuma atividade no Strava nesse dia.'); return; }
+    if(L.length===1){ relAplica(pre,L[0]); return; }
+    state.stravaOpts=state.stravaOpts||{}; state.stravaOpts[pre]=L; relRender(pre);
+  }catch(e){ toast(/conectado/i.test(e.message)?'Conecte o Strava em Conta para usar isso.':'Strava: '+e.message); } }
+document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t) return;
+  if(t.dataset.relstrava){ relStrava(t.dataset.relstrava); }
+  if(t.dataset.relpick){ const [pre,k]=t.dataset.relpick.split('.'); relAplica(pre,state.stravaOpts[pre][+k]); } });
 // ---- cartão do relógio (dentro do treino)
 function relogioCard(pre,bd,edit){ const tem=bd&&(bd.durSec||bd.kcalTotal||bd.bpmAvg);
   return `<div class="relcard"><div class="relh"><span class="oi">⌚</span><div><b>Dados do relógio</b><br><span class="m">${tem?'Recebidos. Confira ou corrija abaixo.':'Anexe o print do smart watch ao terminar o treino.'}</span></div></div>
     ${tem?`<p class="note" style="margin:6px 0">${mmss(bd.durSec)} · ${bd.kcalTotal||'–'} kcal · ${bd.bpmAvg||'–'} bpm médio${bd.bpmMax?' / '+bd.bpmMax+' máx':''}</p>${zoneStrip(bd.zones)}`:''}
-    <div class="relbtns"><label class="btn relprint" for="${pre}Img">${tem?'Trocar print':'Anexar print do relógio'}</label><input type="file" id="${pre}Img" accept="image/*" hidden data-relimg="${pre}"><button class="btn ghost" data-reledit="${pre}">${edit?'Ocultar campos':'Digitar dados'}</button></div>
+    <div class="relbtns"><label class="btn relprint" for="${pre}Img">${tem?'Trocar print':'Anexar print do relógio'}</label><input type="file" id="${pre}Img" accept="image/*" hidden data-relimg="${pre}"><button class="btn ghost" data-reledit="${pre}">${edit?'Ocultar campos':'Digitar dados'}</button>
+      <button class="btn strava relstrava" data-relstrava="${pre}">Sincronizar com o Strava</button></div>
+    ${(state.stravaOpts&&state.stravaOpts[pre]||[]).length?`<div class="stravaopts"><p class="note" style="margin:8px 0 4px">Mais de uma atividade nesse dia. Qual é esse treino?</p>${state.stravaOpts[pre].map((a,k)=>`<button class="row" data-relpick="${pre}.${k}"><div><div class="t">${esc(a.nome||a.tipo)}</div><div class="m">${a.hora} · ${mmss(a.elapsed)}${a.distancia?' · '+fmtNum(a.distancia/1000,2)+' km':''}${a.bpmAvg?' · '+a.bpmAvg+' bpm':''}</div></div></button>`).join('')}</div>`:''}
     ${edit?watchEditor(pre,bd||{}):''}<p class="note" id="${pre}ImgSt"></p></div>`; }
 function renderNovoModelo(){ const N=state.novoModelo; $('#musTitle').textContent='Novo treino';
   $('#musBody').innerHTML=`<div class="form"><label>Nome<input data-nm="nome" value="${esc(N.nome)}" placeholder="Treino C"></label><label>Foco<input data-nm="foco" value="${esc(N.foco)}" placeholder="Ex.: Costas · Ombros"></label></div>
@@ -2275,10 +2296,10 @@ async function salvarOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]
   if(!dur&&!km&&!B.kcalTotal){ toast('Coloque a duração do treino.'); return; }
   let row;
   if(def&&def[2]==='corrida'){ if(!km){ toast('Coloque a distância da corrida.'); return; } const id=idLivre(O.date+'-c');
-    const s={id,date:O.date,kind:'corrida',time:O.time,distKm:km,durSec:dur,pace:dur&&km?Math.round(dur/km):null,kcal:B.kcal||null,kcalTotal:B.kcalTotal||null,bpmAvg:B.bpmAvg||null,bpmMax:B.bpmMax||null,zones:B.zones||null,source:'Manual',local:'livre',splits:[],note:O.tipo==='caminhada'?'caminhada':undefined};
+    const s={id,stravaIds:O.stravaIds,date:O.date,kind:'corrida',time:O.time,distKm:km,durSec:dur,pace:dur&&km?Math.round(dur/km):null,kcal:B.kcal||null,kcalTotal:B.kcalTotal||null,bpmAvg:B.bpmAvg||null,bpmMax:B.bpmMax||null,zones:B.zones||null,source:'Manual',local:'livre',splits:[],note:O.tipo==='caminhada'?'caminhada':undefined};
     row={id,date:O.date,kind:'corrida',data:s}; }
   else { const id=idLivre(O.date+'-t'); const band={...B,date:O.date,time:O.time,tipo:nome,durSec:dur}; if(km) band.distKm=km;
-    const s={id,date:O.date,kind:'treino',modalidade:'outro',foco:nome,blocks:[],band,status:'concluido'}; row={id,date:O.date,kind:'treino',data:s}; }
+    const s={id,stravaIds:O.stravaIds,date:O.date,kind:'treino',modalidade:'outro',foco:nome,blocks:[],band,status:'concluido'}; row={id,date:O.date,kind:'treino',data:s}; }
   try{ const mode=await write([{t:'sessions',k:'upsert',rows:[row]}]); $('#dlgOutro').close(); state.outro=null; render(); toast(mode==='offline'?OFFMSG:nome+' registrado.'); }catch(e){ toast('Não foi possível salvar agora.'); } }
 document.addEventListener('click',async e=>{ const t=e.target.closest('button'); if(!t) return;
   if(t.id==='optOutro'){ novoOutro(); }
