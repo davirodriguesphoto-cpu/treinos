@@ -434,6 +434,10 @@ dialog.painel .mh h3{text-align:center}
 .chips.exr{margin-bottom:8px}
 tr.cont td{border-top-color:transparent}
 .chart.radar{height:min(110vw,460px)}
+.durpick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.durpick label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 10px}
+.durpick select{flex:1;border:0;background:transparent;color:var(--text);font-size:22px;font-family:"Barlow Condensed",sans-serif;font-weight:600;padding:8px 0;min-width:0;appearance:none;-webkit-appearance:none;text-align:center}
+.durpick span{color:var(--muted);font-size:14px}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -1179,7 +1183,7 @@ function vExDetail(e){
     for(const i of r.items){ if(i.ladder&&i.ladder.length>1){ for(const st of i.ladder){ const ehPr=r.pr&&!prMarcado&&st.loadKg===r.max; if(ehPr) prMarcado=true;
           L.push(`<tr class="${L.length?'cont':''}"><td>${fmtD(r.date)}${ehPr?' <span class="tag new">recorde</span>':''}</td><td>${st.reps} × ${fmtNum(st.loadKg)} kg</td><td>${st.loadKg?fmtNum(st.loadKg)+' kg':'–'}</td><td>${st.reps&&st.loadKg?fmtNum(st.reps*st.loadKg,0)+' kg':'–'}</td><td>${esc(i.block||'')}</td></tr>`); } }
       else { const ehPr=r.pr&&!prMarcado; if(ehPr) prMarcado=true; const kg=i.loadKg; const tt=itemTotals(i);
-        L.push(`<tr class="${L.length?'cont':''}"><td>${fmtD(r.date)}${ehPr?' <span class="tag new">recorde</span>':''}</td><td>${esc(qty(i))}</td><td>${kg!=null?fmtNum(kg)+' kg':'–'}</td><td>${kg&&tt.reps?fmtNum(kg*tt.reps,0)+' kg':'–'}</td><td>${esc(i.block||'')}</td></tr>`); } }
+        L.push(`<tr class="${L.length?'cont':''}"><td>${fmtD(r.date)}${ehPr?' <span class="tag new">recorde</span>':''}</td><td>${esc(qty(i))}${i.perSide&&tt.reps?`<br><span class="m">${fmtNum(tt.reps,0)} reps</span>`:''}</td><td>${kg!=null?fmtNum(kg)+' kg':'–'}</td><td>${kg&&tt.reps?fmtNum(kg*tt.reps,0)+' kg':'–'}</td><td>${esc(i.block||'')}</td></tr>`); } }
     return L.join(''); }).join('');
   return `<p style="margin:10px 0 0"><button class="btn accent" id="exBack">‹ Todos os exercícios</button></p>
   <h2>${esc(e.name)}</h2>${fmtTotals(e.tot,true).length?`<div class="lifetime">${fmtTotals(e.tot,true).map(x=>{const [n,...u]=x.split(' ');const uu=u.join(' '); return `<div><b>${n}</b><span>${uu==='reps'?'repetições':uu==='h'?'horas':uu==='min'?'minutos':uu}</span></div>`}).join('')}<div><b>${e.count}</b><span>${e.count>1?'sessões':'sessão'}</span></div></div>`:''}${hasLoad?`<p class="sub">Carga de ${fmtNum(e.first)} kg na primeira vez para ${fmtNum(e.best)} kg na melhor.</p>`:''}
@@ -2133,7 +2137,7 @@ document.addEventListener('change',async e=>{ const t=e.target;
     try{ const w=await lerPrint(f); if(!w.durSec&&!w.kcal&&!w.bpmAvg){ if(st) st.textContent='Não consegui ler esse print. Digite os dados.'; return; }
       if(pre==='m'){ state.mus.band=watchBand(w,state.mus.band); state.mus.watchEdit=true; renderMus(); }
       else if(pre==='h'){ state.draft.band=watchBand(w,state.draft.band); state.hibWatchEdit=true; renderHib(); }
-      else if(pre==='o'){ state.outro.band=watchBand(w,state.outro.band); state.outro.watchEdit=true; if(w.durSec&&!state.outro.dur) state.outro.dur=hms(w.durSec); renderOutro(); } }catch(err){ if(st) st.textContent='Não deu para ler o print agora.'; } }
+      else if(pre==='o'){ state.outro.band=watchBand(w,state.outro.band); state.outro.watchEdit=true; if(w.durSec&&!state.outro.durSec) state.outro.durSec=w.durSec; renderOutro(); } }catch(err){ if(st) st.textContent='Não deu para ler o print agora.'; } }
   if(t.dataset.md==='dt'&&state.mus){ const v=clampDT(t.value); state.mus.date=v.slice(0,10); state.mus.time=v.slice(11,16); if(v!==t.value){ t.value=v; toast('Não dá para registrar no futuro.'); } }
 });
 
@@ -2250,17 +2254,21 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
 
 // ---------- OUTROS TREINOS (corrida, bike, aerobic dance…)
 const OUTROS=[['corrida','Corrida','corrida'],['caminhada','Caminhada','corrida'],['bicicleta','Bicicleta','treino'],['aerobic','Aerobic Dance Exercise','treino'],['natacao','Natação','treino'],['eliptico','Elíptico','treino'],['esteira','Esteira','treino'],['outro','Outro','treino']];
-function novoOutro(){ const dt=dtEscolhida(); $('#dlgAdd').close(); state.outro={tipo:'aerobic',livre:'',date:dt.date,time:dt.time,dur:'',dist:'',band:null,watchEdit:false}; renderOutro(); $('#dlgOutro').showModal(); }
+function durPicker(pre,sec){ sec=sec||0; const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=sec%60; const opt=(n,v)=>Array.from({length:n},(_,k)=>`<option value="${k}" ${k===v?'selected':''}>${String(k).padStart(2,'0')}</option>`).join('');
+  return `<div class="durpick" role="group" aria-label="Duração"><label><select data-${pre}="h">${opt(24,h)}</select><span>h</span></label><label><select data-${pre}="m">${opt(60,m)}</select><span>min</span></label><label><select data-${pre}="s">${opt(60,s)}</select><span>s</span></label></div>`; }
+function novoOutro(){ const dt=dtEscolhida(); $('#dlgAdd').close(); state.outro={tipo:'aerobic',livre:'',date:dt.date,time:dt.time,durSec:0,dist:'',band:null,watchEdit:false}; renderOutro(); $('#dlgOutro').showModal(); }
 function renderOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]===O.tipo);
   $('#outroBody').innerHTML=`<div class="tipos-o">${OUTROS.map(([k,l])=>`<button class="chip" data-otipo="${k}" aria-pressed="${O.tipo===k}">${l}</button>`).join('')}</div>
     ${O.tipo==='outro'?`<label class="dtl">Qual atividade?<input data-of="livre" value="${esc(O.livre)}" placeholder="Ex.: Funcional, Pilates…"></label>`:''}
     ${dtCampos('od',O.date,O.time)}
-    <div class="form"><label>Duração<input data-of="dur" value="${esc(O.dur)}" placeholder="ex.: 45:00"></label>${def&&def[2]==='corrida'||O.tipo==='bicicleta'?`<label>Distância (km)<input data-of="dist" inputmode="decimal" value="${esc(O.dist)}" placeholder="ex.: 5,2"></label>`:''}</div>
+    <div class="dtl" style="margin:10px 0 4px">Duração</div>${durPicker('odur',O.durSec)}
+    ${def&&def[2]==='corrida'||O.tipo==='bicicleta'?`<div class="form"><label>Distância (km)<input data-of="dist" inputmode="decimal" value="${esc(O.dist)}" placeholder="ex.: 5,2"></label></div>`:''}
+    <p class="note">Os dados do relógio são opcionais.</p>
     ${relogioCard('o',O.band,O.watchEdit)}`; }
 async function salvarOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]===O.tipo); const nome=O.tipo==='outro'?(O.livre||'').trim():def[1];
   if(!nome){ toast('Escreva qual foi a atividade.'); return; }
-  const dur=tsec(O.dur)||(O.band&&O.band.durSec)||null; const km=parseFloat(String(O.dist).replace(',','.'))||null; const B=O.band||{};
-  if(!dur&&!km&&!B.kcalTotal){ toast('Coloque a duração, a distância ou anexe o print do relógio.'); return; }
+  const dur=O.durSec||(O.band&&O.band.durSec)||null; const km=parseFloat(String(O.dist).replace(',','.'))||null; const B=O.band||{};
+  if(!dur&&!km&&!B.kcalTotal){ toast('Coloque a duração do treino.'); return; }
   let row;
   if(def&&def[2]==='corrida'){ if(!km){ toast('Coloque a distância da corrida.'); return; } const id=idLivre(O.date+'-c');
     const s={id,date:O.date,kind:'corrida',time:O.time,distKm:km,durSec:dur,pace:dur&&km?Math.round(dur/km):null,kcal:B.kcal||null,kcalTotal:B.kcalTotal||null,bpmAvg:B.bpmAvg||null,bpmMax:B.bpmMax||null,zones:B.zones||null,source:'Manual',local:'livre',splits:[],note:O.tipo==='caminhada'?'caminhada':undefined};
@@ -2273,6 +2281,7 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
   if(t.dataset.otipo&&state.outro){ state.outro.tipo=t.dataset.otipo; renderOutro(); }
   if(t.id==='btnOutroSalvar'){ t.disabled=true; await salvarOutro(); t.disabled=false; } });
 document.addEventListener('input',e=>{ const t=e.target; if(t.dataset.of&&state.outro) state.outro[t.dataset.of]=t.value; });
+document.addEventListener('change',e=>{ const t=e.target; if(t.dataset.odur&&state.outro){ const O=state.outro, cur=O.durSec||0; let h=Math.floor(cur/3600), m=Math.floor(cur%3600/60), s=cur%60; const v=+t.value; if(t.dataset.odur==='h') h=v; if(t.dataset.odur==='m') m=v; if(t.dataset.odur==='s') s=v; O.durSec=h*3600+m*60+s; } });
 // ---------- cabeçalho fixo que encolhe ao rolar
 let _scr=false; window.addEventListener('scroll',()=>{ const s=window.scrollY>40; if(s!==_scr){ _scr=s; document.body.classList.toggle('scrolled',s); } },{passive:true});
 // ---------- botão voltar
