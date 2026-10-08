@@ -474,6 +474,15 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
 .pushconv .btn.ghost.wide{width:100%}
 .diag{font-size:12px;display:grid;gap:2px}
 .diag:empty{display:none}
+.passos.mini{padding-left:18px;margin:4px 0 10px;display:grid;gap:6px;font-size:13px;color:var(--muted);line-height:1.4}
+.passos.mini b{color:var(--text)}
+.bora{display:flex;align-items:center;gap:14px;text-align:left;padding:14px 18px;box-shadow:0 6px 20px color-mix(in srgb,var(--z4) 35%,transparent);animation:boraPulse 2.4s ease-in-out infinite}
+.bora-plus{flex:0 0 46px;height:46px;border-radius:50%;background:#1A1405;color:var(--z4);display:grid;place-items:center;font-size:30px;font-style:normal;font-family:Arial,sans-serif;font-weight:700;line-height:1}
+.bora-txt{display:grid;gap:2px}
+.bora-txt b{font-size:26px;line-height:1}
+.bora-txt small,.welcome .bora-txt small{font-family:system-ui,sans-serif;font-style:normal;font-weight:600;font-size:13px;letter-spacing:0;color:#1A1405;opacity:.8}
+@keyframes boraPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+@media (prefers-reduced-motion: reduce){.bora{animation:none}}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -1755,7 +1764,7 @@ async function forgot(){ const email=String(new FormData($('#authForm')).get('em
   state.authMsg=r.error?('Não deu certo: '+r.error.message):'Se esse e-mail tiver conta, chegou um link para criar uma senha nova. Confira também o spam.'; render(); }
 function vEmpty(){ return `<section class="welcome"><div class="authface">${CARINHA}</div><div class="wm">WÓD<span class="ap">'</span>IO</div><small>seu treino diário</small>
   <p class="wtxt">${state.profile&&state.profile.nome?'Bem-vindo, '+esc(state.profile.nome)+'!':'Bem-vindo!'} Seu app está pronto. Registre o primeiro treino ou traga o que você já tem anotado.</p>
-  <button class="btn bora" id="btnBora">BORA TREINAR!</button>
+  <button class="btn bora" id="btnBora"><span class="bora-plus" aria-hidden="true">+</span><span class="bora-txt"><b>BORA TREINAR!</b><small>Clique aqui e adicione seu primeiro treino</small></span></button>
   <button class="btn strava wide" id="btnWelcomeStrava">Conectar com Strava</button>
   <p class="note">Puxa seus treinos e corridas dos últimos anos direto do Strava (Xiaomi, Garmin, Samsung e Apple sincronizam com ele).</p>
   <button class="btn ghost" id="btnImportHist">IMPORTAR TREINO</button>
@@ -2395,11 +2404,15 @@ async function inscreverPush(){ passo('1. permissão: '+Notification.permission)
   if(!sub){ let erro=null; for(let t=0;t<3&&!sub;t++){ try{ sub=await comPrazo(reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:chave}),15000,'inscrição'); }catch(e){ erro=e; if(e&&e.name==='InvalidStateError'){ const old=await reg.pushManager.getSubscription(); if(old) await old.unsubscribe(); } await new Promise(r=>setTimeout(r,1200)); } } if(!sub) throw erro||new Error('sem inscrição'); }
   passo('3. inscrição no celular: ok'); const j=sub.toJSON(); const r=await comPrazo(sb.from('push_subs').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth}),10000,'servidor'); if(r.error) throw new Error('banco: '+r.error.message); passo('4. registro no servidor: ok'); return sub; }
 async function ativarPush(){ if(!pushSuportado()){ toast('Este celular/navegador não aceita notificações. No iPhone, instale o app na Tela de Início.'); return false; }
-  try{ const perm=await Notification.requestPermission(); if(perm!=='granted'){ toast('Notificações bloqueadas. Libere nas configurações do app no celular.'); return false; }
+  try{ const perm=await Notification.requestPermission(); if(perm!=='granted'){ toast('Notificações bloqueadas no celular. Veja como liberar logo acima.'); setTimeout(renderNotif,300); return false; }
     await inscreverPush(); try{ localStorage.setItem(ukey('wodio:pushOff'),''); localStorage.removeItem(ukey('wodio:pushNunca')); }catch(e){} toast('Chamado das 5h ativado! 💪'); return true; }
   catch(e){ console.error(e); const m=(e&&(e.name+': '+e.message))||String(e); passo('✗ '+m); toast('Não deu para ativar: '+m); return false; } }
 async function desativarPush(){ try{ const sub=await pushAssinatura(); if(sub){ await sb.from('push_subs').delete().eq('endpoint',sub.endpoint); await sub.unsubscribe(); } localStorage.setItem(ukey('wodio:pushOff'),'1'); toast('Chamado das 5h desativado.'); }catch(e){ toast('Não deu para desativar agora.'); } }
-async function renderNotif(){ const el=$('#notifBox'); if(!el) return; if(!pushSuportado()){ el.innerHTML='<p class="note">Este celular ou navegador não recebe notificações. No iPhone, instale o WÓD\'IO pela opção "Adicionar à Tela de Início".</p>'; return; }
+async function renderNotif(){ const el=$('#notifBox'); if(!el) return;
+  if(pushSuportado()&&Notification.permission==='denied'){ el.innerHTML=`<p class="note" style="margin-top:0"><b>As notificações do WÓD'IO estão bloqueadas neste celular.</b> Depois de bloqueadas, o app não consegue pedir de novo — só você libera:</p>
+    <ol class="passos mini"><li>Abra as <b>Configurações</b> do celular → <b>Apps</b> → <b>WÓD'IO</b> → <b>Notificações</b> e ative.</li><li>Se não achar o WÓD'IO lá: no <b>Chrome</b>, ⋮ → Configurações → Configurações do site → <b>Notificações</b> → toque em <b>treinos-davi.vercel.app</b> (em "Bloqueados") → <b>Permitir</b>.</li><li>Volte aqui e ligue a chave.</li></ol>
+    <label class="switch"><input type="checkbox" id="pushToggle"><span class="sl"></span><span>Chamado das 5h</span></label>`; return; }
+  if(!pushSuportado()){ el.innerHTML='<p class="note">Este celular ou navegador não recebe notificações. No iPhone, instale o WÓD\'IO pela opção "Adicionar à Tela de Início".</p>'; return; }
   const sub=await pushAssinatura(); let noBanco=false; if(sub){ try{ const r=await sb.from('push_subs').select('endpoint').eq('endpoint',sub.endpoint).limit(1); noBanco=!!(r.data&&r.data.length); }catch(_){} } const on=!!sub&&noBanco&&Notification.permission==='granted';
   el.innerHTML=`<div id="pushDiag" class="note diag"></div><label class="switch"><input type="checkbox" id="pushToggle" ${on?'checked':''}><span class="sl"></span><span>Chamado das 5h <span class="m">· uma cutucada motivacional todo dia de manhã</span></span></label>${on?'<button class="accitem" id="btnPushTeste">Enviar uma de teste agora</button>':''}`; }
 
