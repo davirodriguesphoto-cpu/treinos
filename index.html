@@ -2383,18 +2383,20 @@ const VAPID='BCLt9FoSf4E8u9JYdS2lcrLemLbG4WGrd9hcdD8Af9ThkjRRq_bE0DFeDFvYZJruwAA
 function pushSuportado(){ return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && location.protocol==='https:'; }
 function b64u(s){ const pad='='.repeat((4-s.length%4)%4); const b=atob((s+pad).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from([...b].map(c=>c.charCodeAt(0))); }
 async function pushAssinatura(){ if(!pushSuportado()) return null; const reg=await navigator.serviceWorker.ready; return reg.pushManager.getSubscription(); }
+async function inscreverPush(){ const reg=await navigator.serviceWorker.ready; let sub=await reg.pushManager.getSubscription();
+  const chave=b64u(VAPID);
+  if(sub){ try{ const k=sub.options&&sub.options.applicationServerKey; if(k){ const a=new Uint8Array(k); if(a.length!==chave.length||a.some((v,i)=>v!==chave[i])){ await sub.unsubscribe(); sub=null; } } }catch(_){} }
+  if(!sub){ let erro=null; for(let t=0;t<3&&!sub;t++){ try{ sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:chave}); }catch(e){ erro=e; if(e&&e.name==='InvalidStateError'){ const old=await reg.pushManager.getSubscription(); if(old) await old.unsubscribe(); } await new Promise(r=>setTimeout(r,1200)); } } if(!sub) throw erro||new Error('sem inscrição'); }
+  const j=sub.toJSON(); const r=await sb.from('push_subs').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth}); if(r.error) throw new Error('banco: '+r.error.message); return sub; }
 async function ativarPush(){ if(!pushSuportado()){ toast('Este celular/navegador não aceita notificações. No iPhone, instale o app na Tela de Início.'); return false; }
-  const perm=await Notification.requestPermission(); if(perm!=='granted'){ toast('Notificações bloqueadas. Dá pra liberar nas configurações do app no celular.'); return false; }
-  const reg=await navigator.serviceWorker.ready; let sub=await reg.pushManager.getSubscription(); if(!sub){ try{ sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)}); }catch(e){ await new Promise(r=>setTimeout(r,1500)); sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)}); } }
-  const j=sub.toJSON(); const r=await sb.from('push_subs').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth}); if(r.error){ console.error(r.error); toast('Não deu para ativar agora.'); return false; }
-  try{ localStorage.setItem(ukey('wodio:pushOff'),''); localStorage.removeItem(ukey('wodio:pushNunca')); }catch(e){} toast('Chamado das 5h ativado! 💪'); return true; }
+  try{ const perm=await Notification.requestPermission(); if(perm!=='granted'){ toast('Notificações bloqueadas. Libere nas configurações do app no celular.'); return false; }
+    await inscreverPush(); try{ localStorage.setItem(ukey('wodio:pushOff'),''); localStorage.removeItem(ukey('wodio:pushNunca')); }catch(e){} toast('Chamado das 5h ativado! 💪'); return true; }
+  catch(e){ console.error(e); toast('Não deu para ativar: '+((e&&(e.name+' '+e.message))||e)); return false; } }
 async function desativarPush(){ try{ const sub=await pushAssinatura(); if(sub){ await sb.from('push_subs').delete().eq('endpoint',sub.endpoint); await sub.unsubscribe(); } localStorage.setItem(ukey('wodio:pushOff'),'1'); toast('Chamado das 5h desativado.'); }catch(e){ toast('Não deu para desativar agora.'); } }
 async function renderNotif(){ const el=$('#notifBox'); if(!el) return; if(!pushSuportado()){ el.innerHTML='<p class="note">Este celular ou navegador não recebe notificações. No iPhone, instale o WÓD\'IO pela opção "Adicionar à Tela de Início".</p>'; return; }
-  const sub=await pushAssinatura(); const on=!!sub&&Notification.permission==='granted';
+  const sub=await pushAssinatura(); let noBanco=false; if(sub){ try{ const r=await sb.from('push_subs').select('endpoint').eq('endpoint',sub.endpoint).limit(1); noBanco=!!(r.data&&r.data.length); }catch(_){} } const on=!!sub&&noBanco&&Notification.permission==='granted';
   el.innerHTML=`<label class="switch"><input type="checkbox" id="pushToggle" ${on?'checked':''}><span class="sl"></span><span>Chamado das 5h <span class="m">· uma cutucada motivacional todo dia de manhã</span></span></label>${on?'<button class="accitem" id="btnPushTeste">Enviar uma de teste agora</button>':''}`; }
-async function autoPush(){ try{ if(!pushSuportado()||Notification.permission!=='granted'||localStorage.getItem(ukey('wodio:pushOff'))==='1') return; const reg=await navigator.serviceWorker.ready; let sub=await reg.pushManager.getSubscription();
-    if(!sub){ try{ sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)}); }catch(e){ await new Promise(r=>setTimeout(r,1500)); sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)}); } }
-    const j=sub.toJSON(); await sb.from('push_subs').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth}); }catch(e){ console.error('autoPush',e); } }
+async function autoPush(){ try{ if(!pushSuportado()||Notification.permission!=='granted'||localStorage.getItem(ukey('wodio:pushOff'))==='1') return; await inscreverPush(); }catch(e){ console.error('autoPush',e); } }
 async function convitePush(){ if(!pushSuportado()||Notification.permission!=='default') return; try{ const off=localStorage.getItem(ukey('wodio:pushOff')); const ult=+localStorage.getItem(ukey('wodio:pushConvite'))||0; if(off==='1'||localStorage.getItem(ukey('wodio:pushNunca'))==='1'||Date.now()-ult<864e5) return; if(await pushAssinatura()) return; }catch(e){ return; }
   if(document.querySelector('dialog[open]')) return; $('#dlgPush').showModal(); }
 document.addEventListener('click',async e=>{ const t=e.target.closest('button'); if(!t) return;
@@ -2402,7 +2404,7 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
   if(t.id==='btnPushNao'){ $('#dlgPush').close(); try{ localStorage.setItem(ukey('wodio:pushConvite'),String(Date.now())); }catch(_){} toast('Tudo bem, pergunto de novo amanhã.'); }
   if(t.id==='btnPushNunca'){ $('#dlgPush').close(); try{ localStorage.setItem(ukey('wodio:pushNunca'),'1'); }catch(_){} toast('Combinado, não pergunto mais. Dá pra ativar em Conta → Notificações.'); }
   if(t.id==='btnPushTeste'){ t.disabled=true; try{ const r=await sb.functions.invoke('push',{body:{action:'teste'}}); toast(r.error?'Não deu para enviar o teste.':'Enviado! Deve chegar em instantes.'); }catch(_){ toast('Não deu para enviar o teste.'); } t.disabled=false; } });
-document.addEventListener('change',async e=>{ if(e.target.id!=='pushToggle') return; const t=e.target; t.disabled=true; if(t.checked){ const ok=await ativarPush(); if(!ok) t.checked=false; } else await desativarPush(); t.disabled=false; renderNotif(); });
+document.addEventListener('change',async e=>{ if(e.target.id!=='pushToggle') return; const t=e.target; t.disabled=true; try{ if(t.checked){ const ok=await ativarPush(); if(!ok) t.checked=false; } else await desativarPush(); }finally{ t.disabled=false; renderNotif(); } });
 // ---------- arrastar para trocar de aba
 (function(){ const ORD=['resumo','exercicios','corpo','sessoes']; let x0=null,y0=null,t0=0,ok=false;
   const bloqueia=el=>!!(el.closest('.chartscroll,.tipogrid,.tablewrap,.chips,canvas,input,select,textarea,.bodies,dialog')||document.querySelector('dialog[open]'));
