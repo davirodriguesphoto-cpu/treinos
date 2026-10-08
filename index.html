@@ -442,6 +442,18 @@ tr.cont td{border-top-color:transparent}
 .durpick span{color:var(--muted);font-size:14px}
 .durpick.dist{grid-template-columns:1fr auto 1.3fr;align-items:center;max-width:320px}
 .durpick .virg{font-size:28px;color:var(--muted);font-weight:700}
+.painel.treino .tfoot{position:sticky;bottom:0;display:grid;gap:8px;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+.painel.treino .trow{display:grid;grid-template-columns:auto 1fr;gap:8px}
+.painel.treino .tfoot:empty{display:none}
+.painel.treino .tfoot:has(.trow > :only-child) .trow{grid-template-columns:1fr}
+.painel.treino .fin{background:var(--z2);color:#06221F;border-color:var(--z2);font-family:"Barlow Condensed",sans-serif;font-size:20px;font-weight:700;letter-spacing:.04em;padding:14px}
+.painel.treino .excluir{color:var(--bad);font-size:14px}
+.andamento.rasc{border-color:var(--z4)}
+.rbtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.durpick input{flex:1;border:0;background:transparent;color:var(--text);font-size:24px;font-family:"Barlow Condensed",sans-serif;font-weight:600;padding:8px 0;min-width:0;width:100%;text-align:center}
+.durpick input::placeholder{color:var(--muted);opacity:.6}
+.durpick.two{grid-template-columns:1fr 1fr;max-width:280px}
+.durpick.one{grid-template-columns:1fr;max-width:200px}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -514,7 +526,7 @@ tr.cont td{border-top-color:transparent}
     <p class="zion">Feito com 🧡 pro Zion</p>
   </div>
 </dialog>
-<input type="file" id="fileImport" accept="application/json,.json,text/plain,.txt" hidden>
+<input type="file" id="fileImport" accept=".pdf,application/pdf,.txt,text/plain,.json,application/json" hidden><input type="file" id="fotoImport" accept="image/*" hidden>
 <dialog id="dlgEdit" aria-labelledby="edT">
   <div class="mh"><h3 id="edT">Editar sessão</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb"><div id="edForm"></div><datalist id="exNames"></datalist>
@@ -539,18 +551,19 @@ tr.cont td{border-top-color:transparent}
     <p class="note" style="margin-top:10px">Os dados do relógio (print) entram dentro do treino, no final.</p>
   </div>
 </dialog>
-<dialog id="dlgHib" aria-labelledby="hibT">
-  <div class="mh"><h3 id="hibT">Crossfit &amp; Hyrox</h3><button class="btn ghost" data-close>Fechar</button></div>
-  <div class="mb"><div id="hibBody"></div>
-    <div class="actions"><button class="btn danger small" data-hdel="1">Excluir</button><button class="btn" data-hsave="0">Salvar e continuar depois</button><button class="btn primary" data-hsave="1">Finalizar treino</button></div></div>
+<dialog id="dlgHib" class="painel treino" aria-labelledby="hibT">
+  <div class="mh"><button class="btn ghost voltar" data-tcancel="h" aria-label="Voltar">‹</button><h3 id="hibT">Crossfit &amp; Hyrox</h3><button class="linkbtn excluir" data-hdel="1">Excluir</button></div>
+  <div class="mb"><div id="hibBody"></div></div>
+  <div class="tfoot"><div class="trow"><button class="btn ghost" data-tcancel="h">Cancelar</button><button class="btn" data-hsave="0">Salvar e continuar depois</button></div><button class="btn fin" data-hsave="1">FINALIZAR TREINO</button></div>
 </dialog>
 <dialog id="dlgPick" aria-labelledby="pkT">
   <div class="mh"><h3 id="pkT">Exercício</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb"><div id="pkBody"></div></div>
 </dialog>
-<dialog id="dlgMus" aria-labelledby="musTitle">
-  <div class="mh"><h3 id="musTitle">Musculação</h3><button class="btn ghost" data-close>Fechar</button></div>
-  <div class="mb"><div id="musBody"></div><div class="actions" id="musActions"></div></div>
+<dialog id="dlgMus" class="painel treino" aria-labelledby="musTitle">
+  <div class="mh"><button class="btn ghost voltar" data-tcancel="m" aria-label="Voltar">‹</button><h3 id="musTitle">Musculação</h3><span></span></div>
+  <div class="mb"><div id="musBody"></div></div>
+  <div class="tfoot" id="musActions"></div>
 </dialog>
 <dialog id="dlgTermos" class="painel" aria-labelledby="tmT">
   <div class="mh"><h3 id="tmT">Termos de uso e privacidade</h3><button class="btn ghost" data-close>Fechar</button></div>
@@ -584,18 +597,17 @@ tr.cont td{border-top-color:transparent}
   </div>
 </dialog>
 <dialog id="dlgWhatsHelp" aria-labelledby="whT">
-  <div class="mh"><h3 id="whT">Importar do WhatsApp</h3><button class="btn ghost" data-close>Fechar</button></div>
+  <div class="mh"><h3 id="whT">Importar treino</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb help">
-    <p class="note" style="margin-top:0">Se você anota seus treinos numa conversa ou grupo do WhatsApp, dá pra trazer tudo de uma vez:</p>
+    <p class="note" style="margin-top:0">Escolha o que você tem:</p>
     <ol class="passos">
-      <li>Abra a <b>conversa</b> onde estão os treinos.</li>
-      <li>Toque nos <b>três pontinhos</b> → <b>Mais</b> → <b>Exportar conversa</b> (no iPhone: toque no nome da conversa → <b>Exportar conversa</b>).</li>
-      <li>Escolha <b>Sem mídia</b> e salve o arquivo no celular (ou mande pra você mesmo e baixe).</li>
-      <li>Se vier um <b>.zip</b>, abra e pegue o arquivo <b>.txt</b> que está dentro.</li>
-      <li>Toque em <b>Escolher arquivo</b> abaixo e selecione o .txt. O app lê cada mensagem e mostra quantos treinos encontrou antes de importar.</li>
+      <li><b>Treino do personal em PDF</b> (ou texto .txt): vira os seus Treinos A, B, C… prontos pra preencher.</li>
+      <li><b>Foto do treino</b>: tire ou escolha a foto da folha de treino. O app lê o texto da imagem.</li>
+      <li><b>Conversa do WhatsApp</b> onde você anota os treinos: abra a conversa → três pontinhos → Mais → <b>Exportar conversa</b> → Sem mídia. Se vier .zip, use o .txt de dentro.</li>
+      <li><b>Backup do WÓD'IO</b> (.json), de Conta → Baixar backup.</li>
     </ol>
-    <p class="note">Também aceita o <b>backup do WÓD'IO</b> (.json), aquele de Conta → Baixar backup.</p>
-    <div class="actions"><button class="btn ghost" data-close>Agora não</button><button class="btn primary" id="btnWhatsGo">Escolher arquivo</button></div>
+    <p class="note">Tudo é lido aqui no celular. Os arquivos não ficam salvos.</p>
+    <div class="actions"><button class="btn ghost" data-close>Agora não</button><button class="btn" id="btnFotoGo">Usar foto</button><button class="btn primary" id="btnWhatsGo">Escolher arquivo</button></div>
   </div>
 </dialog>
 <dialog id="dlgBkLembrete" aria-labelledby="bklT">
@@ -607,9 +619,10 @@ tr.cont td{border-top-color:transparent}
   <div class="mh"><h3 id="psT">Treino do personal</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb"><div id="persBody"></div><div class="actions" id="persActs"></div></div>
 </dialog>
-<dialog id="dlgOutro" aria-labelledby="otT">
-  <div class="mh"><h3 id="otT">Outros treinos</h3><button class="btn ghost" data-close>Fechar</button></div>
-  <div class="mb"><div id="outroBody"></div><div class="actions"><button class="btn ghost" data-close>Cancelar</button><button class="btn primary" id="btnOutroSalvar">Salvar</button></div></div>
+<dialog id="dlgOutro" class="painel treino" aria-labelledby="otT">
+  <div class="mh"><button class="btn ghost voltar" data-tcancel="o" aria-label="Voltar">‹</button><h3 id="otT">Outros treinos</h3><span></span></div>
+  <div class="mb"><div id="outroBody"></div></div>
+  <div class="tfoot"><div class="trow"><button class="btn ghost" data-tcancel="o">Cancelar</button></div><button class="btn fin" id="btnOutroSalvar">FINALIZAR TREINO</button></div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
 <script>
@@ -996,6 +1009,7 @@ function vResumo(){
   return `
   ${state.profile&&state.profile.nome?`<p class="hello">Bom treino, ${esc(state.profile.nome)}.</p>`:''}
   ${acessoVencido()?`<div class="vencido"><b>Seu acesso venceu em ${fmtD(state.acesso.ativo_ate)}.</b><br><span class="m">Você ainda vê seu histórico, mas para registrar treinos é preciso renovar a mensalidade. Fale com o Davi.</span></div>`:state.acesso&&!state.acesso.admin&&state.acesso.ativo_ate&&state.acesso.ativo_ate<=(()=>{const d=new Date(); d.setDate(d.getDate()+3); return d.toISOString().slice(0,10);})()?`<div class="vencido aviso"><span class="m">Seu acesso vence em ${fmtD(state.acesso.ativo_ate)}.</span></div>`:''}
+  ${(()=>{ const r=rascunhoPendente(); return r?`<div class="andamento rasc"><div><span class="pill">não salvo</span> <b>${r.tipo==='h'?'Crossfit & Hyrox':'Musculação · '+esc(r.d.nome||'')}</b><br><span class="m">Você começou a anotar e saiu sem salvar.</span></div><div class="rbtns"><button class="btn ghost small" data-rascunho="descartar">Descartar</button><button class="btn primary small" data-rascunho="abrir">Continuar</button></div></div>`:''; })()}
   ${allSessions().filter(s=>s.status==='andamento').map(s=>`<div class="andamento"><div><span class="pill">em andamento</span> <b>${esc(s.focoExtra?s.foco+' · '+s.focoExtra:(s.foco||'Treino'))}</b><br><span class="m">${fmtD(s.date)}${s.time?' · '+s.time:''} · ${(s.blocks||[]).reduce((a,b)=>a+b.items.length,0)} exercícios</span></div><button class="btn primary small" data-continuar="${esc(s.id)}">Continuar</button></div>`).join('')}
   <section class="hero2">
     <div class="herohead"><div class="big">${tr.length}<small>treinos</small></div>${semanaHTML()}
@@ -1848,6 +1862,7 @@ document.addEventListener('click',async e=>{
   if(t.id==='btnBora'){ openAdd(); }
   if(t.id==='btnImportHist'){ $('#dlgWhatsHelp').showModal(); }
   if(t.id==='btnWhatsGo'){ $('#dlgWhatsHelp').close(); $('#fileImport').click(); }
+  if(t.id==='btnFotoGo'){ $('#dlgWhatsHelp').close(); $('#fotoImport').click(); }
   if(t.id==='btnTermos'){ $('#dlgTermos').showModal(); }
   if(t.id==='btnPerfilEdit'){ openPerfil(); }
   if(t.id==='btnPerfilSave'){ t.disabled=true; await salvarPerfil(); t.disabled=false; }
@@ -1861,6 +1876,7 @@ document.addEventListener('click',async e=>{
 });
 document.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.ativo) setAtivo(e.target.dataset.ativo,e.target.value); });
 document.getElementById('fileImport').addEventListener('change',e=>{ const f=e.target.files[0]; e.target.value=''; if(f) importarQualquer(f); });
+document.getElementById('fotoImport').addEventListener('change',e=>{ const f=e.target.files[0]; e.target.value=''; if(f) importarQualquer(f); });
 
 // ---------- tema
 const SOL='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>';
@@ -1887,6 +1903,11 @@ function buscaExercicios(q,nomes,lim){ const qn=nrm(q); if(!qn) return nomes.sli
 function nomesConhecidos(){ const s=new Set(Object.keys(exerciseIndex())); for(const n of (state.catalogo&&state.catalogo.nomes)||[]) if(n) s.add(n); for(const m of state.modelos||[]) for(const n of m.exercicios||[]) s.add(n); s.delete('Corrida Livre'); return [...s].sort((a,b)=>a.localeCompare(b,'pt',{sensitivity:'base'})); }
 function idLivre(base){ const taken=new Set(allSessions().map(x=>x.id)); let id=base,n=1; while(taken.has(id)){ n++; id=base+'-'+n; } return id; }
 const DRAFTKEY=()=>'wodio:rascunho:'+(user?user.id:'');
+function guardaRascunhoMus(){ try{ if(state.mus) localStorage.setItem(DRAFTKEY()+':mus',JSON.stringify(state.mus)); }catch(e){} }
+function limpaRascunhoMus(){ try{ localStorage.removeItem(DRAFTKEY()+':mus'); }catch(e){} }
+function rascunhoPendente(){ try{ const h=JSON.parse(localStorage.getItem(DRAFTKEY())||'null'); const m=JSON.parse(localStorage.getItem(DRAFTKEY()+':mus')||'null');
+  if(h&&(h.blocks||[]).some(b=>b.items&&b.items.length)) return {tipo:'h',d:h}; if(m&&(m.ex||[]).some(e=>e.series.some(s=>s.kg||s.reps||s.tempo))) return {tipo:'m',d:m}; }catch(e){} return null; }
+function temConteudo(pre){ if(pre==='h') return state.draft&&state.draft.blocks.some(b=>b.items.length); if(pre==='m') return state.mus&&state.mus.ex.some(e=>e.pulado||e.series.some(s=>s.kg||s.reps||s.tempo)); if(pre==='o') return state.outro&&(state.outro.durSec||state.outro.distKm||state.outro.band); return false; }
 function guardaRascunho(){ try{ if(state.draft) localStorage.setItem(DRAFTKEY(),JSON.stringify(state.draft)); }catch(e){} }
 function limpaRascunho(){ try{ localStorage.removeItem(DRAFTKEY()); }catch(e){} }
 
@@ -1907,7 +1928,7 @@ function abrirHibrido(s){ state.draft=JSON.parse(JSON.stringify(s)); state.draft
   const ord=n=>{ const k=['WARM UP','SKILL','WOD'].indexOf(n.replace(/\s+[IVX]+$/,'')); return k<0?9:k; }; state.draft.blocks.sort((a,b)=>ord(a.name)-ord(b.name));
   renderHib(); $('#dlgHib').showModal(); }
 function resumoItem(i){ const p=[]; if(i.sets) p.push(i.sets+'×'); if(i.reps!=null) p.push(i.reps+(i.perSide?'/lado':'')); if(i.timeSec) p.push(i.timeSec+'"'); if(i.distM) p.push(i.distM+' m'); if(i.loadKg) p.push(fmtNum(i.loadKg)+' kg'); if(i.modo&&i.modo!=='padrao') p.push(i.modo); return p.join(' · ')||'toque para preencher'; }
-function compoeResultado(b){ const f=b.formato; if(!f||!f.tipo) return b.resultLivre||null; const n=FORMATOS.find(x=>x[0]===f.tipo)[1]; const p=[n];
+function compoeResultado(b){ const f=b.formato; const rd=b.rounds?b.rounds+' rounds':null; if(!f||!f.tipo) return rd||b.resultLivre||null; const n=FORMATOS.find(x=>x[0]===f.tipo)[1]; const p=[n];
   if(f.tipo==='amrap'){ if(f.tempo) p.push(f.tempo+"'"); if(f.rounds||f.reps) p.push(`${f.rounds||0} rounds${f.reps?' + '+f.reps+' reps':''}`); }
   if(f.tipo==='emom'){ if(f.tempo) p.push(f.tempo+"'"); if(f.modo==='maximo') p.push('máximo no minuto'); if(f.reps) p.push(f.reps+' reps'); }
   if(f.tipo==='e2mom'){ if(f.tempo) p.push(f.tempo+"'"); if(f.reps) p.push(f.reps+' reps'); }
@@ -1915,7 +1936,7 @@ function compoeResultado(b){ const f=b.formato; if(!f||!f.tipo) return b.resultL
   if(f.tipo==='fortime'){ if(f.rounds) p.push(f.rounds+' rounds'); if(f.cap) p.push('cap '+f.cap+"'"); if(f.resultado) p.push(f.resultado); }
   if(f.tipo==='chipper'&&f.resultado) p.push(f.resultado);
   if(f.tipo==='tabata'&&f.reps) p.push(f.reps+' reps');
-  return p.join(' · '); }
+  if(rd&&f.tipo!=='amrap') p.splice(1,0,rd); return p.join(' · '); }
 function renderHib(){ const d=state.draft; const tipos=tiposTreino().map(t=>t.label);
   if(!d.cats) d.cats=(d.focos&&d.focos.length?d.focos:[d.foco||'']).map(f=>({sel:f&&tipos.includes(f)?f:'__outros',livre:f&&!tipos.includes(f)?f:''}));
   const fx=(bi,k,lab,v,ph)=>`<label>${lab}<input data-hf="${bi}.${k}" value="${esc(v==null?'':v)}" placeholder="${ph||''}" inputmode="${k==='resultado'?'text':'numeric'}"></label>`;
@@ -1926,12 +1947,12 @@ function renderHib(){ const d=state.draft; const tipos=tiposTreino().map(t=>t.la
   d.blocks.forEach((b,bi)=>{ const f=b.formato||{};
     h+=`<div class="hblock" data-bi="${bi}"><div class="hbh"><b>${esc(b.name)}</b><span class="hbh-r">${b.extra?`<button class="linkbtn" data-hbrm="${bi}" aria-label="Remover bloco">remover bloco</button>`:`<label class="chk"><input type="checkbox" data-hn="${bi}" ${b.nenhum?'checked':''}> Nenhum</label>`}</span></div>`;
     if(!b.nenhum){
-      h+=`<div class="hfmt"><label>Formato do bloco<select data-hf="${bi}.tipo">${FORMATOS.map(([k,l])=>`<option value="${k}" ${f.tipo===k||(!f.tipo&&!k)?'selected':''}>${l}</option>`).join('')}</select></label>
-        ${f.tipo==='amrap'?fx(bi,'tempo','Tempo (min)',f.tempo)+fx(bi,'rounds','Rounds',f.rounds)+fx(bi,'reps','Reps extras',f.reps):''}
+      h+=`<div class="hfmt"><label>Rounds<input data-hrounds="${bi}" inputmode="numeric" value="${esc(b.rounds||'')}" placeholder="—"></label><label>Formato do bloco<select data-hf="${bi}.tipo">${FORMATOS.map(([k,l])=>`<option value="${k}" ${f.tipo===k||(!f.tipo&&!k)?'selected':''}>${l}</option>`).join('')}</select></label>
+        ${f.tipo==='amrap'?fx(bi,'tempo','Tempo (min)',f.tempo)+fx(bi,'rounds','Rounds feitos',f.rounds)+fx(bi,'reps','Reps extras',f.reps):''}
         ${f.tipo==='emom'?fx(bi,'tempo','Duração (min)',f.tempo)+`<label>Tipo<select data-hf="${bi}.modo"><option value="tarefa" ${f.modo!=='maximo'?'selected':''}>Tarefa a cada minuto</option><option value="maximo" ${f.modo==='maximo'?'selected':''}>Máximo em 1 minuto</option></select></label>`+fx(bi,'reps','Total de reps',f.reps):''}
         ${f.tipo==='e2mom'?fx(bi,'tempo','Duração (min)',f.tempo)+fx(bi,'reps','Total de reps',f.reps):''}
-        ${f.tipo==='intervalo'?fx(bi,'on','On (seg)',f.on??40)+fx(bi,'off','Off (seg)',f.off??20)+fx(bi,'rounds','Rounds',f.rounds)+fx(bi,'reps','Total de reps',f.reps):''}
-        ${f.tipo==='fortime'?fx(bi,'rounds','Rounds',f.rounds)+fx(bi,'cap','Time cap (min)',f.cap)+fx(bi,'resultado','Tempo final',f.resultado,'12:30'):''}
+        ${f.tipo==='intervalo'?fx(bi,'on','On (seg)',f.on??40)+fx(bi,'off','Off (seg)',f.off??20)+fx(bi,'reps','Total de reps',f.reps):''}
+        ${f.tipo==='fortime'?fx(bi,'cap','Time cap (min)',f.cap)+fx(bi,'resultado','Tempo final',f.resultado,'12:30'):''}
         ${f.tipo==='chipper'?fx(bi,'resultado','Tempo final',f.resultado,'18:45'):''}
         ${f.tipo==='tabata'?fx(bi,'reps','Total de reps',f.reps):''}</div>${f.tipo?`<p class="note fdesc">${FORM_DESC[f.tipo]} Vale para todos os exercícios deste bloco.</p>`:''}
       <div class="hitems" data-drop="${bi}">${b.items.map((it,ii)=>`<div class="hitem" data-bi="${bi}" data-ii="${ii}"><button class="hi-main" data-hedit="${bi}.${ii}"><span class="t">${esc(it.name)}</span><span class="m">${esc(resumoItem(it))}</span></button><span class="grip" data-grip="${bi}.${ii}" aria-label="Segure e arraste para outro bloco">≡</span></div>`).join('')||'<p class="note empty-b">Nenhum exercício ainda.</p>'}</div>
@@ -1978,7 +1999,9 @@ function renderPicker(){ const P=state.pick; const el=$('#pkBody');
   const i=P.item; const modo=i.modo||'padrao'; const mais=P.mais||i.timeSec||i.distM||i.sets;
   const inp=(k,l,v)=>`<label>${l}<input data-pk="${k}" inputmode="decimal" value="${esc(v==null?'':v)}"></label>`;
   el.innerHTML=`<div class="pk-name"><b>${esc(i.name)}</b><button class="linkbtn" data-pktroca="1">trocar</button></div>
-    <div class="form">${inp('loadKg','Carga (kg)',i.loadKg)}${inp('reps','Repetições',i.reps)}${mais?inp('sets','Séries',i.sets)+inp('timeSec','Tempo (s)',i.timeSec)+inp('distM','Distância (m)',i.distM):''}</div>
+    <div class="form">${inp('loadKg','Carga (kg)',i.loadKg)}${inp('reps','Repetições',i.reps)}${mais?inp('sets','Séries',i.sets):''}</div>
+    ${mais?`<div class="dtl" style="margin:8px 0 4px">Tempo</div><div class="durpick two"><label><input data-pkt="m" inputmode="numeric" value="${i.timeSec?Math.floor(i.timeSec/60):''}" placeholder="0"><span>min</span></label><label><input data-pkt="s" inputmode="numeric" maxlength="2" value="${i.timeSec?String(i.timeSec%60).padStart(2,'0'):''}" placeholder="00"><span>s</span></label></div>
+      <div class="dtl" style="margin:8px 0 4px">Distância</div><div class="durpick one"><label><input data-pk="distM" inputmode="numeric" value="${esc(i.distM??'')}" placeholder="0"><span>metros</span></label></div>`:''}
     ${mais?'':'<button class="linkbtn" data-pkmais="1">+ séries, tempo ou distância</button>'}
     <div class="seg" role="group" aria-label="Modo">${[['padrao','Padrão'],['unilateral','Unilateral'],['alternado','Alternado']].map(([k,l])=>`<button class="segb" data-pkmodo="${k}" aria-pressed="${modo===k}">${l}</button>`).join('')}</div>
     <label class="pk-note">Observação<input data-pk="note" value="${esc(i.note&&!['unilateral','alternado'].includes(i.note)?i.note:'')}"></label>
@@ -2037,7 +2060,7 @@ function renderMus(){ const M=state.mus; $('#musTitle').textContent='Musculaçã
     <button class="linkbtn" data-musadd="${ei}">+ série</button>`}</div>`).join('')}
   <button class="btn ghost small" data-musex="1">+ exercício</button>
   ${relogioCard('m',M.band,M.watchEdit)}`;
-  $('#musActions').innerHTML=`<button class="btn" data-mussave="0">Salvar e continuar depois</button><button class="btn primary" data-mussave="1">Finalizar treino</button>`; }
+  $('#musActions').innerHTML=`<div class="trow"><button class="btn ghost" data-tcancel="m">Cancelar</button><button class="btn" data-mussave="0">Salvar e continuar depois</button></div><button class="btn fin" data-mussave="1">FINALIZAR TREINO</button>`; guardaRascunhoMus(); }
 function tempoSeg(v){ v=String(v||'').trim(); if(!v) return null; if(v.includes(':')){ const [a,b]=v.split(':').map(Number); return isNaN(a)||isNaN(b)?null:a*60+b; } const n=parseFloat(v.replace(',','.')); return isNaN(n)?null:Math.round(n); }
 async function salvarMus(final){ const M=state.mus; const items=[], pulados=[], vazios=[];
   for(const e of M.ex){ if(e.pulado){ pulados.push(e.name); continue; }
@@ -2055,10 +2078,16 @@ async function salvarMus(final){ const M=state.mus; const items=[], pulados=[], 
   const ops=[{t:'sessions',k:'upsert',rows:[{id:d.id,date:d.date,kind:'treino',data:d}]}]; if(M.orig&&M.orig!==d.id) ops.push({t:'sessions',k:'delete',id:M.orig});
   const nomes=M.ex.map(e=>e.name); if(final&&M.base&&nomes.join('|')!==M.base.join('|')&&confirm('Atualizar o '+M.nome+' com esses exercícios para as próximas vezes?')){
     const mods=(state.modelos||[]).map(m=>m.id===M.id?{...m,exercicios:nomes}:m); ops.push({t:'settings',row:{modelos:mods}}); state.modelos=mods; }
-  try{ const mode=await write(ops); M.orig=d.id; if(final){ $('#dlgMus').close(); state.mus=null; } render(); toast(mode==='offline'?OFFMSG:final?'Treino finalizado.':'Salvo. Continue quando quiser.'); }catch(e){ console.error(e); toast('Não foi possível salvar agora.'); } }
+  try{ const mode=await write(ops); M.orig=d.id; limpaRascunhoMus(); if(final){ $('#dlgMus').close(); state.mus=null; } render(); toast(mode==='offline'?OFFMSG:final?'Treino finalizado.':'Salvo. Continue quando quiser.'); }catch(e){ console.error(e); toast('Não foi possível salvar agora.'); } }
 // ---- campos de data e hora grandes
 function dtCampos(pre,date,time){ return `<div class="dtbig"><label><span>Data</span><input type="date" data-${pre}="date" value="${date}" max="${todayISO()}"></label><label><span>Horário</span><input type="time" data-${pre}="time" value="${time||'07:00'}"></label></div>`; }
 function aplicaDT(obj,campo,valor){ if(campo==='date'){ obj.date=valor>todayISO()?todayISO():valor; } else obj.time=valor; const v=obj.date+'T'+(obj.time||'00:00'); if(v>nowLocal()){ obj.date=todayISO(); obj.time=nowLocal().slice(11,16); toast('Não dá para registrar no futuro.'); return true; } return false; }
+// ---- cancelar / recuperar rascunho
+document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t) return;
+  if(t.dataset.tcancel){ const pre=t.dataset.tcancel; if(temConteudo(pre)&&!confirm('Sair sem salvar? O que você anotou neste treino será descartado.')) return;
+    if(pre==='h'){ $('#dlgHib').close(); state.draft=null; limpaRascunho(); } if(pre==='m'){ $('#dlgMus').close(); state.mus=null; limpaRascunhoMus(); } if(pre==='o'){ $('#dlgOutro').close(); state.outro=null; } }
+  if(t.dataset.rascunho){ const r=rascunhoPendente(); if(!r) return; if(t.dataset.rascunho==='descartar'){ if(confirm('Descartar o treino não salvo?')){ limpaRascunho(); limpaRascunhoMus(); render(); } return; }
+    if(r.tipo==='h'){ state.draft=r.d; state.hibWatchEdit=false; renderHib(); $('#dlgHib').showModal(); } else { state.mus=r.d; renderMus(); $('#dlgMus').showModal(); } } });
 // ---- Strava dentro do treino
 function relAlvo(pre){ return pre==='h'?state.draft:pre==='m'?state.mus:state.outro; }
 function relRender(pre){ if(pre==='h') renderHib(); else if(pre==='m') renderMus(); else renderOutro(); }
@@ -2134,8 +2163,9 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
 document.addEventListener('input',e=>{ const t=e.target;
   if(t.id==='pkCq'){ state.pick.complex.q=t.value; const pos=t.selectionStart; renderPicker(); const s=$('#pkCq'); if(s){ s.focus(); s.setSelectionRange(pos,pos);} return; }
   if(t.id==='pkSearch'){ state.pick.q=t.value; const pos=t.selectionStart; renderPicker(); const s=$('#pkSearch'); if(s){ s.focus(); s.setSelectionRange(pos,pos);} }
+  if(t.dataset.pkt&&state.pick&&state.pick.item){ const it=state.pick.item; const cur=it.timeSec||0; let m=Math.floor(cur/60), s=cur%60; const v=parseInt(t.value,10)||0; if(t.dataset.pkt==='m') m=v; else s=v; it.timeSec=m*60+s||null; }
   if(t.dataset.pk&&state.pick&&state.pick.item){ const k=t.dataset.pk; state.pick.item[k]=k==='note'?t.value:(t.value===''?null:parseFloat(t.value.replace(',','.'))); }
-  if(t.dataset.ms&&state.mus){ const [ei,si,k]=t.dataset.ms.split('.'); state.mus.ex[+ei].series[+si][k]=t.value; }
+  if(t.dataset.ms&&state.mus){ const [ei,si,k]=t.dataset.ms.split('.'); state.mus.ex[+ei].series[+si][k]=t.value; guardaRascunhoMus(); }
   if(t.dataset.nm&&state.novoModelo){ state.novoModelo[t.dataset.nm]=t.value; } });
 document.addEventListener('change',async e=>{ const t=e.target;
   if(t.dataset.hd&&state.draft){ const d=state.draft;
@@ -2145,6 +2175,7 @@ document.addEventListener('change',async e=>{ const t=e.target;
     guardaRascunho(); }
   if(t.dataset.hc!=null&&state.draft){ state.draft.cats[+t.dataset.hc].sel=t.value; renderHib(); }
   if(t.dataset.hcl!=null&&state.draft){ state.draft.cats[+t.dataset.hcl].livre=t.value; guardaRascunho(); }
+  if(t.dataset.hrounds!=null&&state.draft){ state.draft.blocks[+t.dataset.hrounds].rounds=parseInt(t.value,10)||null; guardaRascunho(); }
   if(t.dataset.hn!=null&&state.draft){ state.draft.blocks[+t.dataset.hn].nenhum=t.checked; renderHib(); }
   if(t.dataset.hf&&state.draft){ const [bi,k]=t.dataset.hf.split('.'); const b=state.draft.blocks[+bi]; b.formato=b.formato||{}; b.formato[k]=t.value; if(k==='tipo'){ if(t.value==='intervalo'){ if(b.formato.on==null) b.formato.on='40'; if(b.formato.off==null) b.formato.off='20'; } renderHib(); } else guardaRascunho(); }
   if(t.dataset.w!=null&&String(t.dataset.w).startsWith('h.')&&state.draft){ const k=t.dataset.w.slice(2); const b=state.draft.band=state.draft.band||{};
@@ -2231,7 +2262,16 @@ function stravaMerge(atvs){ const ops=[]; const sess=allSessions(); let novos=0,
     if(s){ s=JSON.parse(JSON.stringify(s)); const b=s.band=s.band||{date:a.data}; for(const [k,v] of [['durSec',a.elapsed],['kcal',a.kcal],['bpmAvg',a.bpmAvg],['bpmMax',a.bpmMax],['time',a.hora]]) if(v!=null&&b[k]==null) b[k]=v; if(!b.tipo) b.tipo='HIIT'; s.stravaIds=[...(s.stravaIds||[]),a.id]; ops.push({id:s.id,date:s.date,kind:'treino',data:s}); completos++; }
     else { const id=idLivre(a.data+'-t'); const n={id,date:a.data,kind:'treino',foco:null,blocks:[],soRelogio:true,source:'Strava',band:{date:a.data,time:a.hora,tipo:a.tipo||'Treino',durSec:a.elapsed,kcal:a.kcal,bpmAvg:a.bpmAvg,bpmMax:a.bpmMax,zones:null},stravaIds:[a.id]}; ops.push({id,date:a.data,kind:'treino',data:n}); sess.push(n); novos++; } }
   return {rows:ops,novos,completos}; }
-async function stravaSync(silencioso,historico){ if(!navigator.onLine) return; try{ if(historico) toast('Buscando seu histórico no Strava… pode levar um minutinho.'); const r=await stravaCall({action:'sync',historico:!!historico}); const m=stravaMerge(r.atividades||[]);
+async function stravaHistorico(){ if(!navigator.onLine){ toast('Sem internet agora.'); return; }
+  const todas=[]; let page=1;
+  try{ while(true){ toast('Buscando no Strava… '+todas.length+' atividades até agora'); const r=await stravaCall({action:'lista',after:0,page,fim:false}); todas.push(...(r.atividades||[])); if(!r.mais||page>=40) break; page++; }
+    if(!todas.length){ toast('Nenhuma atividade encontrada no Strava.'); return; }
+    const m=stravaMerge(todas); toast('Salvando '+m.rows.length+' sessões…');
+    for(let k=0;k<m.rows.length;k+=200){ const {error}=await sb.from('sessions').upsert(m.rows.slice(k,k+200)); if(error) throw error; }
+    try{ await stravaCall({action:'lista',after:Math.floor(Date.now()/1000)-86400*3,page:1,fim:true}); }catch(e){}
+    await loadAll(); toast(`Strava: ${m.novos} novo(s), ${m.completos} completado(s), de ${todas.length} atividades.`);
+  }catch(e){ toast(/limite/.test(e.message)?'O Strava pediu uma pausa. Tente de novo em 15 minutos: o que já veio fica salvo.':'Strava: '+e.message); if(todas.length){ const m=stravaMerge(todas); if(m.rows.length){ try{ for(let k=0;k<m.rows.length;k+=200) await sb.from('sessions').upsert(m.rows.slice(k,k+200)); await loadAll(); }catch(_){} } } } }
+async function stravaSync(silencioso,historico){ if(historico) return stravaHistorico(); if(!navigator.onLine) return; try{ if(historico) toast('Buscando seu histórico no Strava… pode levar um minutinho.'); const r=await stravaCall({action:'sync',historico:!!historico}); const m=stravaMerge(r.atividades||[]);
     if(m.rows.length){ await write([{t:'sessions',k:'upsert',rows:m.rows}]); }
     try{ localStorage.setItem(ukey('wodio:stravaAt'),String(Date.now())); }catch(e){}
     if(!silencioso||m.rows.length) toast(m.rows.length?`Strava: ${m.novos} novo(s), ${m.completos} completado(s).`:'Strava: nada novo.'); }
@@ -2251,7 +2291,7 @@ async function textoDoPdf(file){ await loadPdf(); const doc=await pdfjsLib.getDo
   return out; }
 async function textoDaFoto(file){ await loadTess(); const wk=await Tesseract.createWorker('por'); const r=await wk.recognize(file); await wk.terminate(); return r.data.text||''; }
 function openPersonal(){ state.pers=null; $('#persBody').innerHTML=`<p class="note" style="margin-top:0">Mande o treino que o seu personal passou: <b>PDF</b>, <b>foto</b> ou o <b>texto</b> colado. O app lê aqui no celular, monta os treinos (A, B, C…) sem as séries e os links, e o arquivo <b>não é salvo</b>.</p>
-  <div class="actions" style="justify-content:flex-start"><label class="btn primary" for="persFile">Escolher PDF ou foto</label><input type="file" id="persFile" accept="application/pdf,image/*,.txt,text/plain" hidden></div>
+  <div class="actions" style="justify-content:flex-start"><label class="btn primary" for="persFile">Escolher PDF ou arquivo</label><input type="file" id="persFile" accept=".pdf,application/pdf,.txt,text/plain" hidden><label class="btn" for="persFoto">Usar foto</label><input type="file" id="persFoto" accept="image/*" hidden></div>
   <label class="dtl" style="margin-top:12px">Ou cole o texto<textarea id="persTxt" rows="6" placeholder="Treino A&#10;Agachamento 3x12&#10;..."></textarea></label>
   <div class="actions"><button class="btn" id="btnPersLer">Ler texto</button></div><p class="note" id="persSt"></p>`; $('#persActs').innerHTML=''; $('#dlgPersonal').showModal(); }
 function persPrevia(texto){ const al=state.config.aliases||{}; const T=parseTreinoPersonal(texto);
@@ -2266,7 +2306,7 @@ async function salvarPersonal(){ let mods=[...(state.modelos||[])];
   for(const t of state.pers){ const nome='Treino '+t.letra; const exs=t.itens.map(i=>i.nome); if(!exs.length) continue; const k=mods.findIndex(m=>m.nome===nome);
     if(k>=0) mods[k]={...mods[k],foco:t.foco||mods[k].foco,exercicios:exs}; else { const ids=mods.map(m=>m.id); let id=t.letra; while(ids.includes(id)) id=id+'1'; mods.push({id,nome,foco:t.foco,exercicios:exs}); } }
   try{ const mode=await write([{t:'settings',row:{modelos:mods}}]); state.modelos=mods; $('#dlgPersonal').close(); state.pers=null; openMusPick(true); toast(mode==='offline'?OFFMSG:'Treinos salvos. É só escolher e preencher as cargas.'); }catch(e){ toast('Não foi possível salvar agora.'); } }
-document.addEventListener('change',async e=>{ if(e.target.id!=='persFile') return; const f=e.target.files[0]; e.target.value=''; if(!f) return; const st=$('#persSt'); st.textContent='Lendo o arquivo…';
+document.addEventListener('change',async e=>{ if(e.target.id!=='persFile'&&e.target.id!=='persFoto') return; const f=e.target.files[0]; e.target.value=''; if(!f) return; const st=$('#persSt'); st.textContent='Lendo o arquivo…';
   try{ let txt=''; if(/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name)) txt=await textoDoPdf(f); else if(/^image\//.test(f.type)){ st.textContent='Lendo a foto… (na primeira vez demora um pouco)'; txt=await textoDaFoto(f); } else txt=await f.text();
     persPrevia(txt); }catch(err){ console.error(err); st.textContent='Não consegui ler esse arquivo. Tente outro ou cole o texto.'; } });
 document.addEventListener('click',async e=>{ const t=e.target.closest('button'); if(!t) return;
@@ -2277,10 +2317,11 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
 
 // ---------- OUTROS TREINOS (corrida, bike, aerobic dance…)
 const OUTROS=[['corrida','Corrida','corrida'],['caminhada','Caminhada','corrida'],['bicicleta','Bicicleta','treino'],['aerobic','Aerobic Dance Exercise','treino'],['natacao','Natação','treino'],['eliptico','Elíptico','treino'],['esteira','Esteira','treino'],['outro','Outro','treino']];
-function durPicker(pre,sec){ sec=sec||0; const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=sec%60; const opt=(n,v)=>Array.from({length:n},(_,k)=>`<option value="${k}" ${k===v?'selected':''}>${String(k).padStart(2,'0')}</option>`).join('');
-  return `<div class="durpick" role="group" aria-label="Duração"><label><select data-${pre}="h">${opt(24,h)}</select><span>h</span></label><label><select data-${pre}="m">${opt(60,m)}</select><span>min</span></label><label><select data-${pre}="s">${opt(60,s)}</select><span>s</span></label></div>`; }
-function distPicker(pre,km){ km=km||0; const i=Math.floor(km), c=Math.round((km-i)*100); const opt=(n,v,pad)=>Array.from({length:n},(_,k)=>`<option value="${k}" ${k===v?'selected':''}>${pad?String(k).padStart(2,'0'):k}</option>`).join('');
-  return `<div class="durpick dist" role="group" aria-label="Distância"><label><select data-${pre}="k">${opt(100,i)}</select></label><span class="virg">,</span><label><select data-${pre}="c">${opt(100,c,1)}</select><span>km</span></label></div>`; }
+function durPicker(pre,sec){ sec=sec||0; const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=sec%60; const v=(n,pad)=>sec?(pad?String(n).padStart(2,'0'):String(n)):'';
+  return `<div class="durpick" role="group" aria-label="Duração"><label><input data-${pre}="h" inputmode="numeric" maxlength="2" value="${v(h)}" placeholder="0"><span>h</span></label><label><input data-${pre}="m" inputmode="numeric" maxlength="2" value="${v(m,1)}" placeholder="00"><span>min</span></label><label><input data-${pre}="s" inputmode="numeric" maxlength="2" value="${v(s,1)}" placeholder="00"><span>s</span></label></div>`; }
+function distPicker(pre,km){ km=km||0; const i=Math.floor(km), c=Math.round((km-i)*100);
+  return `<div class="durpick dist" role="group" aria-label="Distância"><label><input data-${pre}="k" inputmode="numeric" value="${km?i:''}" placeholder="0"></label><span class="virg">,</span><label><input data-${pre}="c" inputmode="numeric" maxlength="2" value="${km?String(c).padStart(2,'0'):''}" placeholder="00"><span>km</span></label></div>`; }
+function paceVivo(){ const O=state.outro; const el=document.getElementById('paceVivo'); if(el&&O) el.value=O.durSec&&O.distKm?pace(Math.round(O.durSec/O.distKm))+'/km':''; }
 function novoOutro(){ const dt=dtEscolhida(); $('#dlgAdd').close(); state.outro={tipo:'aerobic',livre:'',date:dt.date,time:dt.time,durSec:0,distKm:0,band:null,watchEdit:false}; renderOutro(); $('#dlgOutro').showModal(); }
 function renderOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]===O.tipo);
   $('#outroBody').innerHTML=`<div class="tipos-o">${OUTROS.map(([k,l])=>`<button class="chip" data-otipo="${k}" aria-pressed="${O.tipo===k}">${l}</button>`).join('')}</div>
@@ -2288,6 +2329,7 @@ function renderOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]===O.t
     ${dtCampos('od',O.date,O.time)}
     <div class="dtl" style="margin:10px 0 4px">Duração</div>${durPicker('odur',O.durSec)}
     ${def&&def[2]==='corrida'||O.tipo==='bicicleta'?`<div class="dtl" style="margin:4px 0 4px">Distância</div>${distPicker('odist',O.distKm)}`:''}
+    ${def&&def[2]==='corrida'?`<div class="form"><label>Passos<input data-of="passos" inputmode="numeric" value="${esc(O.passos||'')}" placeholder="ex.: 5400"></label><label>Ritmo médio<input id="paceVivo" value="${O.durSec&&O.distKm?pace(Math.round(O.durSec/O.distKm))+'/km':''}" placeholder="calculado sozinho" readonly></label></div>`:''}
     <p class="note">Os dados do relógio são opcionais.</p>
     ${relogioCard('o',O.band,O.watchEdit)}`; }
 async function salvarOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]===O.tipo); const nome=O.tipo==='outro'?(O.livre||'').trim():def[1];
@@ -2296,7 +2338,7 @@ async function salvarOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]
   if(!dur&&!km&&!B.kcalTotal){ toast('Coloque a duração do treino.'); return; }
   let row;
   if(def&&def[2]==='corrida'){ if(!km){ toast('Coloque a distância da corrida.'); return; } const id=idLivre(O.date+'-c');
-    const s={id,stravaIds:O.stravaIds,date:O.date,kind:'corrida',time:O.time,distKm:km,durSec:dur,pace:dur&&km?Math.round(dur/km):null,kcal:B.kcal||null,kcalTotal:B.kcalTotal||null,bpmAvg:B.bpmAvg||null,bpmMax:B.bpmMax||null,zones:B.zones||null,source:'Manual',local:'livre',splits:[],note:O.tipo==='caminhada'?'caminhada':undefined};
+    const s={id,stravaIds:O.stravaIds,date:O.date,kind:'corrida',time:O.time,distKm:km,durSec:dur,pace:dur&&km?Math.round(dur/km):null,kcal:B.kcal||null,kcalTotal:B.kcalTotal||null,bpmAvg:B.bpmAvg||null,bpmMax:B.bpmMax||null,zones:B.zones||null,source:'Manual',local:'livre',splits:[],steps:parseInt(O.passos,10)||null,note:O.tipo==='caminhada'?'caminhada':undefined};
     row={id,date:O.date,kind:'corrida',data:s}; }
   else { const id=idLivre(O.date+'-t'); const band={...B,date:O.date,time:O.time,tipo:nome,durSec:dur}; if(km) band.distKm=km;
     const s={id,stravaIds:O.stravaIds,date:O.date,kind:'treino',modalidade:'outro',foco:nome,blocks:[],band,status:'concluido'}; row={id,date:O.date,kind:'treino',data:s}; }
@@ -2306,8 +2348,8 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
   if(t.dataset.otipo&&state.outro){ state.outro.tipo=t.dataset.otipo; renderOutro(); }
   if(t.id==='btnOutroSalvar'){ t.disabled=true; await salvarOutro(); t.disabled=false; } });
 document.addEventListener('input',e=>{ const t=e.target; if(t.dataset.of&&state.outro) state.outro[t.dataset.of]=t.value; });
-document.addEventListener('change',e=>{ const t=e.target; if(t.dataset.odist&&state.outro){ const O=state.outro, cur=O.distKm||0; let i=Math.floor(cur), c=Math.round((cur-i)*100); if(t.dataset.odist==='k') i=+t.value; else c=+t.value; O.distKm=+(i+c/100).toFixed(2); }
-  if(t.dataset.odur&&state.outro){ const O=state.outro, cur=O.durSec||0; let h=Math.floor(cur/3600), m=Math.floor(cur%3600/60), s=cur%60; const v=+t.value; if(t.dataset.odur==='h') h=v; if(t.dataset.odur==='m') m=v; if(t.dataset.odur==='s') s=v; O.durSec=h*3600+m*60+s; } });
+document.addEventListener('input',e=>{ const t=e.target; if(t.dataset.odist&&state.outro){ const O=state.outro, cur=O.distKm||0; let i=Math.floor(cur), c=Math.round((cur-i)*100); if(t.dataset.odist==='k') i=parseInt(t.value,10)||0; else { const v=String(t.value).replace(/\D/g,'').slice(0,2); c=v.length===1?+v*10:(+v||0); } O.distKm=+(i+c/100).toFixed(2); paceVivo(); }
+  if(t.dataset.odur&&state.outro){ const O=state.outro, cur=O.durSec||0; let h=Math.floor(cur/3600), m=Math.floor(cur%3600/60), s=cur%60; const v=parseInt(t.value,10)||0; if(t.dataset.odur==='h') h=v; if(t.dataset.odur==='m') m=v; if(t.dataset.odur==='s') s=v; O.durSec=h*3600+m*60+s; paceVivo(); } });
 // ---------- cabeçalho fixo que encolhe ao rolar
 let _scr=false; window.addEventListener('scroll',()=>{ const s=window.scrollY>40; if(s!==_scr){ _scr=s; document.body.classList.toggle('scrolled',s); } },{passive:true});
 // ---------- botão voltar
