@@ -918,8 +918,8 @@ function toast(t){const el=$('#toast');toastHost(el);el.classList.remove('masc')
 
 // ---------- dados derivados
 function allSessions(){ const a=state.sessions.slice(); return a.sort((x,y)=>x.date.localeCompare(y.date)||String(x.id).localeCompare(String(y.id))); }
-function itemVolume(i){ if(i.ladder) return i.ladder.reduce((a,x)=>a+x.reps*x.loadKg,0)*(i.sets||1); if(!i.loadKg||!i.reps) return 0; return i.loadKg*i.reps*(i.sets||1)*(i.perSide?2:1); }
-function itemTotals(i){ const m=(i.sets||1)*(i.perSide?2:1); const t={reps:0,timeSec:0,distM:0};
+function itemVolume(i){ if(i.ladder) return i.ladder.reduce((a,x)=>a+x.reps*x.loadKg,0)*(i.sets||1); if(!i.loadKg||!i.reps) return 0; return i.loadKg*i.reps*(i.sets||1); }
+function itemTotals(i){ const m=(i.sets||1); /* unilateral/alternado: conta o movimento de um lado, não soma os dois */ const t={reps:0,timeSec:0,distM:0};
   if(i.ladder) t.reps=i.ladder.reduce((a,x)=>a+x.reps,0)*(i.sets||1); else if(i.reps!=null) t.reps=i.reps*m;
   if(i.timeSec) t.timeSec=i.timeSec*m*(i.reps!=null?0:1); if(i.distM) t.distM=i.distM*m; return t; }
 function fmtTotals(t,all){ const p=[]; if(t.reps) p.push(fmtNum(t.reps,0)+' reps'); if(t.distM) p.push(t.distM>=1000?fmtNum(t.distM/1000,1)+' km':fmtNum(t.distM,0)+' m'); if(t.timeSec) p.push(t.timeSec>=3600?fmtNum(t.timeSec/3600,1)+' h':Math.round(t.timeSec/60)+' min'); return all?p:p.slice(0,1); }
@@ -931,7 +931,7 @@ function exerciseIndex(flt){
       const e=ex[i.name]=ex[i.name]||{name:i.name,sessions:[],count:0,tot:{reps:0,timeSec:0,distM:0}}; const it=itemTotals(i); e.tot.reps+=it.reps; e.tot.timeSec+=it.timeSec; e.tot.distM+=it.distM;
       let r=seen[i.name]; if(!r){ r=seen[i.name]={date:s.date,id:s.id,max:null,vol:0,items:[]}; e.sessions.push(r); e.count++; }
       if(i.loadKg!=null) r.max=Math.max(r.max||0,i.loadKg);
-      r.vol+=itemVolume(i); r.items.push({...i,block:b.name});
+      r.vol+=itemVolume(i); r.items.push({...i,block:String(b.name||'').replace(/\s+[IVX]+$/,'')});
     }
   }
   const livres=flt?[]:allSessions().filter(s=>s.kind==='corrida'&&s.local!=='box');
