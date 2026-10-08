@@ -1,4 +1,4 @@
-const C='wodio-v4';
+const C='wodio-v5';
 const SHELL=['/','/index.html','/manifest.webmanifest','/favicon.svg','/favicon-32.png','/icon-192.png','/icon-512.png','/apple-touch-icon.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(C).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
@@ -14,3 +14,7 @@ self.addEventListener('fetch',e=>{
     return hit||net;
   }));
 });
+self.addEventListener('push',e=>{ let d={}; try{ d=e.data?e.data.json():{}; }catch(_){ d={body:e.data&&e.data.text()}; }
+  e.waitUntil(self.registration.showNotification(d.title||"WÓD'IO",{body:d.body||'Bora treinar!',icon:'/icon-192.png',badge:'/favicon-48.png',tag:'chamado-5h',renotify:true,data:{url:d.url||'/'}})); });
+self.addEventListener('notificationclick',e=>{ e.notification.close(); const url=(e.notification.data&&e.notification.data.url)||'/';
+  e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(ws=>{ for(const w of ws){ if('focus' in w) return w.focus(); } return clients.openWindow(url); })); });
