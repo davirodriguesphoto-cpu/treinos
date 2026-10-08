@@ -429,6 +429,11 @@ dialog.painel .mh h3{text-align:center}
 .acc summary::after{font-size:22px}
 .accitem::after{font-size:26px;line-height:1}
 .tipohead .chev{font-size:22px}
+.chartscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px}
+.chartscroll .chart{min-width:100%}
+.chips.exr{margin-bottom:8px}
+tr.cont td{border-top-color:transparent}
+.chart.radar{height:min(110vw,460px)}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -1170,20 +1175,28 @@ function drawKm(only){
 function vExDetail(e){
   if(e.name==='Corrida Box') return vCorridaBox(e); if(e.name==='Corrida Livre') return vCorridaLivre();
   const hasLoad=e.loaded.length>0;
-  const rows=[...e.sessions].reverse().map(r=>`<tr><td>${fmtD(r.date)}${r.pr?' <span class="tag new">recorde</span>':''}</td><td>${r.items.map(i=>esc(qty(i))).join('<br>')}</td><td>${r.max!=null?fmtNum(r.max)+' kg':'–'}</td><td>${r.vol?fmtNum(r.vol,0)+' kg':'–'}</td><td>${esc([...new Set(r.items.map(i=>i.block))].join(', '))}</td></tr>`).join('');
+  const rows=[...e.sessions].reverse().map(r=>{ const L=[]; let prMarcado=false;
+    for(const i of r.items){ if(i.ladder&&i.ladder.length>1){ for(const st of i.ladder){ const ehPr=r.pr&&!prMarcado&&st.loadKg===r.max; if(ehPr) prMarcado=true;
+          L.push(`<tr class="${L.length?'cont':''}"><td>${fmtD(r.date)}${ehPr?' <span class="tag new">recorde</span>':''}</td><td>${st.reps} × ${fmtNum(st.loadKg)} kg</td><td>${st.loadKg?fmtNum(st.loadKg)+' kg':'–'}</td><td>${st.reps&&st.loadKg?fmtNum(st.reps*st.loadKg,0)+' kg':'–'}</td><td>${esc(i.block||'')}</td></tr>`); } }
+      else { const ehPr=r.pr&&!prMarcado; if(ehPr) prMarcado=true; const kg=i.loadKg; const tt=itemTotals(i);
+        L.push(`<tr class="${L.length?'cont':''}"><td>${fmtD(r.date)}${ehPr?' <span class="tag new">recorde</span>':''}</td><td>${esc(qty(i))}</td><td>${kg!=null?fmtNum(kg)+' kg':'–'}</td><td>${kg&&tt.reps?fmtNum(kg*tt.reps,0)+' kg':'–'}</td><td>${esc(i.block||'')}</td></tr>`); } }
+    return L.join(''); }).join('');
   return `<p style="margin:10px 0 0"><button class="btn accent" id="exBack">‹ Todos os exercícios</button></p>
   <h2>${esc(e.name)}</h2>${fmtTotals(e.tot,true).length?`<div class="lifetime">${fmtTotals(e.tot,true).map(x=>{const [n,...u]=x.split(' ');const uu=u.join(' '); return `<div><b>${n}</b><span>${uu==='reps'?'repetições':uu==='h'?'horas':uu==='min'?'minutos':uu}</span></div>`}).join('')}<div><b>${e.count}</b><span>${e.count>1?'sessões':'sessão'}</span></div></div>`:''}${hasLoad?`<p class="sub">Carga de ${fmtNum(e.first)} kg na primeira vez para ${fmtNum(e.best)} kg na melhor.</p>`:''}
-  ${hasLoad?`<div class="panel"><div class="chart tall"><canvas id="cEx" aria-label="Evolução de carga"></canvas></div><div class="legend"><span><i style="background:var(--load)"></i>Carga máxima na sessão</span><span><i style="background:var(--z2);opacity:.5"></i>Volume (carga × reps)</span><span><i style="background:var(--text)"></i>Recorde</span></div></div>`:'<p class="sub">Esse exercício não tem carga registrada; o histórico abaixo mostra reps e tempo.</p>'}
+  ${hasLoad?`<div class="panel"><div class="chips exr" role="group" aria-label="Período do gráfico">${[['3','3 meses'],['6','6 meses'],['12','1 ano'],['tudo','Tudo']].map(([k,l])=>`<button class="chip" data-exr="${k}" aria-pressed="${(state.exRange||'tudo')===k}">${l}</button>`).join('')}</div><div class="chartscroll" id="exScroll"><div class="chart tall" id="exChartBox"><canvas id="cEx" aria-label="Evolução de carga"></canvas></div></div><p class="note" style="margin:4px 0 0">Arraste para o lado para ver todo o período. Toque num ponto para ver os valores.</p><div class="legend"><span><i style="background:var(--load)"></i>Carga máxima na sessão</span><span><i style="background:var(--z2);opacity:.5"></i>Volume (carga × reps)</span><span><i style="background:var(--text)"></i>Recorde</span></div></div>`:'<p class="sub">Esse exercício não tem carga registrada; o histórico abaixo mostra reps e tempo.</p>'}
   <h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Feito</th><th>Carga máx.</th><th>Volume</th><th>Bloco</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function drawEx(){
   const ex=exerciseIndex(); const e=state.ex&&ex[state.ex]; if(e&&(e.name==='Corrida Box'||e.name==='Corrida Livre')){ drawKm(e.name==='Corrida Livre'?'l':'t'); if(e.name==='Corrida Livre') drawPace(); return; } if(!e||!e.loaded.length) return;
-  const T=r=>d2(r.date).getTime();
-  mk('cEx',{data:{datasets:[
-    {type:'line',label:'Carga',data:e.loaded.map(r=>({x:T(r),y:r.max})),borderColor:css('--load'),backgroundColor:css('--load'),pointRadius:e.loaded.map(r=>r.pr?6:3),pointBackgroundColor:e.loaded.map(r=>r.pr?css('--text'):css('--load')),tension:.15,yAxisID:'y',stepped:false},
-    {type:'bar',label:'Volume',data:e.loaded.filter(r=>r.vol).map(r=>({x:T(r),y:Math.round(r.vol)})),backgroundColor:css('--z2')+'66',yAxisID:'y2',barThickness:6}]},
-    options:baseOpts({scales:{x:timeX(),y:{position:'left',title:{display:true,text:'kg',color:css('--muted')},ticks:{color:css('--muted')},grid:{color:css('--line')},border:{display:false}},y2:{position:'right',grid:{display:false},ticks:{color:css('--muted')},border:{display:false},beginAtZero:true}},
-      plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>fmtD(new Date(c[0].raw.x).toISOString().slice(0,10)),label:c=>c.dataset.label==='Carga'?'Carga: '+fmtNum(c.raw.y)+' kg':'Volume: '+fmtNum(c.raw.y,0)+' kg'}}}})});
+  const R=state.exRange||'tudo'; let L=e.loaded; if(R!=='tudo'){ const d=new Date(); d.setMonth(d.getMonth()-(+R)); const lim=d.toISOString().slice(0,10); L=L.filter(r=>r.date>=lim); if(!L.length) L=e.loaded.slice(-1); }
+  const box=$('#exChartBox'), sc=$('#exScroll'); if(box&&sc){ const w=Math.max(sc.clientWidth, L.length*58); box.style.width=w+'px'; }
+  const lab=L.map((r,k)=>{ const d=d2(r.date); const ano=k===0||d2(L[k-1].date).getFullYear()!==d.getFullYear(); return ano?[String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'),String(d.getFullYear())]:String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'); });
+  mk('cEx',{data:{labels:lab,datasets:[
+    {type:'line',label:'Carga',data:L.map(r=>r.max),borderColor:css('--load'),backgroundColor:css('--load'),pointRadius:L.map(r=>r.pr?7:4),pointHoverRadius:8,pointBackgroundColor:L.map(r=>r.pr?css('--text'):css('--load')),tension:.2,yAxisID:'y'},
+    {type:'bar',label:'Volume',data:L.map(r=>r.vol?Math.round(r.vol):null),backgroundColor:css('--z2')+'55',yAxisID:'y2',maxBarThickness:18}]},
+    options:baseOpts({scales:{x:{grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkip:false,font:{size:11}}},y:{position:'left',title:{display:true,text:'kg',color:css('--muted')},ticks:{color:css('--muted')},grid:{color:css('--line')},border:{display:false}},y2:{position:'right',grid:{display:false},ticks:{color:css('--muted')},border:{display:false},beginAtZero:true}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>fmtD(L[c[0].dataIndex].date),label:c=>c.dataset.label==='Carga'?'Carga: '+fmtNum(c.raw)+' kg':'Volume: '+fmtNum(c.raw,0)+' kg'}}}})});
+  if(sc) sc.scrollLeft=sc.scrollWidth;
 }
 const BIO_FIELDS=[['peso','Peso','kg'],['pesoAcima','Peso acima da referência','kg'],['musculoPct','Músculo esquelético','%'],['musculoKg','Músculo esquelético','kg'],['gorduraPct','Gordura corporal','%'],['gorduraKg','Gordura corporal','kg'],['gorduraAcima','Gordura acima da referência','kg'],['imc','IMC','kg/m²'],['visceral','Gordura visceral','nível'],['basal','Metabolismo basal','kcal'],['rcq','Relação cintura-quadril',''],['idadeCorporal','Idade corporal','anos'],['idadeDif','Idade corporal acima da real','anos']];
 const MED=[['torax','Tórax'],['cintura','Cintura'],['abdomen','Abdômen'],['quadril','Quadril'],['bracoE','Braço E'],['bracoD','Braço D'],['coxaE','Coxa E'],['coxaD','Coxa D']];
@@ -1277,7 +1290,7 @@ function vCorpo(){
   <h2>Medidas</h2><p class="sub">Em centímetros.</p>
   <div class="tablewrap"><table><thead><tr><th></th>${ev.map(e=>`<th>${fmtD(e.date)}</th>`).join('')}<th>Variação</th></tr></thead><tbody>${medRows}</tbody></table></div>
   ${ev.length>1&&refs.peso?`<h2>Visão geral</h2><p class="sub">Peso, gordura corporal, músculo e gordura visceral comparados à faixa de referência (100 = limite da referência). Na gordura e no peso, quanto mais perto de 100, melhor; no músculo, a meta é chegar a 100.</p>
-  <div class="panel"><div class="chart tall"><canvas id="cRadar" aria-label="Comparação da primeira e da última avaliação"></canvas></div><div class="legend"><span><i style="background:var(--muted)"></i>${fmtD(a.date)}</span><span><i style="background:var(--z2)"></i>${fmtD(z.date)}</span><span><i style="background:var(--z3)"></i>Referência</span></div></div>`:''}`;
+  <div class="panel"><div class="chart radar"><canvas id="cRadar" aria-label="Comparação da primeira e da última avaliação"></canvas></div><div class="legend"><span><i style="background:var(--muted)"></i>${fmtD(a.date)}</span><span><i style="background:var(--z2)"></i>${fmtD(z.date)}</span><span><i style="background:var(--z3)"></i>Referência</span></div></div>`:''}`;
 }
 const FAIXAS_GORD={M:[[2,6,'Essencial','--z1'],[6,14,'Atleta','--z2'],[14,18,'Ativo','--good'],[18,25,'Aceitável','--z3'],[25,60,'Obesidade','--z5']],F:[[10,14,'Essencial','--z1'],[14,21,'Atleta','--z2'],[21,25,'Ativo','--good'],[25,32,'Aceitável','--z3'],[32,60,'Obesidade','--z5']]};
 const FAIXAS_TXT={M:['2–5%','6–13%','14–17%','18–24%','25%+'],F:['10–13%','14–20%','21–24%','25–31%','32%+']};
@@ -1301,13 +1314,13 @@ function bioChart(id,k,color){
 }
 function drawRadar(){
   const ev=state.bio.evaluations, R=state.bio.refs||{}; if(ev.length<2||!R.peso) return; const a=ev[0], z=ev[ev.length-1];
-  const AX=[['peso','Peso','kg',R.peso[1]],['gorduraPct','Gordura corporal','%',sexoPerfil()==='F'?31:24],['musculoPct','Músculo esquelético','%',R.musculoPct[0]],['visceral','Gordura visceral','',R.visceral[1]]];
+  const AX=[['peso',['Peso'],'kg',R.peso[1]],['gorduraPct',['Gordura','corporal'],'%',sexoPerfil()==='F'?31:24],['musculoPct',['Músculo','esquelético'],'%',R.musculoPct[0]],['visceral',['Gordura','visceral'],'',R.visceral[1]]];
   const val=(e,[k,,,ref])=>e[k]!=null?Math.round(1000*e[k]/ref)/10:null;
   const ds=(e,c,dash)=>({label:fmtD(e.date),data:AX.map(x=>val(e,x)),borderColor:css(c),backgroundColor:css(c)+'22',pointBackgroundColor:css(c),borderWidth:2,borderDash:dash||[],raw:AX.map(([k,,u])=>e[k]!=null?fmtNum(e[k],1)+(u?' '+u:''):'–')});
   const grid=css('--line'),tick=css('--muted');
   mk('cRadar',{type:'radar',data:{labels:AX.map(x=>x[1]),datasets:[ds(a,'--muted',[5,4]),ds(z,'--z2'),{label:'Referência',data:AX.map(()=>100),borderColor:css('--z3'),backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,raw:AX.map(x=>'limite '+fmtNum(x[3],1)+(x[2]?' '+x[2]:''))}]},
     options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{backgroundColor:css('--raised'),titleColor:css('--text'),bodyColor:css('--text'),borderColor:grid,borderWidth:1,callbacks:{label:c=>c.dataset.label+': '+c.dataset.raw[c.dataIndex]+' ('+c.raw+')'}}},
-      scales:{r:{beginAtZero:true,suggestedMax:Math.max(100,...ds(a,'--muted').data)*1.05,angleLines:{color:grid},grid:{color:grid},pointLabels:{color:css('--text'),font:{size:13}},ticks:{color:tick,backdropColor:'transparent',showLabelBackdrop:false,maxTicksLimit:5}}}}});
+      scales:{r:{beginAtZero:true,max:Math.ceil(Math.max(100,...ds(a,'--muted').data,...ds(z,'--z2').data)*1.04/10)*10,angleLines:{color:grid},grid:{color:grid},pointLabels:{color:css('--text'),font:{size:14,weight:'600'},padding:4},ticks:{color:tick,backdropColor:'transparent',showLabelBackdrop:false,stepSize:50,font:{size:10},callback:v=>v%50===0?v:''}}}}});
 }
 function drawCorpo(){ if(!state.bio||!state.bio.evaluations||!state.bio.evaluations.length) return; drawRadar(); bioChart('cPeso','peso','--text'); bioChart('cGord','gorduraPct','--z4'); bioChart('cMusc','musculoPct','--body'); bioChart('cVisc','visceral','--z5'); }
 function sessHTML(s){
@@ -1386,6 +1399,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.tab){ state.tab=t.dataset.tab; state.ex=null; render(); window.scrollTo(0,0); return; }
   if(t.dataset.ex!=null){ state.tab='exercicios'; state.ex=t.dataset.ex; render(); window.scrollTo(0,0); return; }
   if(t.id==='exBack'){ state.ex=null; render(); return; }
+  if(t.dataset.exr){ state.exRange=t.dataset.exr; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
   if(t.dataset.extipo){ state.exTipo=state.exTipo===t.dataset.extipo?null:t.dataset.extipo; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
   if(t.dataset.mode){ state.exMode=t.dataset.mode; render(); return; }
   if(t.dataset.per){ state.per={mode:t.dataset.per,ref:todayISO()}; render(); return; }
@@ -1591,6 +1605,7 @@ $('#btnParse').onclick=()=>{
     const c=P.canon(i.name,al); if(c) i.name=c; else { const hit=[...known].find(k=>P.nkey(k)===P.nkey(i.name)); if(hit) i.name=hit; else i.isNew=true; }
     if(i.loadKg){ const LR={'Abdominal':'Abdominal com Carga','Squat':'Front Squat','Jump Squat':'Jump Front Squat','Isometria no Squat':'Isometria no Front Squat','Prancha':'Prancha com Passagem','Remada':'Gorila Row'}; if(LR[i.name]){ i.name=LR[i.name]; i.isNew=false; } }
     delete i.raw; }
+  for(const s of out) if(s.kind==='treino'&&s.blocks) s.blocks=normalizaBlocos(s.blocks);
   for(const s of out) if(s.kind==='treino'&&s.foco){
     const tm=/^\s*t[ée]cnica\s*:?\s*(.*)$/i.exec(s.foco); if(tm){ s.focoOriginal=s.foco; s.foco='Técnica'; const x=tm[1].split('/')[0].trim(); if(x) s.focoExtra=x; continue; }
     if(/push\s*(&|e|and)\s*pull/i.test(s.foco)){ s.focoOriginal=s.foco; s.foco='Puxadores'; s.focos=['Puxadores','Empurradores']; continue; }
@@ -1748,12 +1763,26 @@ async function restoreBackup(id,when){
     x=await sb.from('settings').upsert({aliases:j.aliases||{},bio_refs:(j.bio||{}).refs||{}}); if(x.error) throw x.error;
     $('#dlgConta').close(); await loadAll(); toast('Backup restaurado: '+rows.length+' sessões.');
   }catch(e){ console.error(e); toast('Não foi possível restaurar agora. Tente de novo.'); } }
+function normalizaBlocos(blocks){ const out=[], cnt={}; const R=['','','II','III','IV','V'];
+  for(const b of blocks||[]){ const nome=String(b.name||'').trim(); const k=nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if(/^mobilidade.*90\/90/.test(k)){ const it={name:'Mobilidade de Quadril'}; if(out.length) out[out.length-1].items.push(it,...(b.items||[])); else { out.push({name:'WARM UP',result:null,items:[it,...(b.items||[])]}); cnt['WARM UP']=1; } continue; }
+    let base=null, extra=null; const par=(/\(([^)]+)\)/.exec(nome)||[])[1];
+    if(/^(warm ?up|aquecimento|ativacao)/.test(k)){ base='WARM UP'; extra=par||(/(\d+)\s*x|(\d+)\s*rounds?/.exec(k)?(/(\d+)/.exec(k)[1]+' rounds'):(/(\d+)\s*min/.exec(k)?/(\d+)/.exec(k)[1]+' min':null)); }
+    else if(/^(skill|tecnica|teste|core|pratica|variac)/.test(k)&&!/corrida|run|mile/.test(k)){ base='SKILL'; extra=/^skill$/.test(k)?null:(par||nome.replace(/:$/,'')); if(/^skill\s*\(/.test(k)) extra=par&&/x$/i.test(par)?par.replace(/x$/i,' rounds'):par; }
+    else if(/^(wod|for ?time|fortime|amrap|emom|e2mom|chipper|tabata|teste)/.test(k)){ base='WOD'; extra=/^wod\s*\d*:?$/.test(k)?null:(par||nome.replace(/^wod\s*/i,'').replace(/:$/,'')); }
+    else if(/^(treino livre|musculacao)/.test(k)) base=k.startsWith('treino')?'TREINO LIVRE':'MUSCULAÇÃO';
+    else if(/^(warm up|skill|wod) [ivx]+$/.test(k)) base=nome.replace(/\s+[IVX]+$/i,'').toUpperCase();
+    else base=nome;
+    const n=(cnt[base]||0)+1; cnt[base]=n; const nb={...b,name:base+(n>1&&['WARM UP','SKILL','WOD'].includes(base)?' '+R[n]:'')};
+    if(extra&&/^\d+\s*x$/i.test(extra)) extra=extra.replace(/\s*x$/i,' rounds');
+    if(extra&&!nb.result) nb.result=extra; out.push(nb); }
+  return out; }
 async function importWhats(text){
   const msgs=text.split(/\n(?=\d{1,2}\/\d{1,2}\/\d{2,4},? \d{1,2}:\d{2})/); const al=state.config.aliases||{}; const out={};
   for(const m of msgs){ const h=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4}),? (\d{1,2}:\d{2})(?::\d{2})?\s*-?\s*[^:]+:\s?/.exec(m); if(!h) continue;
     let y=+h[3]; if(y<100) y+=2000; const md=y+'-'+String(h[2]).padStart(2,'0')+'-'+String(h[1]).padStart(2,'0');
     let ss=[]; try{ ss=P.parseMessage(m.slice(h[0].length),md); }catch(e){ continue; }
-    for(const s of ss){ if(s.kind==='treino') for(const b of s.blocks) for(const i of b.items){ const c=P.canon(i.name,al); if(c) i.name=c; delete i.raw; }
+    for(const s of ss){ if(s.kind==='treino'){ s.blocks=normalizaBlocos(s.blocks); for(const b of s.blocks) for(const i of b.items){ const c=P.canon(i.name,al); if(c) i.name=c; delete i.raw; } }
       delete s.dateConflict; delete s.orphanBand; s.source='WhatsApp'; const k=s.date+'|'+s.kind+(s.kind==='corrida'?'|'+s.distKm:''); out[k]=s; } }
   const L=Object.values(out).sort((a,b)=>a.date.localeCompare(b.date)); if(!L.length){ toast('Não encontrei treinos nesse arquivo.'); return; }
   const tr=L.filter(s=>s.kind==='treino').length, co=L.length-tr;
