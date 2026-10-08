@@ -438,6 +438,8 @@ tr.cont td{border-top-color:transparent}
 .durpick label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 10px}
 .durpick select{flex:1;border:0;background:transparent;color:var(--text);font-size:22px;font-family:"Barlow Condensed",sans-serif;font-weight:600;padding:8px 0;min-width:0;appearance:none;-webkit-appearance:none;text-align:center}
 .durpick span{color:var(--muted);font-size:14px}
+.durpick.dist{grid-template-columns:1fr auto 1.3fr;align-items:center;max-width:320px}
+.durpick .virg{font-size:28px;color:var(--muted);font-weight:700}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -1964,7 +1966,7 @@ function renderPicker(){ const P=state.pick; const el=$('#pkBody');
       <div class="cxlist">${C.comps.map((n,k)=>`<span class="cxchip">${k+1}. ${esc(n)} <button class="linkbtn" data-pkcrm="${k}" aria-label="Tirar">✕</button></span>`).join('')||'<span class="note">Nenhum ainda.</span>'}</div>
       <input class="search" id="pkCq" type="search" placeholder="Buscar exercício do complex" value="${esc(C.q)}" autocomplete="off">
       <div class="rows">${R.map(r=>`<button class="row" data-pkcadd="${esc(r.name)}"><div class="t">${esc(r.name)}${r.via?` <span class="m">(${esc(r.via)})</span>`:''}</div></button>`).join('')}${C.q.trim()&&!R.some(r=>nrm(r.name)===nrm(C.q))?`<button class="row pk-outro" data-pkcadd="${esc(C.q.trim())}"><div class="t">Outros: “${esc(C.q.trim())}”</div></button>`:''}</div>
-      <div class="form">${inp('loadKg','Carga (kg)',i.loadKg)}${inp('reps','Repetições',i.reps)}${inp('sets','Séries / rounds',i.sets)}</div>
+      <p class="note" style="margin:0 0 6px">Usando dois pesos? Coloque a carga total (ex.: 2 de 18 kg = 36 kg).</p><div class="form">${inp('loadKg','Carga (kg)',i.loadKg)}${inp('reps','Repetições',i.reps)}${inp('sets','Séries / rounds',i.sets)}</div>
       <div class="seg" role="group" aria-label="Modo">${[['padrao','Padrão'],['unilateral','Unilateral'],['alternado','Alternado']].map(([k,l])=>`<button class="segb" data-pkmodo="${k}" aria-pressed="${modo===k}">${l}</button>`).join('')}</div>
       <div class="actions"><button class="btn" data-pkok="mais">Adicionar mais</button><button class="btn primary" data-pkok="ok">Concluído</button></div>`; return; }
   if(!P.item){ const q=P.q.trim(); const L=buscaExercicios(q,nomesConhecidos(),60); const exato=L.some(r=>nrm(r.name)===nrm(q));
@@ -2151,7 +2153,7 @@ function linhaItem(i){ let t=''; if(i.sets) t+=i.sets+'x ';
   if(i.timeSec&&i.reps==null) t+=(i.perSide?tempoTxt(i.timeSec)+'/'+tempoTxt(i.timeSec):tempoTxt(i.timeSec))+' ';
   if(i.distM) t+=(i.distM>=1000?fmtNum(i.distM/1000,2).replace(',','.')+'km':i.distM+'m')+(i.perSide?'/'+i.distM+'m':'')+' ';
   const nome=i.name==='Corrida Box'?'de corrida':i.name; t+=nome;
-  if(i.loadKg&&!i.ladder){ t+=i.count>1&&i.unitKg?` com ${i.count} kettlebells de ${fmtNum(i.unitKg)}kg`:` com ${fmtNum(i.loadKg)}kg`; if(i.eachSide) t+=' cada lado'; }
+  if(i.loadKg&&!i.ladder){ t+=` com ${fmtNum(i.loadKg)}kg`; }
   const out=[t.trim()];
   if(i.ladder) out.push(i.ladder.map(x=>`${x.reps}r - ${fmtNum(x.loadKg)}kg`).join(' | '));
   if(i.note&&!/^complex/.test(i.note)) out.push('('+i.note+')');
@@ -2256,18 +2258,20 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
 const OUTROS=[['corrida','Corrida','corrida'],['caminhada','Caminhada','corrida'],['bicicleta','Bicicleta','treino'],['aerobic','Aerobic Dance Exercise','treino'],['natacao','Natação','treino'],['eliptico','Elíptico','treino'],['esteira','Esteira','treino'],['outro','Outro','treino']];
 function durPicker(pre,sec){ sec=sec||0; const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=sec%60; const opt=(n,v)=>Array.from({length:n},(_,k)=>`<option value="${k}" ${k===v?'selected':''}>${String(k).padStart(2,'0')}</option>`).join('');
   return `<div class="durpick" role="group" aria-label="Duração"><label><select data-${pre}="h">${opt(24,h)}</select><span>h</span></label><label><select data-${pre}="m">${opt(60,m)}</select><span>min</span></label><label><select data-${pre}="s">${opt(60,s)}</select><span>s</span></label></div>`; }
-function novoOutro(){ const dt=dtEscolhida(); $('#dlgAdd').close(); state.outro={tipo:'aerobic',livre:'',date:dt.date,time:dt.time,durSec:0,dist:'',band:null,watchEdit:false}; renderOutro(); $('#dlgOutro').showModal(); }
+function distPicker(pre,km){ km=km||0; const i=Math.floor(km), c=Math.round((km-i)*100); const opt=(n,v,pad)=>Array.from({length:n},(_,k)=>`<option value="${k}" ${k===v?'selected':''}>${pad?String(k).padStart(2,'0'):k}</option>`).join('');
+  return `<div class="durpick dist" role="group" aria-label="Distância"><label><select data-${pre}="k">${opt(100,i)}</select></label><span class="virg">,</span><label><select data-${pre}="c">${opt(100,c,1)}</select><span>km</span></label></div>`; }
+function novoOutro(){ const dt=dtEscolhida(); $('#dlgAdd').close(); state.outro={tipo:'aerobic',livre:'',date:dt.date,time:dt.time,durSec:0,distKm:0,band:null,watchEdit:false}; renderOutro(); $('#dlgOutro').showModal(); }
 function renderOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]===O.tipo);
   $('#outroBody').innerHTML=`<div class="tipos-o">${OUTROS.map(([k,l])=>`<button class="chip" data-otipo="${k}" aria-pressed="${O.tipo===k}">${l}</button>`).join('')}</div>
     ${O.tipo==='outro'?`<label class="dtl">Qual atividade?<input data-of="livre" value="${esc(O.livre)}" placeholder="Ex.: Funcional, Pilates…"></label>`:''}
     ${dtCampos('od',O.date,O.time)}
     <div class="dtl" style="margin:10px 0 4px">Duração</div>${durPicker('odur',O.durSec)}
-    ${def&&def[2]==='corrida'||O.tipo==='bicicleta'?`<div class="form"><label>Distância (km)<input data-of="dist" inputmode="decimal" value="${esc(O.dist)}" placeholder="ex.: 5,2"></label></div>`:''}
+    ${def&&def[2]==='corrida'||O.tipo==='bicicleta'?`<div class="dtl" style="margin:4px 0 4px">Distância</div>${distPicker('odist',O.distKm)}`:''}
     <p class="note">Os dados do relógio são opcionais.</p>
     ${relogioCard('o',O.band,O.watchEdit)}`; }
 async function salvarOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]===O.tipo); const nome=O.tipo==='outro'?(O.livre||'').trim():def[1];
   if(!nome){ toast('Escreva qual foi a atividade.'); return; }
-  const dur=O.durSec||(O.band&&O.band.durSec)||null; const km=parseFloat(String(O.dist).replace(',','.'))||null; const B=O.band||{};
+  const dur=O.durSec||(O.band&&O.band.durSec)||null; const km=O.distKm||null; const B=O.band||{};
   if(!dur&&!km&&!B.kcalTotal){ toast('Coloque a duração do treino.'); return; }
   let row;
   if(def&&def[2]==='corrida'){ if(!km){ toast('Coloque a distância da corrida.'); return; } const id=idLivre(O.date+'-c');
@@ -2281,7 +2285,8 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
   if(t.dataset.otipo&&state.outro){ state.outro.tipo=t.dataset.otipo; renderOutro(); }
   if(t.id==='btnOutroSalvar'){ t.disabled=true; await salvarOutro(); t.disabled=false; } });
 document.addEventListener('input',e=>{ const t=e.target; if(t.dataset.of&&state.outro) state.outro[t.dataset.of]=t.value; });
-document.addEventListener('change',e=>{ const t=e.target; if(t.dataset.odur&&state.outro){ const O=state.outro, cur=O.durSec||0; let h=Math.floor(cur/3600), m=Math.floor(cur%3600/60), s=cur%60; const v=+t.value; if(t.dataset.odur==='h') h=v; if(t.dataset.odur==='m') m=v; if(t.dataset.odur==='s') s=v; O.durSec=h*3600+m*60+s; } });
+document.addEventListener('change',e=>{ const t=e.target; if(t.dataset.odist&&state.outro){ const O=state.outro, cur=O.distKm||0; let i=Math.floor(cur), c=Math.round((cur-i)*100); if(t.dataset.odist==='k') i=+t.value; else c=+t.value; O.distKm=+(i+c/100).toFixed(2); }
+  if(t.dataset.odur&&state.outro){ const O=state.outro, cur=O.durSec||0; let h=Math.floor(cur/3600), m=Math.floor(cur%3600/60), s=cur%60; const v=+t.value; if(t.dataset.odur==='h') h=v; if(t.dataset.odur==='m') m=v; if(t.dataset.odur==='s') s=v; O.durSec=h*3600+m*60+s; } });
 // ---------- cabeçalho fixo que encolhe ao rolar
 let _scr=false; window.addEventListener('scroll',()=>{ const s=window.scrollY>40; if(s!==_scr){ _scr=s; document.body.classList.toggle('scrolled',s); } },{passive:true});
 // ---------- botão voltar
