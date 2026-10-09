@@ -483,6 +483,17 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
 .bora-txt small,.welcome .bora-txt small{font-family:system-ui,sans-serif;font-style:normal;font-weight:600;font-size:13px;letter-spacing:0;color:#1A1405;opacity:.8}
 @keyframes boraPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
 @media (prefers-reduced-motion: reduce){.bora{animation:none}}
+.kgg{display:grid;grid-template-columns:1fr auto auto 1fr auto;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:4px 10px}
+.kgg input{border:0!important;background:transparent!important;font-size:18px;text-align:center;padding:6px 0!important;min-width:0;width:100%}
+.kgg span{color:var(--muted);font-size:13px}.kgg b{color:var(--muted);font-size:20px}
+.mus-mw{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:stretch}
+.mus-edit{background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--text);padding:0 12px;font-weight:600;font-size:13px}
+.em-list{display:grid;gap:6px;margin:8px 0}
+.em-row{display:grid;grid-template-columns:1fr 34px 34px 34px;gap:6px;align-items:center}
+.em-nome{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text)}
+.em-nome::after{content:" ✎";color:var(--muted);font-size:12px}
+.iconx:disabled{opacity:.3}
+.linkbtn.em-del{color:var(--bad);margin-top:14px;display:block}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -1100,6 +1111,13 @@ function fcKcalHTML(ss,R){ const b=ss.map(s=>s.band||s); const comFc=b.filter(x=
       <div class="legend"><span><i style="background:var(--z4)"></i>kcal ativas</span><span><i style="background:var(--z4);opacity:.35"></i>kcal total</span></div>
       <div class="ztot"><div style="border-color:var(--z4)"><b>${fmtNum(kt,0)}</b><span>kcal total (${fmtNum(ka,0)} ativas)</span></div><div style="border-color:var(--line)"><b>${nk?fmtNum(kt/nk,0):'–'}</b><span>kcal por sessão</span></div></div></div>
   </div>`; }
+const CATS_BASE=[['cross','Crossfit & Hyrox','var(--z2)'],['mus','Musculação','var(--z3)'],['corrida','Corrida e caminhada','var(--z1)']];
+const COR_OUTROS={'aerobic dance exercise':'#E35BC0','bicicleta':'#3BB273','natacao':'#00B8D9','eliptico':'#8E6CF0','esteira':'#FF7A59'};
+const PALETA_OUTROS=['#E5484D','#C08457','#9BCB3C','#5B6CFF','#F06292','#26A69A','#FFB300'];
+function corOutro(nome){ const k=String(nome||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); if(COR_OUTROS[k]) return COR_OUTROS[k]; let h=0; for(const ch of k) h=(h*31+ch.charCodeAt(0))>>>0; return PALETA_OUTROS[h%PALETA_OUTROS.length]; }
+function catSessao(s){ if(s.kind==='corrida') return 'corrida'; if(s.modalidade==='musculacao') return 'mus'; if(s.modalidade==='outro') return 'o:'+(s.foco||'Outro'); return 'cross'; }
+function catsDoPeriodo(ss){ const usados=new Set(ss.map(catSessao)); const L=CATS_BASE.filter(([k])=>usados.has(k)); for(const k of [...usados].filter(k=>k.startsWith('o:')).sort()) L.push([k,k.slice(2),corOutro(k.slice(2))]); return L; }
+function minSessao(s){ const d=(s.band&&s.band.durSec)||s.durSec; if(d) return Math.round(d/60); return s.kind==='corrida'?30:45; }
 function vPeriodo(){
   const R=perRange(); const ss=allSessions().filter(s=>s.date>=R.a&&s.date<=R.b);
   const tr=ss.filter(s=>s.kind==='treino'), co=ss.filter(s=>s.kind==='corrida');
@@ -1110,7 +1128,7 @@ function vPeriodo(){
   <div class="per"><div class="chips" role="group" aria-label="Período">${[['semana','Semana'],['mes','Mês'],['ano','Ano'],['tudo','Tudo']].map(([k,l])=>`<button class="chip" data-per="${k}" aria-pressed="${R.mode===k}">${l}</button>`).join('')}</div>
   ${R.mode!=='tudo'?`<div class="pernav"><button class="btn ghost" data-pnav="-1" aria-label="Período anterior">‹</button><b>${esc(R.label)}</b><button class="btn ghost" data-pnav="1" aria-label="Próximo período" ${R.canNext?'':'disabled'}>›</button></div>`:''}</div>
   <div class="lifetime four"><div><b>${tr.length}</b><span>treinos</span></div><div><b>${co.length}</b><span>corridas</span></div><div><b>${fmtNum(km,1)}</b><span>km</span></div><div><b>${fmtNum(kc,0)}</b><span>kcal</span></div></div>
-  <div class="panel"><div class="chart"><canvas id="cFreq" aria-label="Atividades no período"></canvas></div><div class="legend"><span><i style="background:var(--z2)"></i>Treinos</span><span><i style="background:var(--z1)"></i>Corridas</span></div></div>
+  <div class="panel"><p class="note" style="margin:0 0 8px">Minutos de treino ${R.daily?'por dia':'por mês'}, separados pelo tipo de atividade.</p><div class="chart"><canvas id="cFreq" aria-label="Minutos de treino no período"></canvas></div><div class="legend">${catsDoPeriodo(ss).map(([k,l,c])=>`<span><i style="background:${c}"></i>${esc(l)}</span>`).join('')||'<span class="m">Nenhum treino no período.</span>'}</div></div>
   <h2>Intensidade</h2><p class="sub">${R.daily?'Minutos em cada zona de FC por dia, somando treinos e corridas.':'Média de minutos em cada zona de FC por sessão, mês a mês.'} Toque numa zona para ver só ela; toque de novo para ver todas.</p>
   <div class="chips" role="group" aria-label="Zonas">${ZL.map(([k,l,c,cl])=>`<button class="chip zchip" data-zone="${k}" aria-pressed="${!solo||solo===k}"><i class="${cl}"></i>${l}</button>`).join('')}</div>
   <div class="panel"><div class="chart"><canvas id="cZones" aria-label="Zonas de FC no período"></canvas></div>${zoneTotals(ss)}</div>
@@ -1124,8 +1142,9 @@ function drawResumo(){
     const z=(s.band||s).zones; if(z&&typeof z==='object'){ const m=zs[k]=zs[k]||{n:0,leve:0,intensivo:0,aerobico:0,anaerobico:0,vo2:0}; m.n++; for(const [q] of ZL) m[q]+=(z[q]||0)/60; } }
   const lab=R.buckets.map(b=>b.label), keys=R.buckets.map(b=>b.key);
   const stackX={stacked:true,grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkipPadding:8}};
-  mk('cFreq',{type:'bar',data:{labels:lab,datasets:[{label:'Treinos',data:keys.map(k=>cT[k]||0),backgroundColor:css('--z2'),stack:'a',borderRadius:2},{label:'Corridas',data:keys.map(k=>cC[k]||0),backgroundColor:css('--z1'),stack:'a',borderRadius:2}]},
-    options:baseOpts({scales:{x:stackX,y:{stacked:true,beginAtZero:true,ticks:{color:css('--muted'),precision:0},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw}}}})});
+  const mins={}; for(const s of ss){ const k=bk(s), c=catSessao(s); const m=mins[c]=mins[c]||{}; m[k]=(m[k]||0)+minSessao(s); }
+  mk('cFreq',{type:'bar',data:{labels:lab,datasets:catsDoPeriodo(ss).map(([c,l,cor])=>({label:l,data:keys.map(k=>(mins[c]||{})[k]||0),backgroundColor:cor.startsWith('var(')?css(cor.slice(4,-1)):cor,stack:'a',borderRadius:2}))},
+    options:baseOpts({scales:{x:stackX,y:{stacked:true,beginAtZero:true,ticks:{color:css('--muted'),callback:v=>v>=60&&v%60===0?(v/60)+'h':v+' min'},grid:{color:css('--line')},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.raw>=60?Math.floor(c.raw/60)+'h'+String(c.raw%60).padStart(2,'0'):c.raw+' min')}}}})});
   const on=ZL.filter(([k])=>!state.zoneSolo||state.zoneSolo===k);
   { const fa={},fm={},fn={},kt={},ka={};
     for(const s of ss){ const k=bk(s), b=s.band||s; if(b.bpmAvg){ fa[k]=(fa[k]||0)+b.bpmAvg; fn[k]=(fn[k]||0)+1; } if(b.bpmMax) fm[k]=R.daily?Math.max(fm[k]||0,b.bpmMax):Math.max(fm[k]||0,b.bpmMax); if(b.kcalTotal) kt[k]=(kt[k]||0)+b.kcalTotal; if(b.kcal) ka[k]=(ka[k]||0)+b.kcal; }
@@ -1724,7 +1743,7 @@ async function delSession(id){
 function openBio(){
   const f=$('#bioForm');
   f.innerHTML=`<label>Data<input type="date" name="date" value="${todayISO()}" required></label>`+
-    BIO_FIELDS.map(([k,l,u])=>`<label>${l}${u?' ('+u+')':''}<input inputmode="decimal" name="${k}"></label>`).join('')+
+    BIO_FIELDS.map(([k,l,u])=>u==='kg'?`<label>${l}<span class="kgg"><input inputmode="numeric" name="${k}__kg" placeholder="0"><span>kg</span><b>.</b><input inputmode="numeric" name="${k}__g" maxlength="3" placeholder="000"><span>g</span></span></label>`:`<label>${l}${u?' ('+u+')':''}<input inputmode="decimal" name="${k}"></label>`).join('')+
     MED.map(([k,l])=>`<label>${l} (cm)<input inputmode="decimal" name="m_${k}"></label>`).join('');
   $('#dlgBio').showModal();
 }
@@ -1733,7 +1752,7 @@ $('#btnBioSave').onclick=async()=>{
   const fd=new FormData($('#bioForm')); const ev={date:fd.get('date'),medidas:{}};
   if(!ev.date){ toast('Informe a data da avaliação.'); return; }
   const n=v=>{ v=String(v||'').trim().replace(',','.'); return v===''?null:parseFloat(v); };
-  for(const [k] of BIO_FIELDS){ const v=n(fd.get(k)); if(v!=null&&!isNaN(v)) ev[k]=v; }
+  for(const [k,,u] of BIO_FIELDS){ let v; if(u==='kg'){ const a=String(fd.get(k+'__kg')||'').replace(/\D/g,''), b=String(fd.get(k+'__g')||'').replace(/\D/g,''); v=a===''&&b===''?null:parseFloat((a||'0')+'.'+(b||'0')); } else v=n(fd.get(k)); if(v!=null&&!isNaN(v)) ev[k]=v; }
   for(const [k] of MED){ const v=n(fd.get('m_'+k)); if(v!=null&&!isNaN(v)) ev.medidas[k]=v; }
   const alt=(state.profile||{}).altura; if(alt&&ev.peso){ const imc=+(ev.peso/((alt/100)**2)).toFixed(1); if(ev.imc==null) ev.imc=imc; else if(Math.abs(ev.imc-imc)>0.5 && !confirm('O IMC informado ('+ev.imc+') não bate com o calculado pela sua altura ('+imc+'). Salvar mesmo assim?')) return; }
   try{ const mode=await write([{t:'bio',k:'upsert',rows:[{date:ev.date,data:ev}]}]); $('#dlgBio').close(); render(); toast(mode==='offline'?OFFMSG:'Avaliação salva.'); }catch(e){ toast('Não foi possível salvar agora.'); }
@@ -1997,6 +2016,7 @@ function renderHib(){ const d=state.draft; const tipos=tiposTreino().map(t=>t.la
     }
     h+=`</div>`;
     const base=b.name.replace(/\s+[IVX]+$/,''); const prox=d.blocks[bi+1]; if(!prox||prox.name.replace(/\s+[IVX]+$/,'')!==base) h+=`<button class="addblock" data-hbadd="${bi}">+ ${esc(base)} ${romano(d.blocks.filter(x=>x.name.replace(/\s+[IVX]+$/,'')===base).length+1)}</button>`; });
+  h+=`<div class="dtl" style="margin:16px 0 4px">Duração do treino</div>${durPicker('hdur',(d.band&&d.band.durSec)||0)}`;
   h+=relogioCard('h',d.band,state.hibWatchEdit);
   $('#hibBody').innerHTML=h; guardaRascunho(); }
 function romano(n){ return ['','I','II','III','IV','V','VI','VII','VIII'][n]||String(n); }
@@ -2054,6 +2074,7 @@ function pickerSalva(){ const P=state.pick; const i=P.item; if(!i||!i.name) retu
   if(P.alvo.tipo==='hib'){ const b=state.draft.blocks[P.alvo.bi]; if(P.alvo.ii!=null) b.items[P.alvo.ii]=i; else b.items.push(i); renderHib(); }
   else if(P.alvo.tipo==='mus'){ if(P.alvo.ii!=null) state.mus.ex[P.alvo.ii].name=i.name; else state.mus.ex.push({name:i.name,tipo:POR_TEMPO.test(i.name)?'tempo':'carga',series:[{kg:'',reps:'',tempo:''},{kg:'',reps:'',tempo:''},{kg:'',reps:'',tempo:''}]}); renderMus(); }
   else if(P.alvo.tipo==='modelo'){ state.novoModelo.ex.push(i.name); renderNovoModelo(); }
+  else if(P.alvo.tipo==='modeloEdit'){ const E=state.editModelo; if(P.alvo.ii!=null) E.ex[P.alvo.ii]=i.name; else E.ex.push(i.name); renderEditModelo(); }
   return true; }
 
 // ---- arrastar entre blocos (segurar o ≡)
@@ -2074,7 +2095,7 @@ document.addEventListener('pointerup',fimDrag); document.addEventListener('point
 
 // ---- MUSCULAÇÃO
 function openMusPick(re){ if(!re){ const dt=dtEscolhida(); state.musDT=dt; $('#dlgAdd').close(); } else if(!state.musDT){ const v=nowLocal(); state.musDT={date:v.slice(0,10),time:v.slice(11,16)}; }
-  $('#musBody').innerHTML=`<p class="note" style="margin-top:0">Escolha o treino:</p><div class="mus-modelos">${(state.modelos||[]).map(m=>`<button class="mus-m" data-musm="${esc(m.id)}"><b>${esc(m.nome)}</b><span>${esc(m.foco||'')}</span><span class="m">${m.exercicios.length} exercícios</span></button>`).join('')}
+  $('#musBody').innerHTML=`<p class="note" style="margin-top:0">Escolha o treino:</p><div class="mus-modelos">${(state.modelos||[]).map(m=>`<div class="mus-mw"><button class="mus-m" data-musm="${esc(m.id)}"><b>${esc(m.nome)}</b><span>${esc(m.foco||'')}</span><span class="m">${m.exercicios.length} exercícios</span></button><button class="mus-edit" data-musedit="${esc(m.id)}" aria-label="Editar ${esc(m.nome)}">✎ Editar</button></div>`).join('')}
     <button class="mus-m novo" data-musnovo="1"><b>+ Novo treino</b><span>Montar um treino C, D, E…</span></button>
     <button class="mus-m novo" id="btnPersonal"><b>Importar treino do personal</b><span>PDF, foto ou texto · cria os treinos A, B, C… de uma vez</span></button></div>`;
   $('#musTitle').textContent='Musculação'; $('#musActions').innerHTML=''; if(!$('#dlgMus').open) $('#dlgMus').showModal(); }
@@ -2096,6 +2117,7 @@ function renderMus(){ const M=state.mus; $('#musTitle').textContent='Musculaçã
     <div class="mus-s">${e.series.map((s,si)=>`<div class="mus-row ${e.tipo==='tempo'?'t':''}"><span class="m">${si+1}ª</span>${e.tipo==='tempo'?`<label><input data-ms="${ei}.${si}.tempo" inputmode="numeric" value="${esc(s.tempo)}" placeholder="tempo (ex.: 5:00 ou 30)"></label>`:`<label><input data-ms="${ei}.${si}.kg" inputmode="decimal" value="${esc(s.kg)}" placeholder="kg"></label><label><input data-ms="${ei}.${si}.reps" inputmode="numeric" value="${esc(s.reps)}" placeholder="reps"></label>`}<button class="iconx" data-musdel="${ei}.${si}" aria-label="Tirar série">✕</button></div>`).join('')}</div>
     <button class="linkbtn" data-musadd="${ei}">+ série</button>`}</div>`).join('')}
   <button class="btn ghost small" data-musex="1">+ exercício</button>
+  <div class="dtl" style="margin:16px 0 4px">Duração do treino</div>${durPicker('mdur',(M.band&&M.band.durSec)||0)}
   ${relogioCard('m',M.band,M.watchEdit)}`;
   $('#musActions').innerHTML=`<div class="trow"><button class="btn ghost" data-tcancel="m">Cancelar</button><button class="btn" data-mussave="0">Salvar e continuar depois</button></div><button class="btn fin" data-mussave="1">FINALIZAR TREINO</button>`; guardaRascunhoMus(); }
 function tempoSeg(v){ v=String(v||'').trim(); if(!v) return null; if(v.includes(':')){ const [a,b]=v.split(':').map(Number); return isNaN(a)||isNaN(b)?null:a*60+b; } const n=parseFloat(v.replace(',','.')); return isNaN(n)?null:Math.round(n); }
@@ -2150,6 +2172,31 @@ function relogioCard(pre,bd,edit){ const tem=bd&&(bd.durSec||bd.kcalTotal||bd.bp
       <button class="btn strava relstrava" data-relstrava="${pre}">Sincronizar com o Strava</button></div>
     ${(state.stravaOpts&&state.stravaOpts[pre]||[]).length?`<div class="stravaopts"><p class="note" style="margin:8px 0 4px">Mais de uma atividade nesse dia. Qual é esse treino?</p>${state.stravaOpts[pre].map((a,k)=>`<button class="row" data-relpick="${pre}.${k}"><div><div class="t">${esc(a.nome||a.tipo)}</div><div class="m">${a.hora} · ${mmss(a.elapsed)}${a.distancia?' · '+fmtNum(a.distancia/1000,2)+' km':''}${a.bpmAvg?' · '+a.bpmAvg+' bpm':''}</div></div></button>`).join('')}</div>`:''}
     ${edit?watchEditor(pre,bd||{}):''}<p class="note" id="${pre}ImgSt"></p></div>`; }
+function abrirEditModelo(id){ const m=(state.modelos||[]).find(x=>x.id===id); if(!m) return; state.editModelo={id,nome:m.nome,foco:m.foco||'',ex:[...m.exercicios]}; renderEditModelo(); }
+function renderEditModelo(){ const E=state.editModelo; $('#musTitle').textContent='Editar '+E.nome;
+  $('#musBody').innerHTML=`<div class="form"><label>Nome<input data-em="nome" value="${esc(E.nome)}"></label><label>Foco<input data-em="foco" value="${esc(E.foco)}" placeholder="Ex.: Costas · Ombros"></label></div>
+    <p class="note">Toque no nome para trocar o exercício. Use as setas para mudar a ordem.</p>
+    <div class="em-list">${E.ex.map((n,k)=>`<div class="em-row"><button class="em-nome" data-emtroca="${k}">${esc(n)}</button><button class="iconx" data-emsobe="${k}" aria-label="Subir" ${k?'':'disabled'}>↑</button><button class="iconx" data-emdesce="${k}" aria-label="Descer" ${k<E.ex.length-1?'':'disabled'}>↓</button><button class="iconx" data-emrm="${k}" aria-label="Tirar">✕</button></div>`).join('')||'<p class="note">Nenhum exercício.</p>'}</div>
+    <button class="btn ghost small" data-emadd="1">+ exercício</button>
+    <button class="linkbtn em-del" data-emdel="1">Excluir este treino</button>`;
+  $('#musActions').innerHTML=`<div class="trow"><button class="btn ghost" data-emvoltar="1">Voltar</button><button class="btn fin" data-emsalvar="1">SALVAR ALTERAÇÕES</button></div>`; }
+async function salvarEditModelo(){ const E=state.editModelo; if(!E.nome.trim()||!E.ex.length){ toast('Dê um nome e deixe pelo menos um exercício.'); return; }
+  const mods=(state.modelos||[]).map(m=>m.id===E.id?{...m,nome:E.nome.trim(),foco:E.foco.trim(),exercicios:E.ex}:m);
+  try{ const mode=await write([{t:'settings',row:{modelos:mods}}]); state.modelos=mods; state.editModelo=null; openMusPick(true); toast(mode==='offline'?OFFMSG:'Treino atualizado.'); }catch(e){ toast('Não foi possível salvar agora.'); } }
+async function excluirModelo(){ const E=state.editModelo; if(!confirm('Excluir o '+E.nome+'? Os treinos já feitos com ele continuam no histórico.')) return;
+  const mods=(state.modelos||[]).filter(m=>m.id!==E.id); try{ await write([{t:'settings',row:{modelos:mods}}]); state.modelos=mods; state.editModelo=null; openMusPick(true); toast('Treino excluído.'); }catch(e){ toast('Não foi possível excluir agora.'); } }
+document.addEventListener('click',async e=>{ const t=e.target.closest('button'); if(!t) return;
+  if(t.dataset.musedit){ abrirEditModelo(t.dataset.musedit); }
+  const E=state.editModelo; if(!E) return;
+  if(t.dataset.emrm!=null){ E.ex.splice(+t.dataset.emrm,1); renderEditModelo(); }
+  if(t.dataset.emsobe!=null){ const k=+t.dataset.emsobe; if(k>0){ [E.ex[k-1],E.ex[k]]=[E.ex[k],E.ex[k-1]]; renderEditModelo(); } }
+  if(t.dataset.emdesce!=null){ const k=+t.dataset.emdesce; if(k<E.ex.length-1){ [E.ex[k+1],E.ex[k]]=[E.ex[k],E.ex[k+1]]; renderEditModelo(); } }
+  if(t.dataset.emtroca!=null){ abrirPicker({tipo:'modeloEdit',ii:+t.dataset.emtroca}); }
+  if(t.dataset.emadd){ abrirPicker({tipo:'modeloEdit'}); }
+  if(t.dataset.emvoltar){ state.editModelo=null; openMusPick(true); }
+  if(t.dataset.emsalvar){ t.disabled=true; await salvarEditModelo(); t.disabled=false; }
+  if(t.dataset.emdel){ await excluirModelo(); } });
+document.addEventListener('input',e=>{ const t=e.target; if(t.dataset.em&&state.editModelo) state.editModelo[t.dataset.em]=t.value; });
 function renderNovoModelo(){ const N=state.novoModelo; $('#musTitle').textContent='Novo treino';
   $('#musBody').innerHTML=`<div class="form"><label>Nome<input data-nm="nome" value="${esc(N.nome)}" placeholder="Treino C"></label><label>Foco<input data-nm="foco" value="${esc(N.foco)}" placeholder="Ex.: Costas · Ombros"></label></div>
     <div class="rows">${N.ex.map((n,k)=>`<div class="item"><span>${esc(n)}</span><button class="btn ghost small" data-nmrm="${k}">✕</button></div>`).join('')||'<p class="note">Adicione os exercícios desse treino.</p>'}</div>
@@ -2373,7 +2420,7 @@ function renderOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]===O.t
 async function salvarOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]===O.tipo); const nome=O.tipo==='outro'?(O.livre||'').trim():def[1];
   if(!nome){ toast('Escreva qual foi a atividade.'); return; }
   const dur=O.durSec||(O.band&&O.band.durSec)||null; const km=O.distKm||null; const B=O.band||{};
-  if(!dur&&!km&&!B.kcalTotal){ toast('Coloque a duração do treino.'); return; }
+  if(!dur){ toast('Coloque a duração do treino (h, min, s).'); return; }
   let row;
   if(def&&def[2]==='corrida'){ if(!km){ toast('Coloque a distância da corrida.'); return; } const id=idLivre(O.date+'-c');
     const s={id,stravaIds:O.stravaIds,date:O.date,kind:'corrida',time:O.time,distKm:km,durSec:dur,pace:dur&&km?Math.round(dur/km):null,kcal:B.kcal||null,kcalTotal:B.kcalTotal||null,bpmAvg:B.bpmAvg||null,bpmMax:B.bpmMax||null,zones:B.zones||null,source:'Manual',local:'livre',splits:[],steps:parseInt(O.passos,10)||null,note:O.tipo==='caminhada'?'caminhada':undefined};
@@ -2386,6 +2433,8 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
   if(t.dataset.otipo&&state.outro){ state.outro.tipo=t.dataset.otipo; renderOutro(); }
   if(t.id==='btnOutroSalvar'){ t.disabled=true; await salvarOutro(); t.disabled=false; } });
 document.addEventListener('input',e=>{ const t=e.target; if(t.dataset.of&&state.outro) state.outro[t.dataset.of]=t.value; });
+document.addEventListener('input',e=>{ const t=e.target; const dk=t.dataset.mdur?'mdur':t.dataset.hdur?'hdur':null;
+  if(dk){ const alvo=dk==='mdur'?state.mus:state.draft; if(alvo){ const B=alvo.band=alvo.band||{}; const cur=B.durSec||0; let h=Math.floor(cur/3600), m=Math.floor(cur%3600/60), s=cur%60; const v=parseInt(t.value,10)||0; const q=t.dataset[dk]; if(q==='h') h=v; if(q==='m') m=v; if(q==='s') s=v; B.durSec=h*3600+m*60+s||null; if(dk==='mdur') guardaRascunhoMus(); else guardaRascunho(); } } });
 document.addEventListener('input',e=>{ const t=e.target; if(t.dataset.odist&&state.outro){ const O=state.outro, cur=O.distKm||0; let i=Math.floor(cur), c=Math.round((cur-i)*100); if(t.dataset.odist==='k') i=parseInt(t.value,10)||0; else { const v=String(t.value).replace(/\D/g,'').slice(0,2); c=v.length===1?+v*10:(+v||0); } O.distKm=+(i+c/100).toFixed(2); paceVivo(); }
   if(t.dataset.odur&&state.outro){ const O=state.outro, cur=O.durSec||0; let h=Math.floor(cur/3600), m=Math.floor(cur%3600/60), s=cur%60; const v=parseInt(t.value,10)||0; if(t.dataset.odur==='h') h=v; if(t.dataset.odur==='m') m=v; if(t.dataset.odur==='s') s=v; O.durSec=h*3600+m*60+s; paceVivo(); } });
 
