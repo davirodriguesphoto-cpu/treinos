@@ -1690,7 +1690,7 @@ $('#btnParse').onclick=()=>{
   if(!out.length){ toast('Não encontrei treino, monitoramento nem corrida nesse texto.'); return; }
   const known=new Set(knownNames()); const al=state.config.aliases||{};
   for(const s of out) if(s.kind==='treino') for(const b of s.blocks) for(const i of b.items){
-    const sh=/^shuttle run de ([\d.,]+)\s*m/i.exec(i.name); if(sh){ const tr=parseFloat(sh[1].replace(',','.')); i.name='Shuttle Run'; if(i.reps){ i.distM=Math.round(tr*i.reps*(i.sets||1)); } i.note=(i.note?i.note+' · ':'')+'trechos de '+sh[1]+'m'; }
+    const sh=/^(burpee )?shuttle run de ([\d.,]+)\s*m/i.exec(i.name); if(sh){ const tr=parseFloat(sh[2].replace(',','.')); i.name=sh[1]?'Burpee Shuttle Run':'Shuttle Run'; if(i.reps){ i.distM=Math.round(tr*i.reps*(i.sets||1)); } i.note=(i.note?i.note+' · ':'')+'trechos de '+sh[2]+'m'; }
     const c=P.canon(i.name,al); if(c) i.name=c; else { const hit=[...known].find(k=>P.nkey(k)===P.nkey(i.name)); if(hit) i.name=hit; else i.isNew=true; }
     if(i.loadKg){ const LR={'Abdominal':'Abdominal com Carga','Squat':'Front Squat','Jump Squat':'Jump Front Squat','Isometria no Squat':'Isometria no Front Squat','Prancha':'Prancha com Passagem','Remada':'Gorila Row'}; if(LR[i.name]){ i.name=LR[i.name]; i.isNew=false; } }
     delete i.raw; }
