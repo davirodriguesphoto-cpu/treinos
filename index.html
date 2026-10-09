@@ -494,6 +494,18 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
 .em-nome::after{content:" ✎";color:var(--muted);font-size:12px}
 .iconx:disabled{opacity:.3}
 .linkbtn.em-del{color:var(--bad);margin-top:14px;display:block}
+.pkgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.pkgrid label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.pkgrid > label > input,.de{border:1px solid var(--line);background:var(--surface);border-radius:10px;color:var(--text)}
+.pkgrid > label > input{padding:10px 12px;font-size:17px;min-width:0;width:100%}
+.de{display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:4px;padding:0 8px}
+.de.one{grid-template-columns:1fr auto}
+.de input{border:0;background:transparent;color:var(--text);font-size:17px;padding:10px 2px;text-align:center;min-width:0;width:100%}
+.de b{color:var(--muted);font-size:12px;font-weight:600}
+.mgrow{grid-template-columns:minmax(80px,110px) minmax(40px,1fr) 40px 64px 16px!important}
+.mgchev{color:var(--muted);font-size:16px;transition:transform .2s}
+.mgrow[aria-expanded="true"] .mgchev{transform:rotate(180deg)}
+.mglist .mgex{margin:2px 0 8px}
 .zion{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
 .imgrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .imgrow label.btn{cursor:pointer}
@@ -1015,7 +1027,7 @@ function zoneStrip(z){ const t=zoneSum(z); if(!t) return '<div class="zones" ari
   const p=k=>(100*(z[k]||0)/t).toFixed(2)+'%';
   return `<div class="zones" role="img" aria-label="Zonas de FC: leve ${mmss(z.leve)}, intensivo ${mmss(z.intensivo)}, aeróbico ${mmss(z.aerobico)}, anaeróbico ${mmss(z.anaerobico)}, VO2 ${mmss(z.vo2)}"><span class="zl" style="width:${p('leve')}"></span><span class="zi" style="width:${p('intensivo')}"></span><span class="za" style="width:${p('aerobico')}"></span><span class="zn" style="width:${p('anaerobico')}"></span><span class="zv" style="width:${p('vo2')}"></span></div>`; }
 const zoneLegend=`<div class="legend"><span><i class="zl"></i>Leve</span><span><i class="zi"></i>Intensivo</span><span><i class="za"></i>Aeróbico</span><span><i class="zn"></i>Anaeróbico</span><span><i class="zv"></i>VO₂ máx</span></div>`;
-function qty(i){ const p=[]; if(i.sets) p.push(i.sets+'×'); if(i.reps!=null&&!i.ladder) p.push(i.reps+(i.perSide?'/lado':'')); if(i.ladder) p.push(i.ladder.map(x=>x.reps+'×'+fmtNum(x.loadKg)+'kg').join(' · ')); if(i.timeSec) p.push((i.timeSec>=60?mmss(i.timeSec):i.timeSec+'"')+(i.perSide&&i.reps==null?'/lado':'')); if(i.distM) p.push((i.distM>=1000?fmtNum(i.distM/1000,2)+' km':i.distM+' m')+(i.perSide?'/lado':'')); if(i.cal) p.push(i.cal+' cal'); if(i.scheme) p.push('('+i.scheme+')'); return p.join(' '); }
+function qty(i){ const p=[]; if(i.sets) p.push(i.sets+'×'); if(i.reps!=null&&!i.ladder) p.push(i.repsE!=null&&i.repsE!==i.reps?i.reps+'D/'+i.repsE+'E':i.reps+(i.perSide?'/lado':'')); if(i.ladder) p.push(i.ladder.map(x=>x.reps+'×'+fmtNum(x.loadKg)+'kg').join(' · ')); if(i.timeSec) p.push((i.timeSec>=60?mmss(i.timeSec):i.timeSec+'"')+(i.perSide&&i.reps==null?'/lado':'')); if(i.distM) p.push((i.distM>=1000?fmtNum(i.distM/1000,2)+' km':i.distM+' m')+(i.perSide?'/lado':'')); if(i.cal) p.push(i.cal+' cal'); if(i.scheme) p.push('('+i.scheme+')'); return p.join(' '); }
 function sparkSVG(vals,color){ if(vals.length<2) return ''; const w=90,h=28,mn=Math.min(...vals),mx=Math.max(...vals),r=mx-mn||1;
   const pts=vals.map((v,k)=>(k/(vals.length-1)*w).toFixed(1)+','+(h-3-(v-mn)/r*(h-6)).toFixed(1)).join(' ');
   return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" points="${pts}"/></svg>`; }
@@ -1340,8 +1352,7 @@ function vMusculos(){
   return `<h2 style="margin-top:12px">Grupos musculares</h2><p class="sub">Quanto cada músculo foi trabalhado no período, em séries e em porcentagem do total. Exercícios compostos contam inteiro no músculo principal e pela metade nos auxiliares. Toque num músculo para ver os exercícios.</p>
   <div class="chips" role="group" aria-label="Período">${[['hoje','Hoje'],['7','7 dias'],['30','30 dias'],['90','90 dias'],['365','12 meses'],['tudo','Tudo']].map(([k,l])=>`<button class="chip" data-mgper="${k}" aria-pressed="${per===k}">${l}</button>`).join('')}</div>
   <div class="mgwrap"><div class="bodies">${bodySVG(val,max)}</div>
-  <div class="mglist">${rank.map(r=>`<button class="mgrow ${sel===r.k?'on':''}" data-mg="${r.k}"><span>${r.l}</span><span class="bar"><i style="width:${Math.round(100*r.v/max)}%"></i></span><b>${r.v?Math.round(100*r.v/tot)+'%':'–'}</b><span class="m">${fmtNum(r.v,0)} séries</span></button>`).join('')}
-  ${sel?`<div class="mgex"><h4>${esc(MG.find(m=>m[0]===sel)[1])} · ${sess[sel]?sess[sel].size:0} treinos · ${Math.round(100*(val[sel]||0)/tot)}% do total</h4>${top.length?top.map(([n,v])=>`<div class="item"><span>${esc(n)}</span><span class="q">${fmtNum(v,1)} séries</span></div>`).join(''):'<p class="note">Nada nesse período.</p>'}</div>`:''}</div></div>
+  <div class="mglist">${rank.map(r=>`<button class="mgrow ${sel===r.k?'on':''}" data-mg="${r.k}" aria-expanded="${sel===r.k}"><span>${r.l}</span><span class="bar"><i style="width:${Math.round(100*r.v/max)}%"></i></span><b>${r.v?Math.round(100*r.v/tot)+'%':'–'}</b><span class="m">${fmtNum(r.v,0)} séries</span><span class="mgchev" aria-hidden="true">▾</span></button>${sel===r.k?`<div class="mgex"><h4>${sess[sel]?sess[sel].size:0} treinos · ${Math.round(100*(val[sel]||0)/tot)}% do total</h4>${top.length?top.map(([n,v])=>`<div class="item"><span>${esc(n)}</span><span class="q">${fmtNum(v,1)} séries</span></div>`).join(''):'<p class="note">Nada nesse período.</p>'}</div>`:''}`).join('')}</div></div>
   ${!ss.length?`<p class="note">Nenhum treino nesse período.</p>`:''}
   ${sg.length?`<details class="sg"><summary>${sg.length} exercícios sem grupo muscular definido</summary><p class="note">${sg.map(([n,c])=>esc(n)+' ('+c+')').join(', ')}</p></details>`:''}`;
 }
@@ -1945,7 +1956,7 @@ aplicaTema();
 if('serviceWorker' in navigator && location.protocol==='https:'){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
 // ================= adicionar treino: folha de opções, híbrido e musculação =================
 const FORMATOS=[['','Sem formato'],['amrap','AMRAP'],['emom','EMOM'],['e2mom','E2MOM'],['intervalo','On / Off'],['fortime','For Time / RFT'],['chipper','Chipper'],['tabata','Tabata']];
-const FORM_DESC={amrap:'Tempo fixo, máximo de rounds e reps.',emom:'A cada minuto: faz a tarefa e descansa o que sobrar, ou máximo de reps dentro do minuto.',e2mom:'Janela de 2 minutos por rodada; o que sobrar é descanso. Não terminou, passa para a próxima.',intervalo:'Tempo executando e tempo descansando, ex.: 40" on / 20" off.',fortime:'Volume fixo, contra o relógio (com time cap).',chipper:'Lista longa, cada exercício uma vez.',tabata:'8 rounds de 20" de esforço e 10" de descanso.'};
+const FORM_DESC={amrap:'Tempo fixo, máximo de rounds e reps.',emom:'A cada minuto: faz a tarefa e descansa o que sobrar, ou máximo de reps dentro do minuto.',e2mom:'Janela de 2 minutos por rodada; o que sobrar é descanso. Não terminou, passa para a próxima.',intervalo:'Tempo executando e tempo descansando, ex.: 40" on / 20" off.',fortime:'Volume fixo, contra o relógio (com time cap).',chipper:'Lista longa, cada exercício uma vez.',tabata:'Cada round dura 4 min: 8 execuções de 20" de esforço com 10" de descanso, divididas entre os exercícios (4 exercícios = 2 vezes cada).'};
 function nowLocal(){ const d=new Date(); d.setSeconds(0,0); return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16); }
 function clampDT(v){ v=v||nowLocal(); return v>nowLocal()?nowLocal():v; }
 async function lerPrint(file){ await loadTess(); const c=await prepImg(file); const wk=await Tesseract.createWorker('eng'); await wk.setParameters({tessedit_pageseg_mode:'11'}); const r=await wk.recognize(c); await wk.terminate(); return parseWatch(r.data.text||''); }
@@ -1983,7 +1994,7 @@ function abrirHibrido(s){ state.draft=JSON.parse(JSON.stringify(s)); state.draft
   const nomes=['WARM UP','SKILL','WOD']; for(const n of nomes) if(!state.draft.blocks.some(b=>b.name===n)) state.draft.blocks.push({name:n,items:[],nenhum:true});
   const ord=n=>{ const k=['WARM UP','SKILL','WOD'].indexOf(n.replace(/\s+[IVX]+$/,'')); return k<0?9:k; }; state.draft.blocks.sort((a,b)=>ord(a.name)-ord(b.name));
   renderHib(); $('#dlgHib').showModal(); }
-function resumoItem(i){ const p=[]; if(i.sets) p.push(i.sets+'×'); if(i.reps!=null) p.push(i.reps+(i.perSide?'/lado':'')); if(i.timeSec) p.push(i.timeSec+'"'); if(i.distM) p.push(i.distM+' m'); if(i.loadKg) p.push(fmtNum(i.loadKg)+' kg'); if(i.modo&&i.modo!=='padrao') p.push(i.modo); return p.join(' · ')||'toque para preencher'; }
+function resumoItem(i){ const p=[]; if(i.sets) p.push(i.sets+'×'); if(i.reps!=null) p.push(i.repsE!=null&&i.repsE!==i.reps?i.reps+'D/'+i.repsE+'E':i.reps+(i.perSide?'/lado':'')); if(i.timeSec) p.push(i.timeSec+'"'); if(i.distM) p.push(i.distM+' m'); if(i.loadKg) p.push(fmtNum(i.loadKg)+' kg'); if(i.modo&&i.modo!=='padrao') p.push(i.modo); return p.join(' · ')||'toque para preencher'; }
 function compoeResultado(b){ const f=b.formato; const rd=b.rounds?b.rounds+' rounds':null; if(!f||!f.tipo) return rd||b.resultLivre||null; const n=FORMATOS.find(x=>x[0]===f.tipo)[1]; const p=[n];
   if(f.tipo==='amrap'){ if(f.tempo) p.push(f.tempo+"'"); if(f.rounds||f.reps) p.push(`${f.rounds||0} rounds${f.reps?' + '+f.reps+' reps':''}`); }
   if(f.tipo==='emom'){ if(f.tempo) p.push(f.tempo+"'"); if(f.modo==='maximo') p.push('máximo no minuto'); if(f.reps) p.push(f.reps+' reps'); }
@@ -1991,9 +2002,11 @@ function compoeResultado(b){ const f=b.formato; const rd=b.rounds?b.rounds+' rou
   if(f.tipo==='intervalo'){ p[0]=`${f.on||40}" on / ${f.off||20}" off`; if(f.rounds) p.push(f.rounds+' rounds'); if(f.reps) p.push(f.reps+' reps'); }
   if(f.tipo==='fortime'){ if(f.rounds) p.push(f.rounds+' rounds'); if(f.cap) p.push('cap '+f.cap+"'"); if(f.resultado) p.push(f.resultado); }
   if(f.tipo==='chipper'&&f.resultado) p.push(f.resultado);
-  if(f.tipo==='tabata'&&f.reps) p.push(f.reps+' reps');
-  if(rd&&f.tipo!=='amrap') p.splice(1,0,rd); return p.join(' · '); }
-function renderHib(){ const d=state.draft; const tipos=tiposTreino().map(t=>t.label);
+  if(f.tipo==='tabata'){ const r=b.rounds||1; p.length=1; p.push(r+(r>1?' rounds':' round')+' · '+(4*r)+"'"); if(f.reps) p.push(f.reps+' reps'); }
+  if(rd&&f.tipo!=='amrap'&&f.tipo!=='tabata') p.splice(1,0,rd); return p.join(' · '); }
+function tabataAuto(d){ for(const b of d.blocks||[]){ if(!b.formato||b.formato.tipo!=='tabata') continue; const n=b.items.length; if(!n) continue; const s=Math.max(1,Math.round(8/n));
+    for(const i of b.items){ if(!i.setsManual) i.sets=s; if(i.timeSec==null&&!i.complex) i.timeSec=20; } } }
+function renderHib(){ if(state.draft) tabataAuto(state.draft); const d=state.draft; const tipos=tiposTreino().map(t=>t.label);
   if(!d.cats) d.cats=(d.focos&&d.focos.length?d.focos:[d.foco||'']).map(f=>({sel:f&&tipos.includes(f)?f:'__outros',livre:f&&!tipos.includes(f)?f:''}));
   const fx=(bi,k,lab,v,ph)=>`<label>${lab}<input data-hf="${bi}.${k}" value="${esc(v==null?'':v)}" placeholder="${ph||''}" inputmode="${k==='resultado'?'text':'numeric'}"></label>`;
   let h=`<div class="cats">${d.cats.map((c,k)=>`<div class="catrow"><label>${k?'E também':'Categoria'}<select data-hc="${k}"><option value="__outros" ${c.sel==='__outros'?'selected':''}>Outros</option>${tipos.map(t=>`<option ${c.sel===t?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
@@ -2053,14 +2066,19 @@ function renderPicker(){ const P=state.pick; const el=$('#pkBody');
     el.innerHTML=`<input class="search" id="pkSearch" type="search" placeholder="Buscar exercício" value="${esc(P.q)}" autocomplete="off">
       ${q&&!exato?`<button class="row pk-outro" data-pkname="${esc(q)}"><div><div class="t">Outros: “${esc(q)}”</div><div class="m">usar esse nome</div></div></button>`:''}
       <div class="rows pk-list">${L.map(r=>`<button class="row" data-pkname="${esc(r.name)}"><div class="t">${esc(r.name)}${r.via?` <span class="m">(${esc(r.via)})</span>`:''}</div></button>`).join('')||'<p class="note">Nada encontrado. Digite o nome e use "Outros".</p>'}</div>`; return; }
-  const i=P.item; const modo=i.modo||'padrao'; const mais=P.mais||i.timeSec||i.distM||i.sets;
-  const inp=(k,l,v)=>`<label>${l}<input data-pk="${k}" inputmode="decimal" value="${esc(v==null?'':v)}"></label>`;
+  const i=P.item; const modo=i.modo||'padrao'; const lado=modo!=='padrao';
+  if(P.alvo.tipo==='hib'&&P.alvo.ii==null&&!P.tabataOk){ P.tabataOk=true; const f=(state.draft.blocks[P.alvo.bi]||{}).formato; if(f&&f.tipo==='tabata'&&i.timeSec==null) i.timeSec=20; }
+  const inp=(k,l,v,ph)=>`<label>${l}<input data-pk="${k}" inputmode="decimal" value="${esc(v==null?'':v)}" placeholder="${ph||''}"></label>`;
   el.innerHTML=`<div class="pk-name"><b>${esc(i.name)}</b><button class="linkbtn" data-pktroca="1">trocar</button></div>
-    <div class="form">${inp('loadKg','Carga (kg)',i.loadKg)}${inp('reps','Repetições',i.reps)}${mais?inp('sets','Séries',i.sets):''}</div>
-    ${mais?`<div class="dtl" style="margin:8px 0 4px">Tempo</div><div class="durpick two"><label><input data-pkt="m" inputmode="numeric" value="${i.timeSec?Math.floor(i.timeSec/60):''}" placeholder="0"><span>min</span></label><label><input data-pkt="s" inputmode="numeric" maxlength="2" value="${i.timeSec?String(i.timeSec%60).padStart(2,'0'):''}" placeholder="00"><span>s</span></label></div>
-      <div class="dtl" style="margin:8px 0 4px">Distância</div><div class="durpick one"><label><input data-pk="distM" inputmode="numeric" value="${esc(i.distM??'')}" placeholder="0"><span>metros</span></label></div>`:''}
-    ${mais?'':'<button class="linkbtn" data-pkmais="1">+ séries, tempo ou distância</button>'}
     <div class="seg" role="group" aria-label="Modo">${[['padrao','Padrão'],['unilateral','Unilateral'],['alternado','Alternado']].map(([k,l])=>`<button class="segb" data-pkmodo="${k}" aria-pressed="${modo===k}">${l}</button>`).join('')}</div>
+    <div class="pkgrid">
+      ${inp('loadKg','Carga (kg)',i.loadKg,'0')}
+      ${lado?`<label>Repetições<span class="de"><input data-pk="reps" inputmode="numeric" value="${esc(i.reps??'')}" placeholder="0"><b>D</b><input data-pk="repsE" inputmode="numeric" value="${esc(i.repsE??'')}" placeholder="0"><b>E</b></span></label>`:inp('reps','Repetições',i.reps,'0')}
+      <label>Metros<span class="de one"><input data-pk="distM" inputmode="numeric" value="${esc(i.distM??'')}" placeholder="0"><b>m</b></span></label>
+      <label>Tempo<span class="de"><input data-pkt="m" inputmode="numeric" value="${i.timeSec?Math.floor(i.timeSec/60):''}" placeholder="0"><b>min</b><input data-pkt="s" inputmode="numeric" maxlength="2" value="${i.timeSec?String(i.timeSec%60).padStart(2,'0'):''}" placeholder="00"><b>s</b></span></label>
+    </div>
+    ${(P.mais||i.sets)?`<div class="form">${inp('sets','Séries',i.sets,'—')}</div>`:'<button class="linkbtn" data-pkmais="1">+ séries</button>'}
+    ${(state.draft&&P.alvo.tipo==='hib'&&((state.draft.blocks[P.alvo.bi]||{}).formato||{}).tipo==='tabata')?'<p class="note" style="margin:6px 0 0">Tabata: 8 execuções de 20" (com 10" de descanso) por round, divididas entre os exercícios. Com 4 exercícios, cada um entra 2 vezes. O tempo e as séries já vêm preenchidos, mas dá pra mudar.</p>':''}
     <label class="pk-note">Observação<input data-pk="note" value="${esc(i.note&&!['unilateral','alternado'].includes(i.note)?i.note:'')}"></label>
     <div class="actions">${P.alvo.ii!=null?'<button class="btn danger small" data-pkrm="1">Remover</button>':''}<button class="btn" data-pkok="mais">Adicionar mais</button><button class="btn primary" data-pkok="ok">Concluído</button></div>`; }
 function pickerSalva(){ const P=state.pick; const i=P.item; if(!i||!i.name) return false; delete i.isNew;
@@ -2070,7 +2088,8 @@ function pickerSalva(){ const P=state.pick; const i=P.item; if(!i||!i.name) retu
     const novos=C.map(n=>({...base,name:n,note:'complex: '+C.join(' + ')}));
     if(P.alvo.tipo==='hib'){ const b=state.draft.blocks[P.alvo.bi]; if(P.alvo.ii!=null) b.items.splice(P.alvo.ii,1,...novos); else b.items.push(...novos); renderHib(); }
     return true; }
-  for(const k of ['loadKg','reps','sets','timeSec','distM']) if(i[k]===''||i[k]==null||Number.isNaN(i[k])) delete i[k];
+  for(const k of ['loadKg','reps','repsE','sets','timeSec','distM']) if(i[k]===''||i[k]==null||Number.isNaN(i[k])) delete i[k];
+  if(!i.modo||i.modo==='padrao') delete i.repsE; else if(i.repsE!=null&&i.reps==null){ i.reps=i.repsE; }
   if(P.alvo.tipo==='hib'){ const b=state.draft.blocks[P.alvo.bi]; if(P.alvo.ii!=null) b.items[P.alvo.ii]=i; else b.items.push(i); renderHib(); }
   else if(P.alvo.tipo==='mus'){ if(P.alvo.ii!=null) state.mus.ex[P.alvo.ii].name=i.name; else state.mus.ex.push({name:i.name,tipo:POR_TEMPO.test(i.name)?'tempo':'carga',series:[{kg:'',reps:'',tempo:''},{kg:'',reps:'',tempo:''},{kg:'',reps:'',tempo:''}]}); renderMus(); }
   else if(P.alvo.tipo==='modelo'){ state.novoModelo.ex.push(i.name); renderNovoModelo(); }
@@ -2248,6 +2267,7 @@ document.addEventListener('input',e=>{ const t=e.target;
   if(t.id==='pkCq'){ state.pick.complex.q=t.value; const pos=t.selectionStart; renderPicker(); const s=$('#pkCq'); if(s){ s.focus(); s.setSelectionRange(pos,pos);} return; }
   if(t.id==='pkSearch'){ state.pick.q=t.value; const pos=t.selectionStart; renderPicker(); const s=$('#pkSearch'); if(s){ s.focus(); s.setSelectionRange(pos,pos);} }
   if(t.dataset.pkt&&state.pick&&state.pick.item){ const it=state.pick.item; const cur=it.timeSec||0; let m=Math.floor(cur/60), s=cur%60; const v=parseInt(t.value,10)||0; if(t.dataset.pkt==='m') m=v; else s=v; it.timeSec=m*60+s||null; }
+  if(t.dataset.pk==='sets'&&state.pick&&state.pick.item) state.pick.item.setsManual=true;
   if(t.dataset.pk&&state.pick&&state.pick.item){ const k=t.dataset.pk; state.pick.item[k]=k==='note'?t.value:(t.value===''?null:parseFloat(t.value.replace(',','.'))); }
   if(t.dataset.ms&&state.mus){ const [ei,si,k]=t.dataset.ms.split('.'); state.mus.ex[+ei].series[+si][k]=t.value; guardaRascunhoMus(); }
   if(t.dataset.nm&&state.novoModelo){ state.novoModelo[t.dataset.nm]=t.value; } });
@@ -2261,7 +2281,7 @@ document.addEventListener('change',async e=>{ const t=e.target;
   if(t.dataset.hcl!=null&&state.draft){ state.draft.cats[+t.dataset.hcl].livre=t.value; guardaRascunho(); }
   if(t.dataset.hrounds!=null&&state.draft){ state.draft.blocks[+t.dataset.hrounds].rounds=parseInt(t.value,10)||null; guardaRascunho(); }
   if(t.dataset.hn!=null&&state.draft){ state.draft.blocks[+t.dataset.hn].nenhum=t.checked; renderHib(); }
-  if(t.dataset.hf&&state.draft){ const [bi,k]=t.dataset.hf.split('.'); const b=state.draft.blocks[+bi]; b.formato=b.formato||{}; b.formato[k]=t.value; if(k==='tipo'){ if(t.value==='intervalo'){ if(b.formato.on==null) b.formato.on='40'; if(b.formato.off==null) b.formato.off='20'; } renderHib(); } else guardaRascunho(); }
+  if(t.dataset.hf&&state.draft){ const [bi,k]=t.dataset.hf.split('.'); const b=state.draft.blocks[+bi]; b.formato=b.formato||{}; b.formato[k]=t.value; if(k==='tipo'){ if(t.value==='tabata'&&(!b.rounds||b.rounds===8)) b.rounds=1; if(t.value==='intervalo'){ if(b.formato.on==null) b.formato.on='40'; if(b.formato.off==null) b.formato.off='20'; } renderHib(); } else guardaRascunho(); }
   if(t.dataset.w!=null&&String(t.dataset.w).startsWith('h.')&&state.draft){ const k=t.dataset.w.slice(2); const b=state.draft.band=state.draft.band||{};
     if(k.startsWith('z.')){ b.zones=b.zones||{}; b.zones[k.slice(2)]=tsec(t.value); } else if(k==='durSec') b.durSec=tsec(t.value); else { const n=parseInt(t.value,10); b[k]=isNaN(n)?null:n; } b.fonteRelogio=true; guardaRascunho(); }
   if(t.id==='hibImg'){ const f=t.files[0]; t.value=''; if(!f) return; const st=$('#hibImgSt'); st.textContent='Lendo o print…';
