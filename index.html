@@ -527,6 +527,18 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
 .authform input{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px;font-size:16px}
 .linkbtn{background:none;border:0;padding:0;color:var(--text);text-decoration:underline;font:inherit}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.pkmus,.mus-rap{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:10px;margin:10px 0}
+.pkmus label,.mus-rap label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.pkmus label:only-child,.mus-rap label:only-child{grid-column:1/-1}
+.mus-rap{margin:8px 0 2px;padding-bottom:10px;border-bottom:1px dashed var(--line)}
+.mus-rap .de input{font-size:16px;padding:8px 2px}
+.runx{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}
+.runx label{display:grid;gap:3px;font-size:12px;color:var(--muted)}
+.runx input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-size:15px;width:100%;color:var(--text)}
+.splitrow{display:grid;grid-template-columns:70px 1fr 34px;gap:8px;align-items:center;margin-top:6px}
+.splitrow input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-size:15px;width:100%;color:var(--text)}
+.edprint{display:block;margin:6px 0 4px}
+.relprint.small{padding:8px 12px;font-size:13px}
 </style>
 </head>
 <body>
@@ -684,8 +696,7 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
     <button class="btn fin wide" id="btnPushSim">ATIVAR</button><button class="btn ghost wide" id="btnPushNao">Agora não</button><button class="linkbtn" id="btnPushNunca">Nunca permitir</button></div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
-<script>
-// Parser de treinos do Davi — usado na importação (node) e no app (browser)
+<script>// Parser de treinos do Davi — usado na importação (node) e no app (browser)
 (function(root){
 const ZN={leve:'leve',intensivo:'intensivo','aeróbico':'aerobico',aerobico:'aerobico','anaeróbico':'anaerobico',anaerobico:'anaerobico','vo₂ máximo':'vo2','vo2 máximo':'vo2','vo2 maximo':'vo2'};
 const WD={SEG:1,TER:2,QUA:3,QUI:4,SEX:5,SAB:6,'SÁB':6,DOM:0};
@@ -713,7 +724,7 @@ function parseRun(t){
     paceBest:paceSec(field(t,/Ritmo mais r[áa]pido:\s*([^\n]+)/i)),
     kcal:num(field(t,/Calorias\s*\(ativa\):\s*([\d.,]+)/i)),kcalTotal:num(field(t,/Calorias\s*\(total\):\s*([\d.,]+)/i)),
     bpmAvg:num(field(t,/Frequ[êe]ncia Card[íi]aca M[ée]dia:\s*(\d+)/i)),bpmMax:num(field(t,/Frequ[êe]ncia Card[íi]aca M[áa]xima:\s*(\d+)/i)),
-    steps:num((field(t,/Passos:\s*([\d.,]+)/i)||'').replace(/\./g,'')),cadAvg:num(field(t,/Cad[êe]ncia M[ée]dia:\s*(\d+)/i)),
+    steps:num((field(t,/Passos:\s*([\d.,]+)/i)||'').replace(/\./g,'')),cadAvg:num(field(t,/Cad[êe]ncia M[ée]dia:\s*(\d+)/i)),cadMax:num(field(t,/Cad[êe]ncia M[áa]xima:\s*(\d+)/i)),
     stride:num(field(t,/Comprimento da passada[^:]*:\s*(\d+)/i)),splits,zones:zones(t)});
 }
 // ---------- exercícios
@@ -849,22 +860,58 @@ if(typeof module!=='undefined') module.exports=api; else root.TreinoParser=api;
 function parseWatch(raw){
   const t=raw.replace(/(\d)[Oo](?=\d|\s*kcal)/g,'$10').replace(/[Oo](?=\d)/g,'0').replace(/(\d)[Oo]\b/g,'$10');
   const out={};
+  const L=t.split('\n').map(x=>x.trim()).filter(Boolean);
+  const idx=re=>L.findIndex(x=>re.test(x));
   let m=/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{1,2}):(\d{2})/.exec(t);
   if(m){ out.date=m[3]+'-'+m[2]+'-'+m[1]; out.time=m[4].padStart(2,'0')+':'+m[5]; }
+  const TRE=/\b(\d{1,2})[:.\-°\s](\d{2})[:.\-°\s](\d{2})\b/g;
   const times=[...t.matchAll(/\b(\d{1,2})[:.\-](\d{2})[:.\-](\d{2})\b/g)].map(x=>(+x[1])*3600+(+x[2])*60+(+x[3]));
   if(times.length) out.durSec=times[0];
-  if(times.length>=6){ const z=times.slice(-5); const k=['leve','intensivo','aerobico','anaerobico','vo2']; out.zones={}; k.forEach((q,i)=>out.zones[q]=z[i]); }
-  const kc=[...t.matchAll(/\b(\d{2,4})\s*(?:\.{2,}|…|k\s*cal)/gi)].map(x=>+x[1]);
+  // zonas: depois do rótulo "Leve" (prints de corrida têm eixos de tempo nos gráficos depois das zonas)
+  // linhas só com o tempo de cada zona (o OCR troca ":" por ".", espaço ou nada, e 0 por O/D)
+  const iLeve=idx(/^leve\b/i); let zs=null;
+  if(iLeve>=0){ const z=[]; for(let i=iLeve;i<L.length&&z.length<5;i++){ const x=L[i]; if(/ritmo|rmo|mmo|cad|frequ/i.test(x)) break; const y=x.replace(/^\S*(?:leve|intens\S*|aer\S*|anaer\S*)\s+/i,'').replace(/[OoDQ]/g,'0'); if(/[a-z]/i.test(y)) continue; const d=y.replace(/\D/g,''); if(d.length<5) continue;
+      if(d.length===6){ const h=+d.slice(0,2), m=+d.slice(2,4), s=+d.slice(4,6); z.push(m<60&&s<60?h*3600+m*60+s:null); } else z.push(null); }
+    if(z.length>=4&&z.some(v=>v!=null)){ while(z.length<5) z.push(null); zs=z; } }
+  if(!zs&&times.length>=6&&!/m[ée]dia de ritmo|passada/i.test(t)) zs=times.slice(-5);
+  if(zs){ const k=['leve','intensivo','aerobico','anaerobico','vo2']; out.zones={}; k.forEach((q,i)=>out.zones[q]=zs[i]); }
+  const kcl=[]; for(const x of L){ const q=/^(\d[\d ]{0,4}\d)\s*(?:k\s*c\S*|keal\S*)/i.exec(x); if(q){ const v=+q[1].replace(/ /g,''); if(v>=10&&v<=9999) kcl.push(v); } }
+  if(kcl.length){ out.kcal=kcl[0]; if(kcl.length>1) out.kcalTotal=kcl[1]; }
+  const kc=out.kcal!=null?[]:[...t.matchAll(/(?<![\d.,])\b(\d{2,4})\s*(?:\.{2,}|…|k\s*ca[a-z1|]?\b|keal)/gi)].map(x=>+x[1]);
   if(kc.length){ out.kcal=kc[0]; if(kc.length>1) out.kcalTotal=kc[1]; }
   m=/\b(\d{2,3})\s+(\d{2,3})\s+BPM\s+BPM\s*m/i.exec(t);
   if(m){ out.bpmAvg=+m[1]; out.bpmMax=+m[2]; }
-  else { m=/(\d{2,3})\s*[be]?pm\b/i.exec(t); if(m) out.bpmAvg=+m[1]; m=/(\d{2,3})\s*\n?\s*BPM\s*m[áa]x/i.exec(t); if(m) out.bpmMax=+m[1]; }
-  if(/corrida|running/i.test(t)) out.tipo='corrida';
-  m=/(\d{1,2}[.,]\d{2})\s*km/i.exec(t); if(m){ out.distKm=parseFloat(m[1].replace(',','.')); out.tipo='corrida'; }
-  const tp=/^\s*(HIIT|Corrida[^\n]*|Treino[^\n]*|Caminhada[^\n]*)/im.exec(t); if(tp) out.tipoTexto=tp[1].trim();
+  else { m=/(\d{2,3})[8Be]?\s*[be]?pm\b/i.exec(t); if(m) out.bpmAvg=+m[1]; m=/(\d{2,3})\s*\n?\s*BPM\s*m[áa]x/i.exec(t); if(m) out.bpmMax=+m[1]; }
+  // seção de frequência: os dois números (média e máxima) podem vir em qualquer ordem
+  const iFc=idx(/frequ[eé]ncia\s+card/i);
+  if(iFc>=0){ const n=[]; for(let i=iFc+1;i<Math.min(L.length,iFc+8)&&n.length<2;i++){ const q=/^(\d{2,3})$/.exec(L[i]); if(q&&![210,150,90,30].includes(+q[1])) n.push(+q[1]); } if(n.length===2){ out.bpmMax=Math.max(...n); if(!out.bpmAvg) out.bpmAvg=Math.min(...n); } }
+  if(out.bpmMax!=null&&out.bpmAvg!=null&&out.bpmMax<out.bpmAvg) out.bpmMax=null;
+  const titulo=L.slice(0,4).join(' ');
+  if(/esteira|treadmill/i.test(titulo)){ out.tipo='corrida'; out.esteira=true; out.tipoTexto='Esteira'; }
+  else if(/corrida|running/i.test(titulo)) out.tipo='corrida';
+  else if(/caminhada|walk/i.test(titulo)){ out.tipo='corrida'; out.caminhada=true; }
+  if(!out.tipo&&/corrida|running/i.test(t)) out.tipo='corrida';
+  m=/(\d{1,2}[.,]\d{2})\s*km/i.exec(t); if(!m){ for(const x of L.slice(0,10)){ const q=/^(\d{1,2}[.,]\d{2})(?:\s*(?:km|kn|in|ic|i|\.{2,}|…))?\.?$/i.exec(x); if(q){ m=q; break; } } }
+  if(m&&(out.tipo==='corrida'||/km/i.test(m[0])||/m[ée]dia de ritmo/i.test(t))){ out.distKm=parseFloat(m[1].replace(',','.')); out.tipo='corrida'; }
+  const tp=/^\s*(HIIT|Corrida[^\n]*|Treino[^\n]*|Caminhada[^\n]*|Esteira)/im.exec(t); if(tp&&!out.tipoTexto) out.tipoTexto=tp[1].trim();
+  if(out.tipo==='corrida'){
+    const pz=s=>{ const q=/^\D{0,2}(\d{1,2})\s*[°'’`´"]?\s*(\d{2})\s*["”'’°]{0,2}\D{0,2}$/.exec(s); if(!q) return null; const a=+q[1], b=+q[2]; return b<60&&a>=2&&a<=30?a*60+b:null; };
+    // ritmo médio: primeiro ritmo da grade do topo
+    const iR=idx(/m[ée]dia de ritmo/i);
+    for(let i=0;i<(iR>=0?iR:Math.min(L.length,20));i++){ if(/[°'’`"]/.test(L[i])){ const p=pz(L[i]); if(p){ out.paceAvg=p; break; } } }
+    // ritmo máximo: os dois valores antes do par "Média de ritmo" / "Ritmo máx."
+    for(let i=0;i<L.length-1;i++){ if(/m[ée]dia de\s+\S*tmo/i.test(L[i])&&/^r\S*o\s*m\S*x/i.test(L[i+1])){ const a=pz(L[i-2]||''), b=pz(L[i-1]||''); if(b&&(!out.paceAvg||b<out.paceAvg)) out.paceBest=b; if(!out.paceAvg&&a) out.paceAvg=a; } }
+    if(!out.paceAvg&&out.durSec&&out.distKm) out.paceAvg=Math.round(out.durSec/out.distKm);
+    const iP=idx(/^passos$/i); if(iP>0){ for(let i=iP-1;i>=Math.max(0,iP-6);i--){ const q=/^(\d{3,6})$/.exec(L[i].replace(/[.,](?=\d{3}$)/,'')); if(q){ out.steps=+q[1]; break; } } }
+    m=/\b(\d{2,3})\s*cm\b/i.exec(t); if(m) out.stride=+m[1];
+    let iC=idx(/cad[eéè]+ncia/i); if(iC<0){ const iM=idx(/m[ée]dia de ppm/i); if(iM>=3) iC=iM-3; }
+    if(iC>=0){ const n=[]; for(let i=iC+1;i<Math.min(L.length,iC+6)&&n.length<2;i++){ const q=/^(\d{2,3})$/.exec(L[i]); if(q&&![255,170,85].includes(+q[1])) n.push(+q[1]); } if(n.length===2){ out.cadAvg=Math.min(...n); out.cadMax=Math.max(...n); } else if(n.length===1) out.cadAvg=n[0]; }
+  }
   return out;
 }
-if(typeof module!=='undefined') module.exports={parseWatch}; else window.parseWatch=parseWatch;
+// ritmo por km: as barras verdes do print têm o ritmo escrito em branco dentro
+function paceDeTexto(s){ const q=/(\d{1,2})\s*[°'’`´":.]?\s*(\d{2})/.exec(String(s||'').replace(/[Oo]/g,'0')); if(!q) return null; const a=+q[1], b=+q[2]; return b<60&&a>=2&&a<=30?a*60+b:null; }
+if(typeof module!=='undefined') module.exports={parseWatch,paceDeTexto}; else { window.parseWatch=parseWatch; window.paceDeTexto=paceDeTexto; }
 // mapeamento exercício -> grupos musculares (peso 1 = principal, 0.5 = secundário)
 const MG=[['peito','Peito'],['ombros','Ombros'],['biceps','Bíceps'],['triceps','Tríceps'],['antebraco','Antebraço'],['abdomen','Abdômen'],['quadriceps','Quadríceps'],['adutores','Adutores'],['panturrilha','Panturrilha'],['trapezio','Trapézio'],['costas','Costas'],['lombar','Lombar'],['gluteos','Glúteos'],['posterior','Posterior de coxa']];
 const MRULES=[
@@ -972,8 +1019,7 @@ function parseTreinoPersonal(texto){ const linhas=texto.split(/\r?\n/).map(x=>x.
     for(const parte of nome.split(/\s\+\s/)) { const p=parte.trim(); if(p.length>=3) treinos[cur].push(p); } }
   return ordem.map(L=>({letra:L,foco:focos[L]||'',exercicios:treinos[L]})).filter(t=>t.exercicios.length); }
 if(typeof module!=='undefined') module.exports={parseTreinoPersonal,limpaNomeExercicio};
-</script><script>
-(function(){
+</script><script>(function(){
 const P=window.TreinoParser;
 const $=s=>document.querySelector(s);
 const state={sessions:[],bio:null,config:{aliases:{}},ready:false,tab:'resumo',ex:null,exFilter:'',openSess:{},pending:null};
@@ -1412,17 +1458,29 @@ function drawRadar(){
       scales:{r:{beginAtZero:true,max:Math.ceil(Math.max(100,...ds(a,'--muted').data,...ds(z,'--z2').data)*1.04/10)*10,angleLines:{color:grid},grid:{color:grid},pointLabels:{color:css('--text'),font:{size:14,weight:'600'},padding:4},ticks:{color:tick,backdropColor:'transparent',showLabelBackdrop:false,stepSize:50,font:{size:10},callback:v=>v%50===0?v:''}}}}});
 }
 function drawCorpo(){ if(!state.bio||!state.bio.evaluations||!state.bio.evaluations.length) return; drawRadar(); bioChart('cPeso','peso','--text'); bioChart('cGord','gorduraPct','--z4'); bioChart('cMusc','musculoPct','--body'); bioChart('cVisc','visceral','--z5'); }
+function corridaDetalhe(s){ const it=(l,v)=>v==null||v===''?'':`<div class="item"><span>${l}</span><span class="q">${v}</span></div>`;
+  const sp=s.splits||[]; const temBpm=sp.some(x=>x.bpm);
+  let h=sp.length?`<div class="block"><h4>Ritmo por km</h4>${sp.map(x=>`<div class="item"><span>Km ${x.km}${x.partial?' (parcial)':''}</span><span class="q">${x.pace?pace(x.pace):'–'}${temBpm&&x.bpm?` <span class="m">· ${x.bpm} bpm</span>`:''}</span></div>`).join('')}</div>`:'';
+  const z=s.zones; const zon=z&&Object.values(z).some(v=>v)?it('Leve · Intensivo · Aeróbico · Anaeróbico · VO₂'+(s.zonasStrava?' <span class="m">(estimadas pela FC)</span>':''),['leve','intensivo','aerobico','anaerobico','vo2'].map(k=>mmss(z[k]||0)).join(' · ')):'';
+  h+=`<div class="block"><h4>Relógio</h4>${it('Ritmo médio',s.pace?pace(s.pace)+'/km':null)}${it('Ritmo mais rápido',s.paceBest?pace(s.paceBest)+'/km':null)}${it('FC média / máxima',s.bpmAvg||s.bpmMax?(s.bpmAvg||'–')+' / '+(s.bpmMax||'–')+' bpm':null)}${it('Calorias ativas / total',s.kcal||s.kcalTotal?(s.kcal||'–')+' / '+(s.kcalTotal||'–')+' kcal':null)}${zon}
+    ${it('Passos',s.steps?fmtNum(s.steps,0):null)}${it('Passada média',s.stride?s.stride+' cm':null)}${it('Cadência média / máxima',s.cadAvg?s.cadAvg+(s.cadMax?' / '+s.cadMax:'')+' passos/min':null)}${it('Ganho de elevação',s.elevGain?fmtNum(s.elevGain,0)+' m':null)}${it('Esforço relativo (Strava)',s.sufferScore)}${it('Temperatura',s.temp!=null?s.temp+' °C':null)}${it('Aparelho',s.device?esc(s.device):null)}</div>`;
+  const be=(s.bestEfforts||[]).filter(b=>b.sec); if(be.length) h+=`<div class="block"><h4>Melhores marcas nesta corrida</h4>${be.map(b=>it(esc(b.nome),hms(b.sec))).join('')}</div>`;
+  if(s.stravaDesc) h+=`<div class="block"><h4>Descrição no Strava</h4><p class="note" style="margin:4px 0">${esc(s.stravaDesc)}</p></div>`;
+  return h; }
+document.addEventListener('change',async e=>{ const t=e.target; if(!t.dataset||!t.dataset.corrprint) return; const f=t.files[0]; t.value=''; if(!f) return;
+  toast('Lendo o print… (na primeira vez demora um pouco)');
+  try{ const w=await lerPrint(f); if(!w.durSec&&!w.kcal&&!w.bpmAvg){ toast('Não consegui ler esse print. Toque em Editar para digitar os dados.'); return; } openEdit(t.dataset.corrprint); printNaEdicao(w); }
+  catch(err){ console.error(err); toast('Não deu para ler o print agora. Confira a internet e tente de novo.'); } });
 function sessHTML(s){
   const d=d2(s.date); const open=state.openSess[s.id];
   if(s.kind==='corrida') return `<div class="sess ${open?'open':''}"><button data-sess="${esc(s.id)}" aria-expanded="${!!open}"><div class="date"><b>${d.getDate()}</b><span>${DIA[d.getDay()]}</span></div><div><div><span class="tag run">${s.local==='box'?'corrida no box':'corrida'}</span>${s.source?` <span class="tag">${esc(s.source)}</span>`:''}${s.note?` <span class="m">${esc(s.note)}</span>`:''} <span class="t">${fmtNum(s.distKm,2)} km</span></div><div class="meta"><span>${mmss(s.durSec)}</span><span>ritmo ${pace(s.pace)}/km</span>${s.bpmAvg?`<span>${s.bpmAvg} bpm</span>`:''}</div>${zoneStrip(s.zones)}</div><span class="m">${s.kcalTotal?s.kcalTotal+' kcal':''}</span></button>
-  <div class="detail">${s.splits&&s.splits.length?`<div class="block"><h4>Ritmo por km</h4>${s.splits.map(x=>`<div class="item"><span>Km ${x.km}${x.partial?' (parcial)':''}</span><span class="q">${pace(x.pace)}</span></div>`).join('')}</div>`:''}
-  <div class="block"><h4>Relógio</h4><div class="item"><span>Ritmo mais rápido</span><span class="q">${pace(s.paceBest)}</span></div><div class="item"><span>BPM máximo</span><span class="q">${s.bpmMax||'–'}</span></div><div class="item"><span>Passos</span><span class="q">${s.steps?fmtNum(s.steps,0):'–'}</span></div><div class="item"><span>Cadência média</span><span class="q">${s.cadAvg||'–'}</span></div></div>
-  ${stravaRef(s)}<div class="actions sessacts"><button class="btn ghost small" data-copy="${esc(s.id)}">Copiar treino</button><button class="btn ghost small" data-export="${esc(s.id)}">Exportar .txt</button><button class="btn" data-edit="${esc(s.id)}">Editar</button><button class="btn danger" data-del="${esc(s.id)}">Excluir corrida</button></div></div></div>`;
+  <div class="detail">${corridaDetalhe(s)}
+  ${stravaRef(s)}<div class="actions sessacts"><label class="btn relprint small" for="cp-${esc(s.id)}">Anexar print</label><input type="file" id="cp-${esc(s.id)}" accept="image/*" hidden data-corrprint="${esc(s.id)}"><button class="btn ghost small" data-copy="${esc(s.id)}">Copiar treino</button><button class="btn ghost small" data-export="${esc(s.id)}">Exportar .txt</button><button class="btn" data-edit="${esc(s.id)}">Editar</button><button class="btn danger" data-del="${esc(s.id)}">Excluir corrida</button></div></div></div>`;
   const b=s.band||{}; const n=(s.blocks||[]).reduce((a,x)=>a+x.items.length,0);
   return `<div class="sess ${open?'open':''}"><button data-sess="${esc(s.id)}" aria-expanded="${!!open}"><div class="date"><b>${d.getDate()}</b><span>${DIA[d.getDay()]}</span></div><div><div class="t">${s.status==='andamento'?'<span class="pill">em andamento</span> ':''}${esc(s.focos?s.focos.join(' + '):(s.foco||'Treino'))}${s.focoExtra?` <span class="m">· ${esc(s.focoExtra)}</span>`:''}${s.fase?` <span class="tag">fase ${s.fase} · sem ${s.semana}</span>`:''}</div><div class="meta"><span>${s.soRelogio?'só relógio':s.modalidade==='outro'?'outros treinos':n+' exercícios'}</span>${b.durSec?`<span>${mmss(b.durSec)}</span>`:''}${b.bpmAvg?`<span>${b.bpmAvg} bpm médio</span>`:''}</div>${zoneStrip(b.zones)}</div><span class="m">${b.kcalTotal?b.kcalTotal+' kcal':''}</span></button>
   <div class="detail">${(s.blocks||[]).map(bl=>`<div class="block"><h4>${esc(bl.name)}${bl.result?` <span class="res">${esc(bl.result)}</span>`:''}</h4>${bl.items.map(i=>`<div class="item"><span>${esc(i.name)}${i.note?` <span class="m">(${esc(i.note)})</span>`:''}</span><span><span class="q">${esc(qty(i))}</span>${i.loadKg!=null&&!i.ladder?` <span class="kg">${fmtNum(i.loadKg)} kg</span>`:''}</span></div>`).join('')}</div>`).join('')}
   ${s.naoRealizados&&s.naoRealizados.length?`<div class="block"><h4>Não realizados</h4>${s.naoRealizados.map(n=>`<div class="item"><span class="m">${esc(n)}</span></div>`).join('')}</div>`:''}
-  ${b.bpmMax?`<div class="block"><h4>Relógio</h4><div class="item"><span>BPM máximo</span><span class="q">${b.bpmMax}</span></div><div class="item"><span>Calorias ativas / total</span><span class="q">${b.kcal||'–'} / ${b.kcalTotal||'–'} kcal</span></div>${b.zones?`<div class="item"><span>Leve · Intensivo · Aeróbico · Anaeróbico · VO₂</span><span class="q">${['leve','intensivo','aerobico','anaerobico','vo2'].map(k=>mmss(b.zones[k])).join(' · ')}</span></div>`:''}</div>`:''}
+  ${b.bpmMax?`<div class="block"><h4>Relógio</h4><div class="item"><span>BPM máximo</span><span class="q">${b.bpmMax}</span></div><div class="item"><span>Calorias ativas / total</span><span class="q">${b.kcal||'–'} / ${b.kcalTotal||'–'} kcal</span></div>${b.sufferScore?`<div class="item"><span>Esforço relativo (Strava)</span><span class="q">${b.sufferScore}</span></div>`:''}${b.zones?`<div class="item"><span>Leve · Intensivo · Aeróbico · Anaeróbico · VO₂${b.zonasStrava?' <span class="m">(estimadas pela FC)</span>':''}</span><span class="q">${['leve','intensivo','aerobico','anaerobico','vo2'].map(k=>mmss(b.zones[k])).join(' · ')}</span></div>`:''}</div>`:''}
   ${stravaRef(s)}<div class="actions sessacts"><button class="btn ghost small" data-copy="${esc(s.id)}">Copiar treino</button><button class="btn ghost small" data-export="${esc(s.id)}">Exportar .txt</button><button class="btn" data-edit="${esc(s.id)}">Editar</button><button class="btn danger" data-del="${esc(s.id)}">Excluir treino</button></div></div></div>`;
 }
 function focoKey(f){ return String(f||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9& ]+/g,' ').split(' ').filter(Boolean).map(w=>w.length>3?w.replace(/s$/,''):w).join(' '); }
@@ -1520,21 +1578,19 @@ async function prepImg(file){
   const url=URL.createObjectURL(file); const img=await new Promise((ok,no)=>{const i=new Image(); i.onload=()=>ok(i); i.onerror=no; i.src=url;});
   const sc=Math.max(1,1400/img.width); const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
   const g=c.getContext('2d'); g.drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url);
+  const cor=document.createElement('canvas'); cor.width=c.width; cor.height=c.height; cor.getContext('2d').drawImage(c,0,0); c._cor=cor;
   const d=g.getImageData(0,0,c.width,c.height), a=d.data;
   for(let i=0;i<a.length;i+=4){ const y=0.299*a[i]+0.587*a[i+1]+0.114*a[i+2]; const v=y<230?0:255; a[i]=a[i+1]=a[i+2]=v; }
   g.putImageData(d,0,0); return c; }
 document.getElementById('regImg').addEventListener('change',async e=>{
   const f=e.target.files[0]; e.target.value=''; if(!f) return; const st=$('#imgStatus');
   st.textContent='Lendo o print… (na primeira vez demora um pouco)';
-  try{ await loadTess(); const c=await prepImg(f);
-    const wk=await Tesseract.createWorker('eng'); await wk.setParameters({tessedit_pageseg_mode:'11'});
-    const r=await wk.recognize(c); await wk.terminate();
-    const w=parseWatch(r.data.text||'');
+  try{ const w=await lerPrint(f);
     if(!w.durSec&&!w.kcal&&!w.bpmAvg){ st.textContent='Não consegui ler esse print. Tente outro ou digite os dados.'; state.watch=null; return; }
     state.watch=w; st.textContent='Print lido: '+(w.date?fmtD(w.date)+' · ':'')+mmss(w.durSec)+' · '+(w.kcalTotal||w.kcal||'–')+' kcal · '+(w.bpmAvg||'–')+' bpm. Confira na próxima tela.';
   }catch(err){ console.error(err); st.textContent='Não deu para ler o print agora. Confira a internet e tente de novo.'; state.watch=null; }
 });
-function watchBand(w,old){ const b={...(old||{})}; for(const k of ['date','time','durSec','kcal','kcalTotal','bpmAvg','bpmMax','zones']) if(w[k]!=null) b[k]=w[k]; b.fonteRelogio=true; if(!b.tipo) b.tipo=w.tipoTexto||'HIIT'; return b; }
+function watchBand(w,old){ const b={...(old||{})}; for(const k of ['date','time','durSec','kcal','kcalTotal','bpmAvg','bpmMax','zones','distKm','paceBest','steps','stride','cadAvg','cadMax','splits']) if(w[k]!=null) b[k]=w[k]; b.fonteRelogio=true; if(!b.tipo) b.tipo=w.tipoTexto||'HIIT'; return b; }
 const tsec=v=>{ v=String(v||'').trim(); if(!v) return null; const p=v.split(':').map(Number); if(p.some(isNaN)) return null; return p.length===3?p[0]*3600+p[1]*60+p[2]:p.length===2?p[0]*60+p[1]:p[0]; };
 function hms(s){ if(s==null) return ''; const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60; return (h?h+':'+String(m).padStart(2,'0'):String(m))+':'+String(x).padStart(2,'0'); }
 function watchEditor(si,b){ const z=b.zones||{};
@@ -1549,7 +1605,7 @@ function renderEdit(){ const s=state.edit; const nm=knownNames();
   let h=`<div class="form">${inp('date',s.date,'Data',{type:'date'})}`;
   if(s.kind==='corrida'){
     h+=inp('distKm',s.distKm,'Distância (km)',{num:1})+inp('durSec',hms(s.durSec),'Tempo')+inp('kcalTotal',s.kcalTotal,'kcal total',{num:1})+inp('bpmAvg',s.bpmAvg,'FC média',{num:1})+inp('bpmMax',s.bpmMax,'FC máx',{num:1})+
-      `<label>Tipo<select data-ed="local"><option value="livre" ${s.local!=='box'?'selected':''}>Corrida livre</option><option value="box" ${s.local==='box'?'selected':''}>Corrida no box</option></select></label>`+inp('note',s.note,'Observação')+`</div>`;
+      `<label>Tipo<select data-ed="local"><option value="livre" ${s.local!=='box'?'selected':''}>Corrida livre</option><option value="box" ${s.local==='box'?'selected':''}>Corrida no box</option></select></label>`+inp('note',s.note,'Observação')+`</div>`+corridaRelogioEd(s);
   } else {
     h+=inp('foco',s.foco,'Tipo de treino')+inp('focoExtra',s.focoExtra,'Ênfase (opcional)')+`</div>`;
     (s.blocks||[]).forEach((b,bi)=>{
@@ -1559,15 +1615,31 @@ function renderEdit(){ const s=state.edit; const nm=knownNames();
         <label class="chk"><input type="checkbox" data-ed="${P}.perSide" ${it.perSide?'checked':''}> por lado</label>${inp(P+'.note',it.note,'Obs.',{cls:'wide'})}<button class="btn ghost small" data-edrm="${bi}.${ii}" aria-label="Remover exercício">Remover</button></div>`; });
       h+=`<button class="btn ghost small" data-edadd="${bi}">+ exercício</button></div>`; });
     h+=`<button class="btn ghost small" data-edaddb="1">+ bloco</button>`;
-    const b=s.band||{}; h+=`<h4 style="margin:16px 0 4px">Relógio</h4>`+watchEditor('e',b);
+    const b=s.band||{}; h+=`<h4 style="margin:16px 0 4px">Relógio</h4>${printBotao('Anexar print do relógio')}`+watchEditor('e',b);
   }
   $('#edForm').innerHTML=h; }
+// ---- corrida: dados do relógio na edição (print, ritmo por km, cadência…)
+function printBotao(txt){ return `<label class="btn relprint edprint" for="eImg">${txt}</label><input type="file" id="eImg" accept="image/*" hidden data-relimg="e"><p class="note" id="eImgSt"></p>`; }
+function corridaRelogioEd(s){ const z=s.zones||{}; const f=(path,l,v,num)=>`<label>${l}<input data-ed="${path}" ${num?'inputmode="numeric"':''} value="${esc(v==null?'':v)}"></label>`;
+  const sp=s.splits||[];
+  return `<h4 style="margin:16px 0 4px">Relógio</h4>${printBotao(s.fonteRelogio?'Trocar print do relógio':'Anexar print do relógio')}
+    <div class="runx">${f('kcal','kcal ativa',s.kcal,1)}${f('paceBest','Ritmo máx (min:s)',s.paceBest?hms(s.paceBest):'')}${f('steps','Passos',s.steps,1)}${f('stride','Passada (cm)',s.stride,1)}${f('cadAvg','Cadência média',s.cadAvg,1)}${f('cadMax','Cadência máx',s.cadMax,1)}
+    ${f('zones.leve','Leve',hms(z.leve))}${f('zones.intensivo','Intensivo',hms(z.intensivo))}${f('zones.aerobico','Aeróbico',hms(z.aerobico))}${f('zones.anaerobico','Anaeróbico',hms(z.anaerobico))}${f('zones.vo2','VO₂ máx',hms(z.vo2))}</div>
+    <div class="dtl" style="margin:12px 0 0">Ritmo por km</div>
+    ${sp.map((x,k)=>`<div class="splitrow"><span class="m">Km ${x.km}${x.partial?' (parcial)':''}</span><input data-ed="splits.${k}.pace" value="${x.pace?hms(x.pace):''}" placeholder="min:s"><button class="iconx" data-edsprm="${k}" aria-label="Tirar km">✕</button></div>`).join('')}
+    <button class="linkbtn" data-edspadd="1">+ km</button>`; }
+function printNaEdicao(w){ const s=state.edit; if(!s) return; const st=()=>document.getElementById('eImgSt');
+  if(s.kind!=='corrida'){ s.band=watchBand(w,s.band); renderEdit(); return; }
+  for(const [k,v] of [['distKm',w.distKm],['durSec',w.durSec],['kcal',w.kcal],['kcalTotal',w.kcalTotal],['bpmAvg',w.bpmAvg],['bpmMax',w.bpmMax],['zones',w.zones],['paceBest',w.paceBest],['steps',w.steps],['stride',w.stride],['cadAvg',w.cadAvg],['cadMax',w.cadMax]]) if(v!=null) s[k]=v;
+  if(w.zones) delete s.zonasStrava; if(w.splits&&w.splits.length) s.splits=w.splits; if(w.esteira&&!s.note) s.note='esteira'; if(w.caminhada&&!s.note) s.note='caminhada';
+  if(s.distKm&&s.durSec) s.pace=Math.round(s.durSec/s.distKm); s.fonteRelogio=true;
+  renderEdit(); const el=st(); if(el) el.textContent=(w.date&&w.date!==s.date?'Atenção: o print é de '+fmtD(w.date)+'. Confira a data lá em cima. ':'')+'Print lido. Confira os números e toque em Salvar alterações.'+((w.duvida||[]).length?' Olhe com atenção: '+w.duvida.join(', ')+'.':'')+(w.zones&&Object.values(w.zones).some(v=>v==null)||(w.splits||[]).some(x=>x.pace==null)?' Algum campo ficou em branco porque não deu para ler: complete olhando o print.':''); }
 function setPath(o,path,v){ const k=path.split('.'); let x=o; for(let i=0;i<k.length-1;i++){ const q=/^\d+$/.test(k[i])?+k[i]:k[i]; x=x[q]=x[q]||{}; } x[k[k.length-1]]=v; }
 document.addEventListener('change',e=>{ const t=e.target; if(!state.edit) return;
   if(t.dataset.ed!=null){ const path=t.dataset.ed; const last=path.split('.').pop(); let v=t.type==='checkbox'?t.checked:t.value;
-    if(['sets','reps','timeSec','distM','kcalTotal','bpmAvg','bpmMax'].includes(last)) v=v===''?null:Math.round(parseFloat(String(v).replace(',','.')));
+    if(['sets','reps','timeSec','distM','kcal','kcalTotal','bpmAvg','bpmMax','steps','stride','cadAvg','cadMax'].includes(last)) v=v===''?null:Math.round(parseFloat(String(v).replace(',','.')));
     else if(['loadKg','distKm'].includes(last)) v=v===''?null:parseFloat(String(v).replace(',','.'));
-    else if(last==='durSec') v=tsec(v);
+    else if(last==='durSec'||last==='paceBest'||last==='pace'||/^zones\./.test(path)) v=tsec(v);
     if(Number.isNaN(v)) v=null;
     setPath(state.edit,path,v);
     if(last==='loadKg'||last==='reps'){ const it=path.split('.').slice(0,-1).reduce((o,q)=>o[/^\d+$/.test(q)?+q:q],state.edit); if(it&&it.ladder) delete it.ladder; } }
@@ -1576,7 +1648,9 @@ document.addEventListener('change',e=>{ const t=e.target; if(!state.edit) return
 document.addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t||!state.edit) return; const s=state.edit;
   if(t.dataset.edrm){ const [bi,ii]=t.dataset.edrm.split('.').map(Number); s.blocks[bi].items.splice(ii,1); renderEdit(); }
   if(t.dataset.edadd!=null){ s.blocks[+t.dataset.edadd].items.push({name:''}); renderEdit(); }
-  if(t.dataset.edaddb){ (s.blocks=s.blocks||[]).push({name:'WOD',items:[{name:''}],result:null}); renderEdit(); } });
+  if(t.dataset.edaddb){ (s.blocks=s.blocks||[]).push({name:'WOD',items:[{name:''}],result:null}); renderEdit(); }
+  if(t.dataset.edsprm!=null){ s.splits.splice(+t.dataset.edsprm,1); s.splits.forEach((x,k)=>x.km=k+1); renderEdit(); }
+  if(t.dataset.edspadd){ s.splits=s.splits||[]; s.splits.forEach(x=>x.partial=false); s.splits.push({km:s.splits.length+1,pace:null}); renderEdit(); } });
 $('#btnEdSave').onclick=async()=>{ const s=state.edit; if(!s) return; const btn=$('#btnEdSave'); btn.disabled=true;
   try{ if(s.kind==='treino'){ for(const b of s.blocks||[]) b.items=b.items.filter(i=>i.name&&i.name.trim()); s.blocks=(s.blocks||[]).filter(b=>b.items.length||b.result); for(const b of s.blocks) for(const i of b.items){ i.name=i.name.trim(); for(const k of Object.keys(i)) if(i[k]===null||i[k]==='') delete i[k]; } }
     else { if(s.distKm&&s.durSec) s.pace=Math.round(s.durSec/s.distKm); }
@@ -1685,7 +1759,7 @@ $('#btnParse').onclick=()=>{
   if(W){ let tgt=out.find(s=>W.tipo==='corrida'?s.kind==='corrida':s.kind==='treino');
     if(!tgt){ tgt=W.tipo==='corrida'?{kind:'corrida'}:{kind:'treino',blocks:[],soRelogio:!out.length||undefined}; out.push(tgt); }
     if(tgt.kind==='treino'){ tgt.band=watchBand(W,tgt.band); if(W.date) tgt.date=W.date; delete tgt.dateConflict; }
-    else { Object.assign(tgt,{distKm:tgt.distKm||W.distKm||null,pace:(W.distKm&&W.durSec)?Math.round(W.durSec/W.distKm):tgt.pace,durSec:W.durSec,kcal:W.kcal,kcalTotal:W.kcalTotal,bpmAvg:W.bpmAvg,bpmMax:W.bpmMax,zones:W.zones,time:W.time,fonteRelogio:true}); if(W.date) tgt.date=W.date; tgt.splits=tgt.splits||[]; }
+    else { Object.assign(tgt,{distKm:tgt.distKm||W.distKm||null,pace:(W.distKm&&W.durSec)?Math.round(W.durSec/W.distKm):tgt.pace,durSec:W.durSec,kcal:W.kcal,kcalTotal:W.kcalTotal,bpmAvg:W.bpmAvg,bpmMax:W.bpmMax,zones:W.zones,time:W.time,fonteRelogio:true}); for(const k of ['paceBest','steps','stride','cadAvg','cadMax']) if(W[k]!=null) tgt[k]=W[k]; if(W.esteira&&!tgt.note) tgt.note='esteira'; if(W.date) tgt.date=W.date; tgt.splits=(W.splits&&W.splits.length)?W.splits:(tgt.splits||[]); }
     if(!tgt.date) tgt.date=todayISO(); }
   if(!out.length){ toast('Não encontrei treino, monitoramento nem corrida nesse texto.'); return; }
   const known=new Set(knownNames()); const al=state.config.aliases||{};
@@ -1922,6 +1996,7 @@ document.addEventListener('click',async e=>{
     if(!cid){ const n=document.getElementById('stravaAviso')||Object.assign(document.createElement('p'),{id:'stravaAviso',className:'note aviso-erro'}); n.textContent='A conexão com o Strava ainda está sendo configurada pelo administrador. Tente de novo mais tarde.'; t.closest('.mb').insertBefore(n,t.closest('.actions')); return; }
     $('#dlgStravaHelp').close(); stravaConectar(!!state.stravaHistAoConectar); }
   if(t.id==='btnStravaSync'){ t.disabled=true; await stravaSync(false); t.disabled=false; }
+  if(t.id==='btnStravaDet'){ t.disabled=true; await stravaDetalhes(); t.disabled=false; }
   if(t.id==='btnStravaOff'){ if(confirm('Desconectar o Strava? Os treinos que já entraram continuam no app.')){ try{ await stravaCall({action:'disconnect'}); toast('Strava desconectado.'); }catch(e){ toast('Não deu para desconectar.'); } renderStrava(); } }
   if(t.id==='btnConvidar'){ t.disabled=true; await convidar(); t.disabled=false; }
   if(t.dataset.unconv){ await desconvidar(t.dataset.unconv); }
@@ -1959,7 +2034,33 @@ const FORMATOS=[['','Sem formato'],['amrap','AMRAP'],['emom','EMOM'],['e2mom','E
 const FORM_DESC={amrap:'Tempo fixo, máximo de rounds e reps.',emom:'A cada minuto: faz a tarefa e descansa o que sobrar, ou máximo de reps dentro do minuto.',e2mom:'Janela de 2 minutos por rodada; o que sobrar é descanso. Não terminou, passa para a próxima.',intervalo:'Tempo executando e tempo descansando, ex.: 40" on / 20" off.',fortime:'Volume fixo, contra o relógio (com time cap).',chipper:'Lista longa, cada exercício uma vez.',tabata:'Cada round dura 4 min: 8 execuções de 20" de esforço com 10" de descanso, divididas entre os exercícios (4 exercícios = 2 vezes cada).'};
 function nowLocal(){ const d=new Date(); d.setSeconds(0,0); return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16); }
 function clampDT(v){ v=v||nowLocal(); return v>nowLocal()?nowLocal():v; }
-async function lerPrint(file){ await loadTess(); const c=await prepImg(file); const wk=await Tesseract.createWorker('eng'); await wk.setParameters({tessedit_pageseg_mode:'11'}); const r=await wk.recognize(c); await wk.terminate(); return parseWatch(r.data.text||''); }
+async function lerPrint(file){ await loadTess(); const c=await prepImg(file); const wk=await Tesseract.createWorker('eng');
+  try{ await wk.setParameters({tessedit_pageseg_mode:'11'}); const r=await wk.recognize(c); const w=parseWatch(r.data.text||'');
+    if(w.tipo==='corrida'){
+      // segunda leitura, em tons de cinza: completa o que a primeira não pegou e confere o que pegou
+      { try{ const r2=await wk.recognize(c._cor); const w2=parseWatch(r2.data.text||'');
+        // onde as duas leituras discordam, fica a primeira e o campo é marcado para conferir
+        const ROT={bpmAvg:'FC média',bpmMax:'FC máx',kcal:'kcal ativa',kcalTotal:'kcal total',steps:'passos',stride:'passada',cadAvg:'cadência média',cadMax:'cadência máx',paceBest:'ritmo máx',distKm:'distância',durSec:'tempo'};
+        w.duvida=Object.keys(ROT).filter(k=>w[k]!=null&&w2[k]!=null&&w[k]!==w2[k]).map(k=>ROT[k]);
+        for(const k of Object.keys(w2)) if(w[k]==null) w[k]=w2[k]; }catch(e){} }
+      try{ const sp=await splitsDoPrint(wk,c._cor,w.distKm); if(sp.length) w.splits=sp; }catch(e){ console.warn(e); } }
+    return w; } finally{ await wk.terminate(); } }
+// ritmo por km: acha as barras verdes do print e lê o texto branco de dentro de cada uma
+function faixasVerdes(cv){ const W=cv.width, H=cv.height; const a=cv.getContext('2d').getImageData(0,0,W,H).data; const rows=new Array(H);
+  for(let y=0;y<H;y++){ let best=0, run=0, x0=0, bx0=0, bx1=0; for(let x=0;x<W;x+=2){ const i=(y*W+x)*4, r=a[i], g=a[i+1], b=a[i+2]; if(g>140&&g-r>60&&g-b>20){ if(!run) x0=x; run++; if(run>best){ best=run; bx0=x0; bx1=x; } } else run=0; } rows[y]={len:best*2,x0:bx0,x1:bx1}; }
+  const out=[]; let y=0; while(y<H){ if(rows[y].len>W*0.12){ const s=y; let x0=rows[y].x0, x1=rows[y].x1; while(y<H&&rows[y].len>W*0.12){ x0=Math.min(x0,rows[y].x0); x1=Math.max(x1,rows[y].x1); y++; } const h=y-s; if(h>=12&&h<=130) out.push({y0:s,y1:y,x0,x1,h}); } y++; }
+  // fica o último grupo de barras empilhadas (a seção "Ritmo por km" vem depois das zonas)
+  const grupos=[]; for(const f of out){ const g=grupos[grupos.length-1]; if(g&&f.y0-g[g.length-1].y1<f.h*2.2) g.push(f); else grupos.push([f]); }
+  return grupos; }
+async function splitsDoPrint(wk,cv,distKm){ const grupos=faixasVerdes(cv); await wk.setParameters({tessedit_pageseg_mode:'7'});
+  try{ for(let gi=grupos.length-1;gi>=0;gi--){ const G=grupos[gi]; const paces=[];
+      for(const f of G){ const pad=Math.round(f.h/2), w=Math.max(1,f.x1-f.x0-2*pad), h=Math.max(1,f.h-8); const src=cv.getContext('2d').getImageData(f.x0+pad,f.y0+4,w,h); const d=src.data;
+        for(let i=0;i<d.length;i+=4){ const v=d[i]>95?0:255; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; }
+        const k=document.createElement('canvas'); k.width=w*2+60; k.height=h*2+60; const kg=k.getContext('2d'); kg.fillStyle='#fff'; kg.fillRect(0,0,k.width,k.height);
+        const tmp=document.createElement('canvas'); tmp.width=w; tmp.height=h; tmp.getContext('2d').putImageData(src,0,0); kg.imageSmoothingQuality='high'; kg.drawImage(tmp,30,30,w*2,h*2);
+        const r=await wk.recognize(k); paces.push(paceDeTexto(r.data.text)); }
+      if(paces.some(p=>p!=null)){ const frac=distKm?Math.round((distKm%1)*100)/100:0; return paces.map((p,k)=>({km:k+1,pace:p,partial:k===paces.length-1&&frac>=0.01&&paces.length===Math.ceil(distKm)})); } }
+    return []; } finally{ await wk.setParameters({tessedit_pageseg_mode:'11'}); } }
 const nrm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9+/ ]+/g,' ').replace(/\s+/g,' ').trim();
 function buscaExercicios(q,nomes,lim){ const qn=nrm(q); if(!qn) return nomes.slice(0,lim||60).map(n=>({name:n,via:null}));
   const al=state.config.aliases||{}; const rev={}; for(const [k,v] of Object.entries(al)) if(!k.startsWith('foco:')) (rev[v]=rev[v]||[]).push(k);
@@ -2067,6 +2168,7 @@ function renderPicker(){ const P=state.pick; const el=$('#pkBody');
       ${q&&!exato?`<button class="row pk-outro" data-pkname="${esc(q)}"><div><div class="t">Outros: “${esc(q)}”</div><div class="m">usar esse nome</div></div></button>`:''}
       <div class="rows pk-list">${L.map(r=>`<button class="row" data-pkname="${esc(r.name)}"><div class="t">${esc(r.name)}${r.via?` <span class="m">(${esc(r.via)})</span>`:''}</div></button>`).join('')||'<p class="note">Nada encontrado. Digite o nome e use "Outros".</p>'}</div>`; return; }
   const i=P.item; const modo=i.modo||'padrao'; const lado=modo!=='padrao';
+  if(P.alvo.tipo==='mus'&&P.alvo.ii==null){ renderPickerMus(P,el); return; }
   if(P.alvo.tipo==='hib'&&P.alvo.ii==null&&!P.tabataOk){ P.tabataOk=true; const f=(state.draft.blocks[P.alvo.bi]||{}).formato; if(f&&f.tipo==='tabata'&&i.timeSec==null) i.timeSec=20; }
   const inp=(k,l,v,ph)=>`<label>${l}<input data-pk="${k}" inputmode="decimal" value="${esc(v==null?'':v)}" placeholder="${ph||''}"></label>`;
   el.innerHTML=`<div class="pk-name"><b>${esc(i.name)}</b><button class="linkbtn" data-pktroca="1">trocar</button></div>
@@ -2081,7 +2183,22 @@ function renderPicker(){ const P=state.pick; const el=$('#pkBody');
     ${(state.draft&&P.alvo.tipo==='hib'&&((state.draft.blocks[P.alvo.bi]||{}).formato||{}).tipo==='tabata')?'<p class="note" style="margin:6px 0 0">Tabata: 8 execuções de 20" (com 10" de descanso) por round, divididas entre os exercícios. Com 4 exercícios, cada um entra 2 vezes. O tempo e as séries já vêm preenchidos, mas dá pra mudar.</p>':''}
     <label class="pk-note">Observação<input data-pk="note" value="${esc(i.note&&!['unilateral','alternado'].includes(i.note)?i.note:'')}"></label>
     <div class="actions">${P.alvo.ii!=null?'<button class="btn danger small" data-pkrm="1">Remover</button>':''}<button class="btn" data-pkok="mais">Adicionar mais</button><button class="btn primary" data-pkok="ok">Concluído</button></div>`; }
+// musculação: a última vez que o exercício foi feito vira ponto de partida
+function ultimoMus(nome){ const k=nrm(nome); const ss=allSessions(); for(let x=ss.length-1;x>=0;x--){ const s=ss[x]; if(s.modalidade!=='musculacao') continue; for(const b of s.blocks||[]) for(const it of b.items||[]){ if(nrm(it.name)!==k) continue;
+  if(it.modoTempo) return {tempo:true,sets:(it.series||[]).length||it.sets||3,tempoTxt:((it.series||[])[0]||{}).tempo||''};
+  const L=it.ladder||[]; const u=L[L.length-1]||{}; return {sets:L.length||it.sets||3,loadKg:u.loadKg||it.loadKg||null,reps:u.reps||null}; } } return null; }
+function renderPickerMus(P,el){ const i=P.item;
+  if(!P.musInit){ P.musInit=true; const u=ultimoMus(i.name); i.tempo=u?!!u.tempo:POR_TEMPO.test(i.name); if(u){ i.sets=u.sets; if(u.tempo) i.tempoTxt=u.tempoTxt; else { if(u.loadKg) i.loadKg=u.loadKg; if(u.reps) i.reps=u.reps; } P.musUlt=true; } else i.sets=3; }
+  const v=x=>esc(x==null?'':x);
+  el.innerHTML=`<div class="pk-name"><b>${esc(i.name)}</b><button class="linkbtn" data-pktroca="1">trocar</button></div>
+    <div class="seg mini" role="group" aria-label="Medida">${[['carga','Carga e reps'],['tempo','Tempo']].map(([k,l])=>`<button class="segb" data-pkmt="${k}" aria-pressed="${(i.tempo?'tempo':'carga')===k}">${l}</button>`).join('')}</div>
+    <div class="pkmus">${i.tempo?'':`<label>Carga<span class="de one"><input data-pk="loadKg" inputmode="decimal" value="${v(i.loadKg)}" placeholder="0"><b>kg</b></span></label>`}
+      <label>Séries<span class="de"><input data-pk="sets" inputmode="numeric" value="${v(i.sets)}" placeholder="3"><b>×</b>${i.tempo?`<input data-pk="tempoTxt" value="${v(i.tempoTxt)}" placeholder="0:30"><b>tempo</b>`:`<input data-pk="reps" inputmode="numeric" value="${v(i.reps)}" placeholder="0"><b>reps</b>`}</span></label></div>
+    <p class="note" style="margin:4px 0 0">${P.musUlt?'Valores da última vez que você fez esse exercício. ':''}Cada série vira uma linha, e dá para ajustar uma a uma depois.${i.tempo?'':' Usando dois pesos? Coloque a carga total.'}</p>
+    <div class="actions"><button class="btn" data-pkok="mais">Adicionar mais</button><button class="btn primary" data-pkok="ok">Concluído</button></div>`; }
+function seriesMus(n,kg,reps,tempo){ n=Math.max(1,Math.min(12,parseInt(n,10)||3)); return Array.from({length:n},()=>({kg:kg==null||Number.isNaN(kg)?'':String(kg),reps:reps==null||Number.isNaN(reps)?'':String(reps),tempo:tempo||''})); }
 function pickerSalva(){ const P=state.pick; const i=P.item; if(!i||!i.name) return false; delete i.isNew;
+  if(P.alvo.tipo==='mus'&&P.alvo.ii==null){ state.mus.ex.push({name:i.name,tipo:i.tempo?'tempo':'carga',series:seriesMus(i.sets,i.tempo?null:i.loadKg,i.tempo?null:i.reps,i.tempo?(i.tempoTxt||''):'')}); renderMus(); return true; }
   if(!i.complex&&P.alvo.tipo==='hib'&&![i.loadKg,i.reps,i.timeSec,i.distM].some(v=>v!=null&&v!==''&&!Number.isNaN(v))){ toast('Coloque carga, repetições, tempo ou distância.'); return false; }
   if(P.complex){ const C=P.complex.comps; if(!C.length){ toast('Adicione os exercícios do complex.'); return false; }
     const base={}; for(const k of ['loadKg','reps','sets','modo']) if(i[k]!=null&&i[k]!==''&&!Number.isNaN(i[k])) base[k]=i[k];
@@ -2126,19 +2243,28 @@ function iniciarMus(id,sess){ const m=(state.modelos||[]).find(x=>x.id===id); if
   const nomes=sess?[...(sess.blocks[0]||{items:[]}).items.map(i=>i.name),...(sess.naoRealizados||[])]:m.exercicios;
   const vazio=()=>[{kg:'',reps:'',tempo:''},{kg:'',reps:'',tempo:''},{kg:'',reps:'',tempo:''}];
   state.mus={id,stravaIds:sess?sess.stravaIds:undefined,nome:m?m.nome:(sess.focoExtra||'Treino'),orig:sess?sess.id:null,date:sess?sess.date:state.musDT.date,time:sess?(sess.time||'07:00'):state.musDT.time,band:sess?sess.band:null,watchEdit:false,
-    ex:nomes.map(n=>({name:n,tipo:prevT[n]||(POR_TEMPO.test(n)?'tempo':'carga'),pulado:pulados.has(n),series:(prev[n]&&prev[n].length?prev[n]:vazio()).map(x=>({kg:x.kg??'',reps:x.reps??'',tempo:x.tempo??''}))})),base:m?[...m.exercicios]:null};
+    ex:nomes.map(n=>({name:n,tipo:prevT[n]||(POR_TEMPO.test(n)?'tempo':'carga'),pulado:pulados.has(n),rapido:!(prev[n]&&prev[n].length),series:(prev[n]&&prev[n].length?prev[n]:vazio()).map(x=>({kg:x.kg??'',reps:x.reps??'',tempo:x.tempo??''}))})),base:m?[...m.exercicios]:null};
   renderMus(); if(!$('#dlgMus').open) $('#dlgMus').showModal(); }
 function renderMus(){ const M=state.mus; $('#musTitle').textContent='Musculação · '+M.nome;
   $('#musBody').innerHTML=`${dtCampos('md',M.date,M.time)}
   <p class="note">Os valores vêm do último ${esc(M.nome)}. Ajuste carga, repetições ou tempo de cada série. Se o aparelho estiver ocupado, marque <b>não realizado</b>.</p>
   ${M.ex.map((e,ei)=>`<div class="mus-ex ${e.pulado?'pulado':''}"><div class="hbh"><b>${esc(e.name)}</b><span class="hbh-r"><button class="chipbtn ${e.pulado?'on':''}" data-muspula="${ei}">${e.pulado?'não realizado ✓':'não realizado'}</button><button class="iconx" data-musrm="${ei}" aria-label="Remover exercício">✕</button></span></div>
     ${e.pulado?'':`<div class="seg mini" role="group" aria-label="Medida">${[['carga','Carga e reps'],['tempo','Tempo']].map(([k,l])=>`<button class="segb" data-mustipo="${ei}.${k}" aria-pressed="${e.tipo===k}">${l}</button>`).join('')}</div>
+    ${e.rapido?linhaRapida(e,ei):''}
     <div class="mus-s">${e.series.map((s,si)=>`<div class="mus-row ${e.tipo==='tempo'?'t':''}"><span class="m">${si+1}ª</span>${e.tipo==='tempo'?`<label><input data-ms="${ei}.${si}.tempo" inputmode="numeric" value="${esc(s.tempo)}" placeholder="tempo (ex.: 5:00 ou 30)"></label>`:`<label><input data-ms="${ei}.${si}.kg" inputmode="decimal" value="${esc(s.kg)}" placeholder="kg"></label><label><input data-ms="${ei}.${si}.reps" inputmode="numeric" value="${esc(s.reps)}" placeholder="reps"></label>`}<button class="iconx" data-musdel="${ei}.${si}" aria-label="Tirar série">✕</button></div>`).join('')}</div>
     <button class="linkbtn" data-musadd="${ei}">+ série</button>`}</div>`).join('')}
   <button class="btn ghost small" data-musex="1">+ exercício</button>
   <div class="dtl" style="margin:16px 0 4px">Duração do treino</div>${durPicker('mdur',(M.band&&M.band.durSec)||0)}
   ${relogioCard('m',M.band,M.watchEdit)}`;
   $('#musActions').innerHTML=`<div class="trow"><button class="btn ghost" data-tcancel="m">Cancelar</button><button class="btn" data-mussave="0">Salvar e continuar depois</button></div><button class="btn fin" data-mussave="1">FINALIZAR TREINO</button>`; guardaRascunhoMus(); }
+// linha rápida: preenche todas as séries de uma vez (aparece quando o exercício começa vazio)
+function linhaRapida(e,ei){ const s0=e.series[0]||{}; const v=x=>esc(x==null?'':x);
+  return `<div class="mus-rap">${e.tipo==='tempo'?'':`<label>Carga<span class="de one"><input data-mq="${ei}.kg" inputmode="decimal" value="${v(s0.kg)}" placeholder="0"><b>kg</b></span></label>`}
+    <label>Séries<span class="de"><input data-mq="${ei}.n" inputmode="numeric" value="${e.series.length}"><b>×</b>${e.tipo==='tempo'?`<input data-mq="${ei}.tempo" value="${v(s0.tempo)}" placeholder="0:30"><b>tempo</b>`:`<input data-mq="${ei}.reps" inputmode="numeric" value="${v(s0.reps)}" placeholder="0"><b>reps</b>`}</span></label></div>`; }
+document.addEventListener('input',e=>{ const t=e.target; if(!t.dataset||!t.dataset.mq||!state.mus) return; const [ei,k]=t.dataset.mq.split('.'); const ex=state.mus.ex[+ei]; if(!ex) return;
+  if(k==='n') return; for(let si=0;si<ex.series.length;si++){ ex.series[si][k]=t.value; const inp=document.querySelector(`[data-ms="${ei}.${si}.${k}"]`); if(inp) inp.value=t.value; } guardaRascunhoMus(); });
+document.addEventListener('change',e=>{ const t=e.target; if(!t.dataset||!t.dataset.mq||!state.mus) return; const [ei,k]=t.dataset.mq.split('.'); if(k!=='n') return; const ex=state.mus.ex[+ei]; if(!ex) return;
+  const n=Math.max(1,Math.min(12,parseInt(t.value,10)||ex.series.length)); const base=ex.series[0]||{kg:'',reps:'',tempo:''}; while(ex.series.length<n) ex.series.push({...base}); ex.series.length=n; renderMus(); });
 function tempoSeg(v){ v=String(v||'').trim(); if(!v) return null; if(v.includes(':')){ const [a,b]=v.split(':').map(Number); return isNaN(a)||isNaN(b)?null:a*60+b; } const n=parseFloat(v.replace(',','.')); return isNaN(n)?null:Math.round(n); }
 async function salvarMus(final){ const M=state.mus; const items=[], pulados=[], vazios=[];
   for(const e of M.ex){ if(e.pulado){ pulados.push(e.name); continue; }
@@ -2172,6 +2298,8 @@ function relRender(pre){ if(pre==='h') renderHib(); else if(pre==='m') renderMus
 function relAplica(pre,a){ const O=relAlvo(pre); if(!O) return; const B=O.band=O.band||{};
   for(const [k,v] of [['durSec',a.elapsed],['kcal',a.kcal],['bpmAvg',a.bpmAvg],['bpmMax',a.bpmMax],['time',a.hora]]) if(v!=null&&(B[k]==null||B[k]==='')) B[k]=v;
   if(!B.tipo) B.tipo=a.tipo||'Treino'; B.date=O.date; O.stravaIds=[...new Set([...(O.stravaIds||[]),a.id])];
+  for(const k of [...new Set([...BAND_EXTRAS,...RUN_EXTRAS])]) if(!semValor(a[k])&&semValor(B[k])) B[k]=a[k];
+  if(a.splits&&a.splits.length&&semValor(B.splits)) B.splits=a.splits; if(a.zones&&!B.zones){ B.zones=a.zones; B.zonasStrava=true; } if(a.det) O.stravaDet=true;
   if(pre==='o'){ if(!O.durSec&&a.elapsed) O.durSec=a.elapsed; if(!O.distKm&&a.distancia) O.distKm=+(a.distancia/1000).toFixed(2); }
   state.stravaOpts=state.stravaOpts||{}; state.stravaOpts[pre]=[]; relRender(pre); toast('Dados do Strava adicionados.'); }
 async function relStrava(pre){ const O=relAlvo(pre); if(!O) return; if(!navigator.onLine){ toast('Sem internet agora.'); return; }
@@ -2243,11 +2371,12 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
     if(/^complex/i.test(c)&&state.pick.alvo.tipo==='hib') state.pick.complex={comps:[],q:''}; renderPicker(); if(state.pick.complex) setTimeout(()=>{ const s=$('#pkCq'); if(s) s.focus(); },60); return; }
   if(t.dataset.pkcadd!=null){ const n=t.dataset.pkcadd; const c=P.canon(n,state.config.aliases)||n; state.pick.complex.comps.push(c); state.pick.complex.q=''; renderPicker(); setTimeout(()=>{ const s=$('#pkCq'); if(s) s.focus(); },60); return; }
   if(t.dataset.pkcrm!=null){ state.pick.complex.comps.splice(+t.dataset.pkcrm,1); renderPicker(); return; }
-  if(t.dataset.pktroca){ state.pick.item=null; state.pick.complex=null; renderPicker(); return; }
+  if(t.dataset.pktroca){ state.pick.item=null; state.pick.complex=null; state.pick.musInit=false; state.pick.musUlt=false; renderPicker(); return; }
   if(t.dataset.pkmais){ state.pick.mais=true; renderPicker(); return; }
   if(t.dataset.pkmodo){ state.pick.item.modo=t.dataset.pkmodo; renderPicker(); return; }
+  if(t.dataset.pkmt){ state.pick.item.tempo=t.dataset.pkmt==='tempo'; renderPicker(); return; }
   if(t.dataset.pkrm){ const A=state.pick.alvo; if(A.tipo==='hib') state.draft.blocks[A.bi].items.splice(A.ii,1); $('#dlgPick').close(); renderHib(); return; }
-  if(t.dataset.pkok){ if(!pickerSalva()) return; if(t.dataset.pkok==='mais'){ const A=state.pick.alvo; state.pick={alvo:{tipo:A.tipo,bi:A.bi},item:null,q:'',complex:null}; renderPicker(); setTimeout(()=>{ const s=$('#pkSearch'); if(s) s.focus(); },60); } else $('#dlgPick').close(); return; }
+  if(t.dataset.pkok){ if(!pickerSalva()) return; if(t.dataset.pkok==='mais'){ const A=state.pick.alvo; state.pick={alvo:{tipo:A.tipo,bi:A.bi},item:null,q:'',complex:null,musInit:false,musUlt:false}; renderPicker(); setTimeout(()=>{ const s=$('#pkSearch'); if(s) s.focus(); },60); } else $('#dlgPick').close(); return; }
   if(t.dataset.musm){ iniciarMus(t.dataset.musm); return; }
   if(t.dataset.musnovo){ state.novoModelo={nome:'',foco:'',ex:[]}; renderNovoModelo(); return; }
   if(t.dataset.musadd!=null){ const ex=state.mus.ex[+t.dataset.musadd]; const u=ex.series[ex.series.length-1]||{kg:'',reps:'',tempo:''}; ex.series.push({...u}); renderMus(); return; }
@@ -2268,7 +2397,7 @@ document.addEventListener('input',e=>{ const t=e.target;
   if(t.id==='pkSearch'){ state.pick.q=t.value; const pos=t.selectionStart; renderPicker(); const s=$('#pkSearch'); if(s){ s.focus(); s.setSelectionRange(pos,pos);} }
   if(t.dataset.pkt&&state.pick&&state.pick.item){ const it=state.pick.item; const cur=it.timeSec||0; let m=Math.floor(cur/60), s=cur%60; const v=parseInt(t.value,10)||0; if(t.dataset.pkt==='m') m=v; else s=v; it.timeSec=m*60+s||null; }
   if(t.dataset.pk==='sets'&&state.pick&&state.pick.item) state.pick.item.setsManual=true;
-  if(t.dataset.pk&&state.pick&&state.pick.item){ const k=t.dataset.pk; state.pick.item[k]=k==='note'?t.value:(t.value===''?null:parseFloat(t.value.replace(',','.'))); }
+  if(t.dataset.pk&&state.pick&&state.pick.item){ const k=t.dataset.pk; state.pick.item[k]=k==='note'||k==='tempoTxt'?t.value:(t.value===''?null:parseFloat(t.value.replace(',','.'))); }
   if(t.dataset.ms&&state.mus){ const [ei,si,k]=t.dataset.ms.split('.'); state.mus.ex[+ei].series[+si][k]=t.value; guardaRascunhoMus(); }
   if(t.dataset.nm&&state.novoModelo){ state.novoModelo[t.dataset.nm]=t.value; } });
 document.addEventListener('change',async e=>{ const t=e.target;
@@ -2295,7 +2424,10 @@ document.addEventListener('change',async e=>{ const t=e.target;
     try{ const w=await lerPrint(f); if(!w.durSec&&!w.kcal&&!w.bpmAvg){ if(st) st.textContent='Não consegui ler esse print. Digite os dados.'; return; }
       if(pre==='m'){ state.mus.band=watchBand(w,state.mus.band); state.mus.watchEdit=true; renderMus(); }
       else if(pre==='h'){ state.draft.band=watchBand(w,state.draft.band); state.hibWatchEdit=true; renderHib(); }
-      else if(pre==='o'){ state.outro.band=watchBand(w,state.outro.band); state.outro.watchEdit=true; if(w.durSec&&!state.outro.durSec) state.outro.durSec=w.durSec; renderOutro(); } }catch(err){ if(st) st.textContent='Não deu para ler o print agora.'; } }
+      else if(pre==='o'){ const O=state.outro; O.band=watchBand(w,O.band); O.watchEdit=true; if(w.durSec&&!O.durSec) O.durSec=w.durSec;
+        if(w.tipo==='corrida'){ const def=OUTROS.find(x=>x[0]===O.tipo); if(!def||def[2]!=='corrida') O.tipo=w.esteira?'esteira':w.caminhada?'caminhada':'corrida'; if(w.distKm&&!O.distKm) O.distKm=w.distKm; if(w.steps&&!O.passos) O.passos=String(w.steps); }
+        if(w.date&&w.date!==O.date&&w.date<=todayISO()){ O.date=w.date; if(w.time) O.time=w.time; } renderOutro(); }
+      else if(pre==='e'){ printNaEdicao(w); } }catch(err){ if(st) st.textContent='Não deu para ler o print agora.'; } }
   if(t.dataset.md==='dt'&&state.mus){ const v=clampDT(t.value); state.mus.date=v.slice(0,10); state.mus.time=v.slice(11,16); if(v!==t.value){ t.value=v; toast('Não dá para registrar no futuro.'); } }
 });
 
@@ -2330,7 +2462,7 @@ function treinoTxt(s){ const d=d2(s.date); const dd=brData(s.date).slice(0,5);
   if(s.kind==='corrida'){ const L=['Detalhes da Corrida',`Data/Hora: ${brData(s.date)} - ${(s.time||'05:00')}h`,`Distância Total: ${fmtNum(s.distKm,2).replace(',','.')} km`];
     if(s.durSec) L.push('Duração: '+hms(s.durSec)); if(s.pace) L.push('Ritmo Médio: '+Math.floor(s.pace/60)+':'+String(s.pace%60).padStart(2,'0')); if(s.paceBest) L.push('Ritmo mais rápido: '+Math.floor(s.paceBest/60)+':'+String(s.paceBest%60).padStart(2,'0'));
     if(s.kcal) L.push(`Calorias (ativa): ${s.kcal} kcal`); if(s.kcalTotal) L.push(`Calorias (total): ${s.kcalTotal} kcal`); if(s.bpmAvg) L.push(`Frequência Cardíaca Média: ${s.bpmAvg} bpm`); if(s.bpmMax) L.push(`Frequência Cardíaca Máxima: ${s.bpmMax} bpm`);
-    if(s.steps) L.push('Passos: '+fmtNum(s.steps,0)); if(s.cadAvg) L.push(`Cadência Média: ${s.cadAvg} passos/min`);
+    if(s.steps) L.push('Passos: '+fmtNum(s.steps,0)); if(s.cadAvg) L.push(`Cadência Média: ${s.cadAvg} passos/min`); if(s.cadMax) L.push(`Cadência Máxima: ${s.cadMax} passos/min`); if(s.stride) L.push(`Comprimento da passada: ${s.stride} cm`); if(s.elevGain) L.push(`Ganho de elevação: ${fmtNum(s.elevGain,0)} m`);
     if(s.splits&&s.splits.length){ L.push('','Ritmo por km'); for(const x of s.splits) L.push(`Km ${x.km}${x.partial?' (parcial)':''}: ${Math.floor(x.pace/60)}:${String(x.pace%60).padStart(2,'0')}`); }
     return L.join('\n'); }
   const foco=(s.focos?s.focos.join(' & '):(s.foco||'Treino'))+(s.focoExtra?' · '+s.focoExtra:'');
@@ -2346,27 +2478,57 @@ function exportarTreino(id){ const s=allSessions().find(x=>x.id===id); if(!s) re
   const blob=new Blob([txt],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast('Arquivo salvo: '+nome); }
 
 // ---------- Strava
-async function stravaCall(body){ const r=await sb.functions.invoke('strava',{body}); if(r.error){ let msg=r.error.message; try{ const j=await r.error.context.json(); msg=j.error||msg; }catch(e){} throw new Error(msg); } return r.data; }
+async function stravaCall(body){ body={...body,fcMax:fcMaxPerfil()}; const r=await sb.functions.invoke('strava',{body}); if(r.error){ let msg=r.error.message; try{ const j=await r.error.context.json(); msg=j.error||msg; }catch(e){} throw new Error(msg); } return r.data; }
 async function renderStrava(){ const el=$('#stravaBox'); if(!el) return; el.innerHTML='<p class="note">Verificando Strava…</p>';
   try{ const st=(await sb.rpc('strava_status')).data||{};
     const pl=$('#stravaPill'); if(pl) pl.innerHTML=st.conectado?'<span class="pill ok">conectado</span>':'';
-    el.innerHTML=`<div>`+(st.conectado?`<p class="note" style="margin-top:0">Conectado${st.atleta?' como <b>'+esc(st.atleta)+'</b>':''}. Os treinos do relógio chegam sozinhos; o print continua completando calorias totais, batimentos e zonas quando o Strava não manda.</p><div class="actions" style="justify-content:flex-start"><button class="btn" id="btnStravaSync">Sincronizar agora</button><button class="btn ghost" id="btnStravaHist">Puxar histórico completo</button><button class="btn ghost" id="btnStravaOff">Desconectar</button></div><p class="pw-card">Powered by Strava</p>`
+    el.innerHTML=`<div>`+(st.conectado?`<p class="note" style="margin-top:0">Conectado${st.atleta?' como <b>'+esc(st.atleta)+'</b>':''}. Os treinos do relógio chegam sozinhos; o print continua completando calorias totais, batimentos e zonas quando o Strava não manda.</p><div class="actions" style="justify-content:flex-start"><button class="btn" id="btnStravaSync">Sincronizar agora</button><button class="btn ghost" id="btnStravaHist">Puxar histórico completo</button><button class="btn ghost" id="btnStravaDet">Completar treinos com os detalhes</button><button class="btn ghost" id="btnStravaOff">Desconectar</button></div><p class="pw-card">Powered by Strava</p>`
       :`<p class="note" style="margin-top:0">Conecte o Strava para os treinos do relógio entrarem automaticamente (Xiaomi, Garmin, Samsung e Apple sincronizam com ele).</p><div class="actions" style="justify-content:flex-start"><button class="btn strava" id="btnStravaOn">Conectar com Strava</button></div>`)+'<p class="pw-card">Powered by Strava</p></div>';
   }catch(e){ el.innerHTML=''; } }
 async function stravaConectar(hist){ try{ try{ if(hist) localStorage.setItem('wodio:stravaHist','1'); else localStorage.removeItem('wodio:stravaHist'); }catch(e){} const c=await stravaCall({action:'config'}); if(!c.client_id){ toast('O Strava ainda não foi configurado.'); return; }
   const red=location.origin+'/?strava=1'; location.href=`https://www.strava.com/oauth/authorize?client_id=${c.client_id}&redirect_uri=${encodeURIComponent(red)}&response_type=code&approval_prompt=auto&scope=activity:read_all&state=wodio`; }catch(e){ toast('Não deu para abrir o Strava: '+e.message); } }
+function fcMaxPerfil(){ const P=state.profile||{}; if(P.fcMax) return +P.fcMax; const i=idadeDe(P.nascimento); return i?220-i:null; }
+// tudo o que o Strava manda além do básico (sem localização)
+const RUN_EXTRAS=['paceBest','cadAvg','cadMax','elevGain','sufferScore','device','temp','bestEfforts'];
+const BAND_EXTRAS=['sufferScore','device','temp','watts','cadAvg','cadMax','elevGain','velMax'];
+const semValor=v=>v==null||v===''||(Array.isArray(v)&&!v.length);
+function completaCorrida(s,a){ let mud=false; const put=(k,v)=>{ if(!semValor(v)&&semValor(s[k])){ s[k]=v; mud=true; } };
+  put('bpmAvg',a.bpmAvg); put('bpmMax',a.bpmMax); put('kcal',a.kcal); put('durSec',a.elapsed); put('time',a.hora);
+  for(const k of RUN_EXTRAS) put(k,a[k]); put('stravaDesc',a.descricao);
+  if(a.splits&&a.splits.length&&semValor(s.splits)){ s.splits=a.splits; mud=true; }
+  if(a.zones&&!s.zones){ s.zones=a.zones; s.zonasStrava=true; mud=true; }
+  if(a.det&&!s.stravaDet){ s.stravaDet=true; mud=true; } return mud; }
+function completaBanda(s,a){ const b=s.band=s.band||{date:s.date}; let mud=false; const put=(k,v)=>{ if(!semValor(v)&&semValor(b[k])){ b[k]=v; mud=true; } };
+  put('durSec',a.elapsed); put('kcal',a.kcal); put('bpmAvg',a.bpmAvg); put('bpmMax',a.bpmMax); put('time',a.hora); for(const k of BAND_EXTRAS) put(k,a[k]);
+  if(a.zones&&!b.zones){ b.zones=a.zones; b.zonasStrava=true; mud=true; }
+  if(a.det&&!s.stravaDet){ s.stravaDet=true; mud=true; } return mud; }
 function stravaMerge(atvs){ const ops=[]; const sess=allSessions(); let novos=0, completos=0;
-  const usados=new Set(); for(const s of sess) for(const id of (s.stravaIds||[])) usados.add(String(id));
-  for(const a of atvs){ if(usados.has(String(a.id))) continue;
+  const porId=new Map(); for(const s of sess) for(const id of (s.stravaIds||[])) porId.set(String(id),s);
+  const salva=s=>{ const k=ops.findIndex(o=>o.id===s.id); const row={id:s.id,date:s.date,kind:s.kind,data:s}; if(k>=0) ops[k]=row; else ops.push(row); };
+  for(const a of atvs){ const ja=porId.get(String(a.id));
+    if(ja){ // já importada: só completa com os detalhes que faltavam
+      if(!a.det) continue; const s=JSON.parse(JSON.stringify((ops.find(o=>o.id===ja.id)||{}).data||ja)); const mud=s.kind==='corrida'?completaCorrida(s,a):completaBanda(s,a); if(mud){ salva(s); completos++; } continue; }
     const corrida=/run|walk|hike/i.test(a.tipo); const km=a.distancia?+(a.distancia/1000).toFixed(2):null;
     if(corrida&&km){ let s=sess.find(x=>x.kind==='corrida'&&x.date===a.data&&Math.abs((x.distKm||0)-km)<0.4);
-      if(s){ s=JSON.parse(JSON.stringify(s)); for(const [k,v] of [['bpmAvg',a.bpmAvg],['bpmMax',a.bpmMax],['kcal',a.kcal],['durSec',a.elapsed],['time',a.hora]]) if(v!=null&&s[k]==null) s[k]=v; s.stravaIds=[...(s.stravaIds||[]),a.id]; ops.push({id:s.id,date:s.date,kind:'corrida',data:s}); completos++; }
-      else { const id=idLivre(a.data+'-c'); const n={id,date:a.data,kind:'corrida',time:a.hora,distKm:km,durSec:a.elapsed,pace:a.moving&&km?Math.round(a.moving/km):null,kcal:a.kcal,bpmAvg:a.bpmAvg,bpmMax:a.bpmMax,source:'Strava',local:'livre',splits:[],zones:null,stravaIds:[a.id]}; ops.push({id,date:a.data,kind:'corrida',data:n}); sess.push(n); novos++; }
+      if(s){ s=JSON.parse(JSON.stringify(s)); completaCorrida(s,a); s.stravaIds=[...(s.stravaIds||[]),a.id]; salva(s); porId.set(String(a.id),s); completos++; }
+      else { const id=idLivre(a.data+'-c'); const n={id,date:a.data,kind:'corrida',time:a.hora,distKm:km,durSec:a.elapsed,pace:a.moving&&km?Math.round(a.moving/km):null,kcal:a.kcal,bpmAvg:a.bpmAvg,bpmMax:a.bpmMax,source:'Strava',local:'livre',splits:[],zones:null,stravaIds:[a.id]};
+        if(a.esteira) n.note='esteira'; else if(/walk|hike/i.test(a.tipo)) n.note='caminhada'; completaCorrida(n,a); salva(n); sess.push(n); porId.set(String(a.id),n); novos++; }
       continue; }
     let s=sess.filter(x=>x.kind==='treino'&&x.date===a.data).sort((x,y)=>(x.band&&x.band.durSec?1:0)-(y.band&&y.band.durSec?1:0))[0];
-    if(s){ s=JSON.parse(JSON.stringify(s)); const b=s.band=s.band||{date:a.data}; for(const [k,v] of [['durSec',a.elapsed],['kcal',a.kcal],['bpmAvg',a.bpmAvg],['bpmMax',a.bpmMax],['time',a.hora]]) if(v!=null&&b[k]==null) b[k]=v; if(!b.tipo) b.tipo='HIIT'; s.stravaIds=[...(s.stravaIds||[]),a.id]; ops.push({id:s.id,date:s.date,kind:'treino',data:s}); completos++; }
-    else { const id=idLivre(a.data+'-t'); const n={id,date:a.data,kind:'treino',foco:null,blocks:[],soRelogio:true,source:'Strava',band:{date:a.data,time:a.hora,tipo:a.tipo||'Treino',durSec:a.elapsed,kcal:a.kcal,bpmAvg:a.bpmAvg,bpmMax:a.bpmMax,zones:null},stravaIds:[a.id]}; ops.push({id,date:a.data,kind:'treino',data:n}); sess.push(n); novos++; } }
+    if(s){ s=JSON.parse(JSON.stringify(s)); completaBanda(s,a); if(!s.band.tipo) s.band.tipo='HIIT'; s.stravaIds=[...(s.stravaIds||[]),a.id]; salva(s); completos++; }
+    else { const id=idLivre(a.data+'-t'); const n={id,date:a.data,kind:'treino',foco:null,blocks:[],soRelogio:true,source:'Strava',band:{date:a.data,time:a.hora,tipo:a.tipo||'Treino',durSec:a.elapsed,kcal:a.kcal,bpmAvg:a.bpmAvg,bpmMax:a.bpmMax,zones:null},stravaIds:[a.id]}; completaBanda(n,a); salva(n); sess.push(n); novos++; } }
   return {rows:ops,novos,completos}; }
+// completa os treinos já importados com os detalhes do Strava (ritmo por km, cadência, zonas…), em lotes por causa do limite do Strava
+async function stravaDetalhes(){ if(!navigator.onLine){ toast('Sem internet agora.'); return; }
+  const fila=allSessions().filter(s=>(s.stravaIds||[]).length&&!s.stravaDet).sort((a,b)=>a.date<b.date?1:-1).flatMap(s=>s.stravaIds.map(String));
+  if(!fila.length){ toast('Todos os treinos do Strava já estão completos.'); return; }
+  let feitos=0;
+  try{ while(fila.length){ const lote=fila.splice(0,20); toast(`Completando com o Strava… ${feitos} de ${feitos+lote.length+fila.length}`);
+      const r=await stravaCall({action:'detalhes',ids:lote}); const m=stravaMerge(r.atividades||[]);
+      if(m.rows.length) await write([{t:'sessions',k:'upsert',rows:m.rows}]); feitos+=(r.atividades||[]).length;
+      if(r.limite){ toast(`${feitos} treinos completados. O Strava pediu uma pausa: toque de novo daqui a 15 minutos para continuar (faltam ${fila.length+lote.length-(r.atividades||[]).length}).`); render(); return; } }
+    render(); toast(`Pronto: ${feitos} treinos completados com os detalhes do Strava.`);
+  }catch(e){ render(); toast(/limite/.test(e.message)?`O Strava pediu uma pausa. ${feitos} já foram; tente de novo em 15 minutos.`:'Strava: '+e.message); } }
 async function stravaHistorico(){ if(!navigator.onLine){ toast('Sem internet agora.'); return; }
   const todas=[]; let page=1;
   try{ while(true){ toast('Buscando no Strava… '+todas.length+' atividades até agora'); const r=await stravaCall({action:'lista',after:0,page,fim:false}); todas.push(...(r.atividades||[])); if(!r.mais||page>=40) break; page++; }
@@ -2376,7 +2538,7 @@ async function stravaHistorico(){ if(!navigator.onLine){ toast('Sem internet ago
     try{ await stravaCall({action:'lista',after:Math.floor(Date.now()/1000)-86400*3,page:1,fim:true}); }catch(e){}
     await loadAll(); toast(`Strava: ${m.novos} novo(s), ${m.completos} completado(s), de ${todas.length} atividades.`);
   }catch(e){ toast(/limite/.test(e.message)?'O Strava pediu uma pausa. Tente de novo em 15 minutos: o que já veio fica salvo.':'Strava: '+e.message); if(todas.length){ const m=stravaMerge(todas); if(m.rows.length){ try{ for(let k=0;k<m.rows.length;k+=200) await sb.from('sessions').upsert(m.rows.slice(k,k+200)); await loadAll(); }catch(_){} } } } }
-async function stravaSync(silencioso,historico){ if(historico) return stravaHistorico(); if(!navigator.onLine) return; try{ if(historico) toast('Buscando seu histórico no Strava… pode levar um minutinho.'); const r=await stravaCall({action:'sync',historico:!!historico}); const m=stravaMerge(r.atividades||[]);
+async function stravaSync(silencioso,historico){ if(historico) return stravaHistorico(); if(!navigator.onLine) return; try{ if(historico) toast('Buscando seu histórico no Strava… pode levar um minutinho.'); const lim=new Date(Date.now()-86400000*45).toISOString().slice(0,10); const ja=allSessions().filter(s=>s.stravaDet&&s.date>=lim).flatMap(s=>s.stravaIds||[]).slice(-150); const r=await stravaCall({action:'sync',historico:!!historico,ja}); const m=stravaMerge(r.atividades||[]);
     if(m.rows.length){ await write([{t:'sessions',k:'upsert',rows:m.rows}]); }
     try{ localStorage.setItem(ukey('wodio:stravaAt'),String(Date.now())); }catch(e){}
     if(!silencioso||m.rows.length) toast(m.rows.length?`Strava: ${m.novos} novo(s), ${m.completos} completado(s).`:'Strava: nada novo.'); }
@@ -2421,7 +2583,7 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
   if(t.id==='btnPersSalvar'){ t.disabled=true; await salvarPersonal(); t.disabled=false; } });
 
 // ---------- OUTROS TREINOS (corrida, bike, aerobic dance…)
-const OUTROS=[['corrida','Corrida','corrida'],['caminhada','Caminhada','corrida'],['bicicleta','Bicicleta','treino'],['aerobic','Aerobic Dance Exercise','treino'],['natacao','Natação','treino'],['eliptico','Elíptico','treino'],['esteira','Esteira','treino'],['outro','Outro','treino']];
+const OUTROS=[['corrida','Corrida','corrida'],['caminhada','Caminhada','corrida'],['bicicleta','Bicicleta','treino'],['aerobic','Aerobic Dance Exercise','treino'],['natacao','Natação','treino'],['eliptico','Elíptico','treino'],['esteira','Esteira','corrida'],['outro','Outro','treino']];
 function durPicker(pre,sec){ sec=sec||0; const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=sec%60; const v=(n,pad)=>sec?(pad?String(n).padStart(2,'0'):String(n)):'';
   return `<div class="durpick" role="group" aria-label="Duração"><label><input data-${pre}="h" inputmode="numeric" maxlength="2" value="${v(h)}" placeholder="0"><span>h</span></label><label><input data-${pre}="m" inputmode="numeric" maxlength="2" value="${v(m,1)}" placeholder="00"><span>min</span></label><label><input data-${pre}="s" inputmode="numeric" maxlength="2" value="${v(s,1)}" placeholder="00"><span>s</span></label></div>`; }
 function distPicker(pre,km){ km=km||0; const i=Math.floor(km), c=Math.round((km-i)*100);
@@ -2443,7 +2605,8 @@ async function salvarOutro(){ const O=state.outro; const def=OUTROS.find(x=>x[0]
   if(!dur){ toast('Coloque a duração do treino (h, min, s).'); return; }
   let row;
   if(def&&def[2]==='corrida'){ if(!km){ toast('Coloque a distância da corrida.'); return; } const id=idLivre(O.date+'-c');
-    const s={id,stravaIds:O.stravaIds,date:O.date,kind:'corrida',time:O.time,distKm:km,durSec:dur,pace:dur&&km?Math.round(dur/km):null,kcal:B.kcal||null,kcalTotal:B.kcalTotal||null,bpmAvg:B.bpmAvg||null,bpmMax:B.bpmMax||null,zones:B.zones||null,source:'Manual',local:'livre',splits:[],steps:parseInt(O.passos,10)||null,note:O.tipo==='caminhada'?'caminhada':undefined};
+    const s={id,stravaIds:O.stravaIds,date:O.date,kind:'corrida',time:O.time,distKm:km,durSec:dur,pace:dur&&km?Math.round(dur/km):null,kcal:B.kcal||null,kcalTotal:B.kcalTotal||null,bpmAvg:B.bpmAvg||null,bpmMax:B.bpmMax||null,zones:B.zones||null,source:B.fonteRelogio?'Relógio':'Manual',local:'livre',splits:B.splits||[],steps:parseInt(O.passos,10)||B.steps||null,paceBest:B.paceBest||null,stride:B.stride||null,cadAvg:B.cadAvg||null,cadMax:B.cadMax||null,note:O.tipo==='caminhada'?'caminhada':O.tipo==='esteira'?'esteira':undefined};
+    for(const k of ['elevGain','sufferScore','device','temp','bestEfforts','zonasStrava']) if(B[k]!=null) s[k]=B[k]; if(O.stravaIds&&O.stravaDet) s.stravaDet=true;
     row={id,date:O.date,kind:'corrida',data:s}; }
   else { const id=idLivre(O.date+'-t'); const band={...B,date:O.date,time:O.time,tipo:nome,durSec:dur}; if(km) band.distKm=km;
     const s={id,stravaIds:O.stravaIds,date:O.date,kind:'treino',modalidade:'outro',foco:nome,blocks:[],band,status:'concluido'}; row={id,date:O.date,kind:'treino',data:s}; }
