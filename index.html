@@ -539,6 +539,66 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
 .splitrow input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-size:15px;width:100%;color:var(--text)}
 .edprint{display:block;margin:6px 0 4px}
 .relprint.small{padding:8px 12px;font-size:13px}
+:root{--cic:#FF7E8E;--cicink:#3A0A14;--cicbg:color-mix(in srgb,var(--cic) 12%,var(--surface))}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--cic:#E14F69;--cicink:#FFFFFF}}
+:root[data-theme="light"]{--cic:#E14F69;--cicink:#FFFFFF}
+.cic{background:var(--cicbg);border:1px solid color-mix(in srgb,var(--cic) 45%,var(--line));border-radius:14px;padding:12px 14px 10px;margin:14px 0 4px}
+.cich{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.cict{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:15px;letter-spacing:.06em;color:var(--cic)}
+.cich .linkbtn{color:var(--cic);font-size:13px}
+.cictop{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}
+.cictop>div{display:grid;gap:2px}.cictop span,.cicprev span{font-size:12.5px;color:var(--muted)}
+.cicbig{font-family:"Barlow Condensed",sans-serif;font-size:32px;font-weight:700;line-height:1;color:var(--cic)}
+.cicniv{text-align:right}.cicniv b{font-family:"Barlow Condensed",sans-serif;font-size:22px;font-weight:700}
+.cicniv.n-baixo b{color:var(--muted)}.cicniv.n-medio b{color:var(--z3)}.cicniv.n-alto b{color:var(--cic)}
+.cicprev{display:grid;grid-template-columns:1fr 1fr;margin:12px 0 10px;border-top:1px solid color-mix(in srgb,var(--cic) 25%,var(--line));padding-top:10px}
+.cicprev>div{display:grid;gap:1px}.cicprev>div+div{border-left:1px solid color-mix(in srgb,var(--cic) 25%,var(--line));padding-left:12px}
+.cicprev b{font-size:17px}
+.cicbtns{display:grid;grid-template-columns:1.5fr 1fr;gap:8px}.cicbtns .btn{font-size:15px;padding-left:8px;padding-right:8px}
+.cicmain{background:var(--cic);border-color:var(--cic);color:var(--cicink);font-weight:700}
+.cicsec{border-color:color-mix(in srgb,var(--cic) 55%,var(--line));color:var(--text);background:transparent}
+.cicaviso{color:var(--cic);font-size:12.5px;font-weight:600;text-align:center;margin:10px 0 2px}
+.cicaviso2{color:var(--muted);font-size:12px;text-align:center;margin:14px 0 0}
+.cicvazio{margin:2px 0 12px;color:var(--text)}
+.cicgrav{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin-bottom:12px}
+.cicgrav>div{display:grid;gap:2px}.cicdias{font-size:15px;color:var(--cic);font-weight:600}
+#dlgCicNota .segb[aria-pressed="true"]{background:var(--cic);color:var(--cicink);border-color:var(--cic)}
+#btnNotaSalvar{background:var(--cic);border-color:var(--cic);color:var(--cicink)}.cicfruta{font-size:18px;margin-top:4px}
+.gico{width:28px;height:28px}.gico.big{width:76px;height:76px;color:var(--cic);background:color-mix(in srgb,var(--cic) 10%,transparent);border-radius:50%;padding:10px}
+.cicdica{background:var(--cicbg);border:1px dashed var(--cic);border-radius:10px;padding:8px 10px;margin:0 0 10px;font-size:14px}
+.cicnav{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-bottom:6px}
+.cicnav b{text-align:center;font-family:"Barlow Condensed",sans-serif;font-size:20px;font-weight:600}
+.cicgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cdw{text-align:center;font-size:12px;color:var(--muted);padding:4px 0}
+.cd{position:relative;aspect-ratio:1;border:1px solid transparent;border-radius:50%;background:transparent;color:var(--text);font-size:15px;display:grid;place-items:center;padding:0;cursor:pointer}
+.cd.vaz{cursor:default}.cd.fut{color:color-mix(in srgb,var(--text) 70%,transparent)}
+.cd.mr{background:var(--cic);color:var(--cicink);font-weight:700}
+.cd.mp{border:2px dashed var(--cic);color:var(--cic)}
+.cd.fe{background:color-mix(in srgb,var(--z1) 20%,transparent);color:var(--z1);font-weight:600}
+.cd.hj span{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:2px}
+.cd.sel{outline:2px solid var(--text);outline-offset:1px}
+.cd .ovu{position:absolute;top:2px;right:2px}
+.ovu{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--z1);box-shadow:0 0 0 2px var(--bg)}
+.cd .nt{position:absolute;bottom:3px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--z3)}
+.cd.mr .nt{background:var(--cicink)}
+.ciclegenda{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0;font-size:12.5px;color:var(--muted)}
+.ciclegenda span{display:inline-flex;align-items:center;gap:6px}
+.lg{display:inline-block;width:14px;height:14px;border-radius:50%}.lg.mr{background:var(--cic)}.lg.mp{border:2px dashed var(--cic)}.lg.fe{background:color-mix(in srgb,var(--z1) 35%,transparent)}
+.cicdet{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:6px}
+.cicacts{display:grid;gap:8px;margin-top:6px}
+.cicnts,.cicchips{display:flex;flex-wrap:wrap;gap:6px}
+.cicchip{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:7px 12px;font-size:14px;display:inline-flex;align-items:center;gap:4px}
+.cicchip.on{background:color-mix(in srgb,var(--cic) 18%,var(--surface));border-color:var(--cic);color:var(--text)}
+.cicchip .iconx{padding:0 0 0 4px;min-width:0}
+.gota{display:inline-block;width:7px;height:9px;background:var(--cic);border-radius:50% 50% 50% 50%/60% 60% 40% 40%;margin-right:-1px}
+#dlgCicNota h4{display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px}
+.cicnd{margin:0;color:var(--muted)}
+.cicadd{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+.cicadd input,.cicgf input{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 10px;color:var(--text);font-size:15px;min-width:0;width:100%}
+.cicvezes{display:flex;align-items:center;gap:10px;margin-top:10px}.cicvezes b{font-size:22px;min-width:2ch;text-align:center}.cicvezes span{flex:1;color:var(--muted)}
+.ciccf{border-bottom:1px solid var(--line);padding:10px 0}.ciccf h5{margin:0 0 8px}
+.cicstep{display:flex;align-items:center;gap:10px}.cicstep b{font-family:"Barlow Condensed",sans-serif;font-size:26px;min-width:2ch;text-align:center}.cicstep span{color:var(--muted);flex:1}
+.cicgf{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.cicgf label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -579,6 +639,7 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
   <div class="mb">
     <div id="perfilCard"></div>
     <details class="acc"><summary>Perfil</summary><div class="accb"><button class="accitem" id="btnPerfilEdit">Editar perfil</button><p class="note">Conectado como <b id="contaEmail"></b></p></div></details>
+    <details class="acc" id="accCiclo" hidden><summary>Meu ciclo</summary><div class="accb"><div id="cicloConf"></div></div></details>
     <details class="acc"><summary>Segurança</summary><div class="accb"><button class="accitem" id="btnChangePw">Trocar senha</button></div></details>
     <details class="acc"><summary>Dados</summary><div class="accb"><button class="accitem" id="btnImport2">Importar dados</button><button class="accitem" id="btnExport">Baixar backup</button>
       <p class="note">O backup é um arquivo com todos os seus treinos, corridas e avaliações. Guarde no seu Drive ou mande pra você mesmo.</p>
@@ -630,17 +691,28 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
   <div class="mb"><div id="musBody"></div></div>
   <div class="tfoot" id="musActions"></div>
 </dialog>
+<dialog id="dlgCiclo" class="painel" aria-labelledby="cicT">
+  <div class="mh"><button class="btn ghost voltar" data-close aria-label="Voltar">‹</button><h3 id="cicT">Meu ciclo</h3><span></span></div>
+  <div class="mb" id="cicBody"></div>
+</dialog>
+<dialog id="dlgCicNota" aria-labelledby="cnT">
+  <div class="mh"><h3 id="cnT">Anotações</h3><button class="btn ghost" data-close>Fechar</button></div>
+  <div class="mb"><div id="cicNotaBody"></div>
+    <div class="actions"><button class="btn ghost" data-close>Cancelar</button><button class="btn primary" id="btnNotaSalvar">Salvar</button></div></div>
+</dialog>
 <dialog id="dlgTermos" class="painel" aria-labelledby="tmT">
   <div class="mh"><h3 id="tmT">Termos de uso e privacidade</h3><button class="btn ghost" data-close>Fechar</button></div>
   <div class="mb termos">
     <p><b>O que é.</b> O WÓD'IO é um app pessoal para registrar treinos, corridas e avaliações corporais, mantido pelo Davi Rodrigues para um grupo de amigos que treinam juntos.</p>
     <p><b>Quem acessa.</b> Só entra quem foi convidado pelo e-mail. Seus treinos, medidas, fotos e batimentos ficam na sua conta e só você vê. Nem o administrador tem acesso aos seus registros pelo app.</p>
-    <p><b>Que dados guardamos.</b> Nome, e-mail, data de nascimento, sexo, altura e foto (se você colocar), os treinos que você registra, os dados do relógio que você informa e as avaliações de bioimpedância. Prints do relógio são lidos no próprio celular e não são guardados.</p>
+    <p><b>Que dados guardamos.</b> Nome, e-mail, data de nascimento, sexo, altura e foto (se você colocar), os treinos que você registra, os dados do relógio que você informa e as avaliações de bioimpedância e, se você usar o Meu ciclo, os registros do ciclo e as anotações que fizer nele. Prints do relógio são lidos no próprio celular e não são guardados.</p>
     <p><b>Para que usamos.</b> Apenas para mostrar seu histórico, gráficos e evolução dentro do app. Nada é vendido, compartilhado ou usado para publicidade.</p>
     <p><b>Onde fica.</b> Os dados ficam no Supabase, um serviço de banco de dados na nuvem, com cópias de segurança diárias guardadas por 30 dias.</p>
     <p><b>Seus direitos.</b> Você pode baixar uma cópia dos seus dados a qualquer momento em Conta → Baixar backup, e pedir ao Davi para apagar sua conta e todos os dados, quando quiser.</p>
     <p><b>Mensalidade.</b> O acesso custa R$ 3,99 por mês, pago por Pix ou cartão. Sem fidelidade: se não renovar, você continua vendo o seu histórico, mas deixa de registrar novos treinos.</p>
     <p><b>Saúde.</b> O WÓD'IO não é orientação médica nem de educação física. Faixas de referência e estimativas (como FC máxima) são apenas informativas. Em caso de dúvida, procure um profissional.</p>
+    <p><b>Meu ciclo.</b> Quem marca o sexo feminino no perfil pode acompanhar o ciclo menstrual: datas da menstruação, anotações de fluxo, medicamentos e relações, previsões e acompanhamento da gravidez. É uma ferramenta de acompanhamento pessoal. As previsões de menstruação, ovulação, período fértil e probabilidade de engravidar são estimativas feitas a partir dos seus registros e de médias, e ciclos variam de pessoa para pessoa e de mês para mês. Por isso o app <b>não é método contraceptivo</b>, não diagnostica nada e não substitui a consulta com profissionais de saúde. Para decisões sobre contracepção, gravidez ou qualquer mudança no seu ciclo, procure sempre o seu ginecologista.</p>
+    <p><b>Privacidade do Meu ciclo.</b> Esses registros são tão privados quanto o resto: ficam só na sua conta, ninguém mais vê, e você pode apagar tudo a qualquer momento em Conta → Meu ciclo.</p>
     <p class="note">Ao usar o app, você concorda com estes termos.</p>
   </div>
 </dialog>
@@ -1101,9 +1173,204 @@ function semanaHTML(){ const hoje=d2(todayISO()); const ini=new Date(hoje); ini.
   for(let k=0;k<7;k++){ const d=new Date(ini); d.setDate(ini.getDate()+k); const di=iso(d); const ok=feitos.has(di); if(ok) n++; const st=ok?'ok':di===iso(hoje)?'hoje':di<iso(hoje)?'falta':'fut';
     dias+=`<span class="wk ${st}" title="${fmtD(di)}"><i>${L[k]}</i><b>${st==='falta'?'<svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>':''}${ok?'<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}</b></span>`; }
   return `<div class="semana" aria-label="${n} de 7 dias com treino nesta semana"><div class="wk-t">${n} ${n===1?'dia':'dias'} nesta semana${n>=5?' 🔥':''}</div><div class="wk-row">${dias}</div></div>`; }
+// ================= MEU CICLO (só para perfil feminino) =================
+// Dados em settings.ciclo: {config, periodos:[{inicio,fim}], notas:{iso:{fluxo,meds,sexo}}, meds:[...]}
+const CIC_DEF={durMenstr:5,durCiclo:28,lutea:14,mediaMenstr:true,mediaCiclo:true,gravidez:false,gravSem:null,gravDia:0,gravRef:null};
+const CIC_AVISO='<p class="cicaviso">Em caso de dúvidas, consulte seu ginecologista.</p>';
+const CIC_AVISO2='<p class="cicaviso2">As datas são estimativas para acompanhamento. O app não é método contraceptivo.</p>';
+const FLUXOS=[[1,'Leve'],[2,'Médio'],[3,'Intenso'],[4,'Muito intenso']];
+function ehF(){ return (state.profile||{}).sexo==='F'; }
+function cic(){ const C=state.ciclo=state.ciclo||{}; C.config={...CIC_DEF,...(C.config||{})}; C.periodos=C.periodos||[]; C.notas=C.notas||{}; if(!C.meds) C.meds=['Pílula','Pílula do dia seguinte']; return C; }
+function isoAdd(iso,n){ const d=new Date(iso+'T12:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
+function isoDiff(a,b){ return Math.round((Date.parse(a+'T12:00:00Z')-Date.parse(b+'T12:00:00Z'))/86400000); }
+function fmtDia(iso){ const d=d2(iso); return d.getDate()+' de '+MES[d.getMonth()]; }
+const media=a=>Math.round(a.reduce((x,y)=>x+y,0)/a.length);
+
+// ---- previsões
+function cicCalc(){ const C=cic(), K=C.config, hoje=todayISO();
+  const P=C.periodos.filter(p=>p&&p.inicio).sort((a,b)=>a.inicio<b.inicio?-1:1);
+  const ints=[]; for(let i=1;i<P.length;i++){ const d=isoDiff(P[i].inicio,P[i-1].inicio); if(d>=18&&d<=45) ints.push(d); }
+  const iU=ints.slice(-6); const ciclo=K.mediaCiclo&&iU.length>=2?media(iU):K.durCiclo;
+  const dU=P.filter(p=>p.fim).map(p=>isoDiff(p.fim,p.inicio)+1).filter(d=>d>=1&&d<=12).slice(-6); const menstr=K.mediaMenstr&&dU.length>=2?media(dU):K.durMenstr;
+  const lutea=Math.min(Math.max(+K.lutea||14,8),18);
+  const last=P[P.length-1]||null;
+  const menstruando=!!(last&&!last.fim&&isoDiff(hoje,last.inicio)<10&&isoDiff(hoje,last.inicio)>=0);
+  const real=new Set(), prev=new Set();
+  for(const p of P){ const aberto=!p.fim&&p===last&&menstruando; const fim=p.fim||(aberto?hoje:isoAdd(p.inicio,menstr-1));
+    for(let d=p.inicio;d<=fim;d=isoAdd(d,1)) real.add(d);
+    if(aberto) for(let d=isoAdd(hoje,1);d<=isoAdd(p.inicio,menstr-1);d=isoAdd(d,1)) prev.add(d); }
+  let prox=null, atraso=0; const futuros=[];
+  if(last){ prox=isoAdd(last.inicio,ciclo); if(!menstruando&&prox<=hoje){ atraso=isoDiff(hoje,prox); }
+    for(let k=0,s=prox;k<9;k++,s=isoAdd(s,ciclo)){ futuros.push(s); if(s>hoje||k===0) for(let j=0;j<menstr;j++){ const d=isoAdd(s,j); if(d>hoje&&!real.has(d)) prev.add(d); } } }
+  // janelas férteis: 5 dias antes da ovulação até 1 dia depois
+  const janelas=[]; const ini=P.map(p=>p.inicio); const todos=[...ini,...futuros];
+  for(let i=1;i<todos.length;i++){ const ov=isoAdd(todos[i],-lutea); janelas.push({ov,de:isoAdd(ov,-5),ate:isoAdd(ov,1)}); }
+  return {P,last,ciclo,menstr,lutea,menstruando,real,prev,prox,atraso,futuros,janelas,nCiclos:iU.length,nMenstr:dU.length,hoje}; }
+function cicDia(R,iso){ const m=R.real.has(iso)?'real':R.prev.has(iso)?'prev':null; const j=R.janelas.find(w=>iso>=w.de&&iso<=w.ate);
+  let nivel='Baixo'; if(j&&!m){ const d=isoDiff(iso,j.ov); nivel=d>=-2&&d<=1?'Alto':'Médio'; }
+  let diaCiclo=null; const ant=R.P.filter(p=>p.inicio<=iso).pop(); if(ant) diaCiclo=isoDiff(iso,ant.inicio)+1;
+  return {m,fertil:!!j&&!m,ov:!!j&&j.ov===iso,nivel,diaCiclo}; }
+function proxJanela(R){ return R.janelas.find(w=>w.ate>=R.hoje)||null; }
+function gravAgora(){ const K=cic().config; if(!K.gravidez||K.gravSem==null) return null; const tot=(+K.gravSem)*7+(+K.gravDia||0)+isoDiff(todayISO(),K.gravRef||todayISO()); return {sem:Math.floor(tot/7),dia:tot%7}; }
+
+// ---- tabela de tamanho por semana (texto do Davi) + ícones no traço do app
+const GRAV=[[4,'papoula','Semente de papoula','cerca de 1 a 2 mm'],[5,'gergelim','Sementinha de gergelim',''],[6,'lentilha','Lentilha',''],[7,'grao','Grão-de-bico',''],[8,'framboesa','Uva pequena / Framboesa','cerca de 1,6 cm e 1 g'],[9,'feijao','Grão de feijão jalo',''],[10,'azeitona','Azeitona verde',''],[11,'figo','Figo',''],[12,'limao','Limão','cerca de 5,4 cm e 14 g'],[13,'vagem','Vagem de ervilha',''],[14,'siciliano','Limão siciliano',''],[15,'maca','Maçã',''],[16,'abacate','Pera grande / Abacate','cerca de 11,6 cm e 100 g'],[17,'gengibre','Pedaço de gengibre',''],[18,'pimentao','Pimentão verde',''],[19,'coco','Coco seco',''],[20,'banana','Banana','cerca de 16,4 cm a 25,6 cm e 300 g, medido da cabeça aos pés'],[21,'pepino','Pepino',''],[22,'cenoura','Cenoura',''],[23,'manga','Manga',''],[24,'milho','Espiga de milho','cerca de 30 cm e 600 g'],[25,'alhoporo','Alho-poró',''],[26,'cebolinha','Cebolinha verde',''],[27,'couveflor','Couve-flor média',''],[28,'berinjela','Repolho roxo / Berinjela','cerca de 37,6 cm e 1.005 g'],[29,'salsao','Salsão ou aipo',''],[30,'repolho','Repolho',''],[31,'abobora','Abóbora menina',''],[32,'couve','Pé de couve / Abóbora pequena','cerca de 42,4 cm e 1.702 g'],[33,'abacaxi','Abacaxi','cerca de 44,1 cm e 2 kg'],[34,'cantaloupe','Melão cantaloupe','cerca de 45,3 cm e 2,2 kg'],[35,'melao','Melão orange',''],[36,'alface','Folha de alface romana','cerca de 47,4 cm e 2.622 g'],[37,'acelga','Folha de acelga',''],[38,'jaca','Jaca','cerca de 47 cm a 50 cm e 3 kg'],[39,'minimelancia','Minimelancia',''],[40,'melancia','Abóbora pequena / Melancia pequena','cerca de 51,2 cm e 3.462 g']];
+const GICO={
+ papoula:'<circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="5.5" stroke-dasharray="1.5 2.6"/>',
+ gergelim:'<path d="M12 7.5c2 1.8 2.5 4.8 0 8-2.5-3.2-2-6.2 0-8Z" fill="currentColor"/><circle cx="12" cy="12" r="7" stroke-dasharray="1.5 2.6"/>',
+ lentilha:'<ellipse cx="12" cy="12" rx="5.5" ry="3.8"/><path d="M8.2 12.2c2.4 1 5.2 1 7.6 0"/>',
+ grao:'<circle cx="12" cy="12.8" r="5.6"/><path d="M12 7.2c-.3-1.4-1.4-2.2-2.8-2.1M9.6 11.2c.8-.9 2-1.3 3.2-1"/>',
+ framboesa:'<circle cx="10" cy="10.2" r="2.2"/><circle cx="14" cy="10.2" r="2.2"/><circle cx="8.6" cy="14" r="2.1"/><circle cx="12" cy="13.8" r="2.1"/><circle cx="15.4" cy="14" r="2.1"/><circle cx="12" cy="17.6" r="2"/><path d="M12 8V5.6M9.8 5.4h4.4"/>',
+ feijao:'<path d="M7.6 8.6c2.2-2.8 6.6-2.8 8.8 0 2.2 2.8 1.8 7-1.2 8.2-1.6.7-2.2-.7-3.3-.7s-2.5 1.5-4 .4c-2.5-1.8-2.2-5.4-.3-7.9Z"/><path d="M10.8 12.6c.8.5 1.7.5 2.4 0"/>',
+ azeitona:'<ellipse cx="11.4" cy="13.6" rx="4.3" ry="5.8" transform="rotate(-25 11.4 13.6)"/><circle cx="13" cy="10.6" r="1"/><path d="M14.2 8c1.1-1.9 2.8-2.9 5-2.7-.6 1.6-2.2 2.6-4.2 2.6"/>',
+ figo:'<path d="M12 5.6c-.6 2-2 2.9-3.6 4.5-2 2.1-2.2 6.4.9 8.2 1.7 1 3.7 1 5.4 0 3.1-1.8 2.9-6.1.9-8.2-1.6-1.6-3-2.5-3.6-4.5Z"/><path d="M12 5.6V3.6M10.6 15.4c.9.6 1.9.6 2.8 0"/>',
+ limao:'<circle cx="12" cy="13" r="6.2"/><path d="M12 6.8c.7-1.8 2.5-2.8 4.6-2.6-.4 1.8-2 2.9-4 2.9"/><path d="M9 11.2c.6-1 1.6-1.6 2.6-1.8"/>',
+ vagem:'<path d="M4.5 15.2c3.8 2.2 10.6 1 14.6-6.4.6-1.1 0-1.9-.9-1.4C13.7 12 9.6 13.8 4.5 15.2Z"/><circle cx="8.6" cy="14" r="1.2"/><circle cx="11.8" cy="12.9" r="1.2"/><circle cx="14.8" cy="11" r="1.2"/>',
+ siciliano:'<path d="M4 12c1-.3 1.7-1 2.3-2 1.6-2.7 4.2-3.8 7-3.4 2.9.5 4.8 2.7 5.3 3.8.3.8.7 1.3 1.4 1.6-1 .3-1.7 1-2.3 2-1.6 2.7-4.2 3.8-7 3.4-2.9-.5-4.8-2.7-5.3-3.8C5.1 12.8 4.7 12.3 4 12Z"/><path d="M9 10.4c1-.8 2.2-1.2 3.4-1.2"/>',
+ maca:'<path d="M12 8.4c-1.7-1.3-5-1.3-6.2 1.4-1.4 3.1.2 8 2.7 9.7 1.2.8 2.3.4 3.5.1 1.2.3 2.3.7 3.5-.1 2.5-1.7 4.1-6.6 2.7-9.7-1.2-2.7-4.5-2.7-6.2-1.4Z"/><path d="M12 8.4c0-1.7.6-3.1 1.8-3.9M13.3 5.6c1.6-.7 3.3-.1 3.9 1.2-1.5.7-3 .4-3.9-1.2"/>',
+ abacate:'<path d="M12 3.8c-2.5 0-3.5 3.1-4.5 5.8-1.2 3.1-1.8 5.6-.6 8 1 2 3.1 2.7 5.1 2.7s4.1-.7 5.1-2.7c1.2-2.4.6-4.9-.6-8-1-2.7-2-5.8-4.5-5.8Z"/><circle cx="12" cy="14.6" r="2.7"/>',
+ gengibre:'<path d="M4.6 14c0-1.7 1.7-2.5 3.1-2.1.2-1.9 2.1-2.7 3.5-1.9.8-1.7 3.1-1.9 4.2-.4 1.7-.6 3.7.6 3.5 2.5-.2 1.7-1.9 2.3-3.1 1.9-.4 1.7-2.3 2.5-3.7 1.7-1 1.5-3.3 1.5-4.2-.2-1.5.4-3.3-.1-3.3-1.5Z"/><path d="M9.6 12.6l.4 1.2M14.2 11.4l-.2 1.3"/>',
+ pimentao:'<path d="M12 8c-1.5-1-4.8-1-5.8 1.7-.9 2.5-.4 6.2 1.5 8.7 1 1.4 2.5 1.4 3.3.6.9.8 2.5.8 3.5-.6 1.9-2.5 2.3-6.2 1.2-8.7C14.7 7 13.4 7 12 8Z"/><path d="M12 8V5.4c0-.9.7-1.5 1.7-1.5M12 8.2c-.3 3.4-.2 6.9 0 10.2"/>',
+ coco:'<circle cx="12" cy="12.4" r="6.8"/><circle cx="10.3" cy="9.8" r=".9" fill="currentColor"/><circle cx="13.7" cy="9.8" r=".9" fill="currentColor"/><circle cx="12" cy="12.6" r=".9" fill="currentColor"/><path d="M6.6 16l1.5-.6M17.4 16l-1.5-.6M12 19.2v-1.5"/>',
+ banana:'<path d="M5 9.4c0 5.7 4.6 9.3 9.8 8.3 2.7-.5 4.5-2.1 5.1-3.7-1.6.8-3.5 1.2-5.6.8C10.1 14 7.4 11.5 7 7.8"/><path d="M5 9.4l.9-2 1.1.4"/><path d="M19.9 14l.6.8"/>',
+ pepino:'<path d="M5 15.6c-1.4-1.3-.8-3.4 1-4.2l10.4-4.6c1.9-.8 3.8.3 3.6 2.1-.1 1-.8 1.8-1.8 2.3L7.8 15.9c-1 .5-2.1.4-2.8-.3Z"/><path d="M8.6 12.6h.01M11.6 11.2h.01M14.6 9.9h.01M10 14.4h.01M13 13h.01"/>',
+ cenoura:'<path d="M16.3 7.7c1.7 1.7 1.3 3.5 0 4.8l-9.5 7.2c-.8.6-1.9-.4-1.3-1.3L12.7 9c1.3-1.3 2-2.9 3.6-1.3Z"/><path d="M16.3 7.7l1.4-3.6M16.3 7.7l3.6-1.4M16.3 7.7l3.5.6M10.2 13.6l1.3 1M8 16.4l1.1.8"/>',
+ manga:'<path d="M8.4 6.4c3.6-1.6 9.3.4 10.3 5.2 1 4.8-2.5 8.3-6.8 7.8C7.4 19 4.2 15.8 4.8 11.6c.3-2.3 1.7-4.3 3.6-5.2Z"/><path d="M12 6.3c.4-1.5 1.7-2.5 3.3-2.5"/>',
+ milho:'<path d="M12 3.6c2.5 0 3.9 3 3.9 7.4S14.5 18.6 12 18.6 8.1 15.4 8.1 11 9.5 3.6 12 3.6Z"/><path d="M9.8 7.2h4.4M8.9 10.4h6.2M8.9 13.6h6.2"/><path d="M8.3 12.4c-2.1 1-3.1 3.7-2.7 7.4 2.9-.4 5-1.7 5.9-3.6M15.7 12.4c2.1 1 3.1 3.7 2.7 7.4-2.9-.4-5-1.7-5.9-3.6"/>',
+ alhoporo:'<path d="M9.6 21h4.8v-8.6H9.6Z"/><path d="M9.6 12.4L6.2 3.6M12 12.4V3.2M14.4 12.4l3.4-8.8M9.6 16.6h4.8"/>',
+ cebolinha:'<path d="M9 21c.4-5 0-10.2-2.6-17.2M12 21V3.4M15 21c-.4-5 0-10.2 2.6-17.2"/><path d="M8.2 21h7.6"/>',
+ couveflor:'<path d="M5.4 12.4c-1.4-.6-1.8-2.6-.3-3.6.3-2 2.3-3 3.9-2 .8-1.9 3.7-2.1 4.7-.2 1.9-.8 3.7.6 3.5 2.5 1.6.8 1.4 3-.5 3.4"/><path d="M4.8 12.4h14.4c-.8 3.9-3.7 6.7-7.2 6.7s-6.4-2.8-7.2-6.7Z"/><path d="M12 12.4v6.6M8.4 13l1.6 5.2M15.6 13l-1.6 5.2"/>',
+ berinjela:'<path d="M9.1 8.4c2.1-1.6 5.2-1 6.6 1.3 1.6 2.7.6 5.8-1.4 7.8-2.5 2.5-6.2 3.5-8.3 1.8-1.8-1.6-.6-4.9 1-7.8.6-1.2 1.3-2.3 2.1-3.1Z"/><path d="M9.1 8.4c.6 1.5 2.3 2.1 3.7 1.5M12.8 9.9c.9-.4 1.5-1.3 1.5-2.3l1.6-3.3"/>',
+ salsao:'<path d="M9 21V9.2M12 21V6.2M15 21V9.2"/><path d="M9 9.2C7.4 8.8 6.4 7.4 6.6 5.8 8 6 9 7.2 9 9.2ZM12 6.2c-1-1.2-1-2.9 0-4.1 1 1.2 1 2.9 0 4.1ZM15 9.2c1.6-.4 2.6-1.8 2.4-3.4-1.4.2-2.4 1.4-2.4 3.4Z"/><path d="M7.4 21h9.2"/>',
+ repolho:'<circle cx="12" cy="12.6" r="7.2"/><path d="M12 5.4c-2 2.5-2.6 5.6-1 8.9M12 5.4c2.7 1.5 4.1 4.1 3.7 7.2M5.2 10.6c2.5.4 4.5 1.7 5.8 3.7M18.8 10.6c-2.1.6-3.5 2.1-4.1 3.9"/>',
+ abobora:'<path d="M12 4.4c-1.9 0-2.7 1.5-2.7 3.5 0 1.7.2 2.7-1 4.3-1.5 1.9-2.1 3.5-1.3 5.4.9 2.1 3.1 2.8 5 2.8s4.1-.7 5-2.8c.8-1.9.2-3.5-1.3-5.4-1.2-1.6-1-2.6-1-4.3 0-2-.8-3.5-2.7-3.5Z"/><path d="M12 4.4V2.6M9.8 15.4c1.4.6 3 .6 4.4 0"/>',
+ couve:'<path d="M12 21v-6M12 15c-4.6 0-7.2-3.3-6.8-7.6.4-2.7 2.6-4.3 4.9-3.7.6-1 2.7-1 3.8 0 2.3-.6 4.5 1 4.9 3.7.4 4.3-2.2 7.6-6.8 7.6Z"/><path d="M12 15V6.4M12 11l-2.7-2M12 9.4l2.5-1.9"/>',
+ abacaxi:'<path d="M12 9.2c3 0 5 2.6 5 6s-2 5.9-5 5.9-5-2.5-5-5.9 2-6 5-6Z"/><path d="M8.4 12.6l6.4 6.2M15.6 12.6l-6.4 6.2"/><path d="M12 9.2V5.2M12 9.2L9.2 5.4M12 9.2l2.8-3.8M12 6.8l-3.8-.9M12 6.8l3.8-.9"/>',
+ cantaloupe:'<circle cx="12" cy="12.6" r="7.2"/><path d="M7.2 7.4l9.6 10.4M16.8 7.4l-9.6 10.4M4.8 12.6h14.4"/>',
+ melao:'<ellipse cx="12" cy="12.6" rx="8.2" ry="6.6"/><path d="M12 6v13.2M7.8 6.8c-1.4 3.7-1.4 7.9 0 11.6M16.2 6.8c1.4 3.7 1.4 7.9 0 11.6"/>',
+ alface:'<path d="M12 21c-3.5-1.7-5.5-6.6-4.7-11.7C7.9 5.9 9.5 3.5 12 2.9c2.5.6 4.1 3 4.7 6.4.8 5.1-1.2 10-4.7 11.7Z"/><path d="M12 21V6.4M12 10.4l-2.5-1.9M12 14l2.7-2M12 17.2l-2.3-1.7"/>',
+ acelga:'<path d="M10.5 21v-8M13.5 21v-8M10.5 13c-3.7-.6-5.8-3.7-5.2-7.4C5.9 3.4 8.8 2.6 12 3.4c3.2-.8 6.1 0 6.7 2.2.6 3.7-1.5 6.8-5.2 7.4"/><path d="M12 13V6.4"/>',
+ jaca:'<ellipse cx="12" cy="13" rx="6.2" ry="7.6"/><path d="M12 5.4V3.2M9 8.8l.7.7M13 8.6l.7.7M15.2 11.4l.7.7M9.4 12.4l.7.7M12.4 14l.7.7M9.2 16.2l.7.7M13.6 17.4l.7.7M15.6 15l.7.7"/>',
+ minimelancia:'<circle cx="12" cy="12.6" r="7.2"/><path d="M12 5.4c-2 2-2.9 4.5-2.9 7.2s.9 5.2 2.9 7.2M12 5.4c2 2 2.9 4.5 2.9 7.2s-.9 5.2-2.9 7.2M7.6 7.2c-1.4 1.6-2 3.4-2 5.4M16.4 7.2c1.4 1.6 2 3.4 2 5.4"/>',
+ melancia:'<path d="M3.2 9.2a8.8 8.8 0 0 0 17.6 0Z"/><path d="M5.8 9.2a6.2 6.2 0 0 0 12.4 0"/><path d="M9 12.2h.01M12 13.4h.01M15 12.2h.01"/>'};
+function gIco(k,cls){ return `<svg class="${cls||'gico'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GICO[k]||''}</svg>`; }
+function gravLinha(sem){ const s=Math.min(40,Math.max(4,sem)); return GRAV.find(g=>g[0]===s); }
+
+// ---- cartão da tela inicial
+function cicloCard(){ if(!ehF()) return ''; const C=cic(), K=C.config;
+  const btns=(a,b)=>`<div class="cicbtns">${a}<button class="btn cicsec" data-cic="notas">Anotações</button></div>`;
+  const head=`<div class="cich"><span class="cict">Meu ciclo</span><button class="linkbtn" data-cic="cal">Calendário</button></div>`;
+  const G=gravAgora();
+  if(G){ const g=gravLinha(G.sem);
+    return `<section class="cic"><div class="cich"><span class="cict">Meu ciclo · gravidez</span></div><div class="cicgrav">${gIco(g[1],'gico big')}<div><b class="cicbig">${G.sem} semana${G.sem===1?'':'s'}</b>${G.dia?`<span class="cicdias">e ${G.dia} dia${G.dia>1?'s':''}</span>`:''}<span class="m">Tamanho do bebê${G.sem<4?' (a tabela começa na 4ª semana)':G.sem>40?' (reta final!)':''}</span><b class="cicfruta">${esc(g[2])}</b>${g[3]?`<span class="m">${esc(g[3])}</span>`:''}</div></div>
+      ${btns(`<button class="btn cicmain" data-cic="cal">Calendário</button>`)}${CIC_AVISO}</section>`; }
+  const R=cicCalc(); const hoje=R.hoje;
+  if(!R.last) return `<section class="cic">${head}<p class="cicvazio">Registre o início da sua última menstruação para ver as previsões do ciclo.</p>${btns(`<button class="btn cicmain" data-cic="inicio">Início da menstruação</button>`)}${CIC_AVISO}</section>`;
+  const J=proxJanela(R); const dH=cicDia(R,hoje);
+  const fert=J?(hoje>=J.de?`<b>Até ${fmtDia(J.ate)}</b><span>Período fértil agora</span>`:`<b>${fmtDia(J.de)}</b><span>Próximo período fértil</span>`):`<b>–</b><span>Próximo período fértil</span>`;
+  const prevs=`<div class="cicprev"><div><b>${fmtDia(R.atraso>0?hoje:R.prox)}</b><span>${R.atraso>0?'Menstruação atrasada':'Próxima menstruação'}</span></div><div>${fert}</div></div>`;
+  if(R.menstruando){ const dia=isoDiff(hoje,R.last.inicio)+1;
+    return `<section class="cic">${head}<div class="cictop"><div><b class="cicbig">${dia}º dia</b><span>de menstruação</span></div><div class="cicniv n-baixo"><b>Baixo</b><span>probabilidade de engravidar</span></div></div>${prevs}
+      ${btns(`<button class="btn cicmain" data-cic="fim">Fim da menstruação</button>`)}${CIC_AVISO}</section>`; }
+  const falta=isoDiff(R.prox,hoje);
+  const big=R.atraso>0?`Atraso de ${R.atraso} dia${R.atraso>1?'s':''}`:falta===0?'Pode começar hoje':`Falta${falta>1?'m':''} ${falta} dia${falta>1?'s':''}`;
+  return `<section class="cic">${head}<div class="cictop"><div><b class="cicbig">${big}</b><span>${R.atraso>0?'em relação à previsão':'para a próxima menstruação'}</span></div><div class="cicniv n-${dH.nivel==='Alto'?'alto':dH.nivel==='Médio'?'medio':'baixo'}"><b>${dH.nivel}</b><span>probabilidade de engravidar</span></div></div>${prevs}
+    ${btns(`<button class="btn cicmain" data-cic="inicio">Início da menstruação</button>`)}${CIC_AVISO}</section>`; }
+
+// ---- calendário
+const DSEMC=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+function abrirCiclo(modo){ const hoje=todayISO(); state.cicCal={mes:hoje.slice(0,7),sel:hoje,modo:modo||null}; renderCiclo(); if(!$('#dlgCiclo').open) $('#dlgCiclo').showModal(); }
+function periodoDe(iso){ const R=cicCalc(); return R.P.find(p=>{ const fim=p.fim||(R.menstruando&&p===R.last?R.hoje:isoAdd(p.inicio,R.menstr-1)); return iso>=p.inicio&&iso<=fim; })||null; }
+function renderCiclo(){ const S=state.cicCal; if(!S) return; const R=cicCalc(); const C=cic(); const G=gravAgora();
+  const [y,m]=S.mes.split('-').map(Number); const d1=new Date(y,m-1,1); const nd=new Date(y,m,0).getDate(); const pad=d1.getDay();
+  let cel=''; for(let i=0;i<pad;i++) cel+='<span class="cd vaz"></span>';
+  for(let d=1;d<=nd;d++){ const iso=S.mes+'-'+String(d).padStart(2,'0'); const I=G?{m:null,fertil:false,ov:false}:cicDia(R,iso); const n=C.notas[iso];
+    const cls=['cd',I.m==='real'?'mr':I.m==='prev'?'mp':'',I.fertil?'fe':'',iso===R.hoje?'hj':'',iso===S.sel?'sel':'',iso>R.hoje?'fut':''].filter(Boolean).join(' ');
+    cel+=`<button class="${cls}" data-cicd="${iso}" aria-label="${fmtDia(iso)}${I.m==='real'?', menstruação':I.m==='prev'?', menstruação prevista':''}${I.fertil?', período fértil':''}${I.ov?', ovulação':''}"><span>${d}</span>${I.ov?'<i class="ovu"></i>':''}${n?'<i class="nt"></i>':''}</button>`; }
+  const sel=S.sel, I=G?null:cicDia(R,sel), per=G?null:periodoDe(sel), N=C.notas[sel];
+  const ds=d2(sel); const titulo=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][ds.getDay()]+', '+fmtDia(sel)+' de '+ds.getFullYear();
+  const resumoNota=N?[N.fluxo?'Fluxo '+FLUXOS.find(f=>f[0]===N.fluxo)[1].toLowerCase():null,...(N.meds||[]),N.sexo?(N.sexo.prot?'Protegido':'Desprotegido')+(N.sexo.vezes>1?', '+N.sexo.vezes+' vezes':', 1 vez'):null].filter(Boolean):[];
+  const fut=sel>R.hoje; let acoes='';
+  if(fut) acoes=`<p class="note" style="margin:0">Dia futuro: aqui aparece só a previsão.</p>`;
+  else{ if(!G){ if(per){ acoes+=`<button class="btn cicmain" data-cicact="fim">Fim da menstruação neste dia</button><button class="btn ghost small" data-cicact="apagar">Apagar esta menstruação</button>`; }
+    else acoes+=`<button class="btn cicmain" data-cicact="inicio">Início da menstruação neste dia</button>`; }
+  acoes+=`<button class="btn cicsec" data-cicact="notas">Anotações</button>`; }
+  const dica=S.modo==='inicio'?'Toque no dia em que a menstruação começou e confirme.':S.modo==='fim'?'Toque no dia em que a menstruação terminou e confirme.':'';
+  $('#cicBody').innerHTML=`${dica?`<p class="cicdica">${dica}</p>`:''}
+    <div class="cicnav"><button class="btn ghost" data-cicmes="-1" aria-label="Mês anterior">‹</button><b>${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][m-1]} de ${y}</b><button class="btn ghost" data-cicmes="1" aria-label="Próximo mês">›</button></div>
+    <div class="cicgrid">${DSEMC.map(x=>`<span class="cdw">${x}</span>`).join('')}${cel}</div>
+    ${G?'':`<div class="ciclegenda"><span><i class="lg mr"></i>Menstruação</span><span><i class="lg mp"></i>Prevista</span><span><i class="lg fe"></i>Período fértil</span><span><i class="ovu"></i>Ovulação</span></div>`}
+    <div class="cicdet"><b>${titulo}</b>
+      ${G?'':`<span class="m">${I.diaCiclo?'Dia '+I.diaCiclo+' do ciclo · ':''}${I.m==='real'?'Menstruação':I.m==='prev'?'Menstruação prevista':I.ov?'Dia da ovulação (previsto)':I.fertil?'Período fértil':''}${I.m||I.fertil||I.ov?' · ':''}Probabilidade de engravidar: ${I.nivel}</span>`}
+      ${resumoNota.length?`<div class="cicnts">${resumoNota.map(x=>`<span class="cicchip on">${esc(x)}</span>`).join('')}</div>`:''}
+      <div class="cicacts">${acoes}</div></div>
+    ${CIC_AVISO2}${CIC_AVISO}`; }
+async function salvaCiclo(msg){ const C=cic(); try{ const mode=await write([{t:'settings',row:{ciclo:C}}]); saveCache(); render(); if($('#dlgCiclo').open) renderCiclo(); if($('#accCiclo')&&!$('#accCiclo').hidden) renderCicloConf(); if(msg) toast(mode==='offline'?OFFMSG:msg); return true; }catch(e){ console.error(e); toast('Não foi possível salvar agora.'); return false; } }
+function cicInicio(iso){ const C=cic(), R=cicCalc(); if(iso>R.hoje){ toast('Não dá para registrar no futuro.'); return; }
+  if(periodoDe(iso)){ toast('Esse dia já está numa menstruação registrada.'); return; }
+  const P=C.periodos.sort((a,b)=>a.inicio<b.inicio?-1:1);
+  for(const p of P) if(!p.fim&&p.inicio<iso){ const f=isoAdd(p.inicio,R.menstr-1); p.fim=f<iso?f:isoAdd(iso,-1); }
+  const depois=P.find(p=>p.inicio>iso); const novo={inicio:iso,fim:null};
+  if(depois||isoDiff(R.hoje,iso)>=10){ let f=isoAdd(iso,R.menstr-1); if(depois&&f>=depois.inicio) f=isoAdd(depois.inicio,-1); if(f>R.hoje) f=R.hoje; novo.fim=f; }
+  C.periodos.push(novo); state.cicCal&&(state.cicCal.modo=null); salvaCiclo('Início da menstruação registrado.'); }
+function cicFim(iso){ const C=cic(), R=cicCalc(); if(iso>R.hoje){ toast('Não dá para registrar no futuro.'); return; }
+  const p=[...C.periodos].filter(x=>x.inicio<=iso).sort((a,b)=>a.inicio<b.inicio?-1:1).pop(); if(!p){ toast('Registre primeiro o início da menstruação.'); return; }
+  const prox=C.periodos.find(x=>x.inicio>p.inicio&&x.inicio<=iso); if(prox||isoDiff(iso,p.inicio)>14){ toast('Esse dia está longe demais do início registrado.'); return; }
+  p.fim=iso; state.cicCal&&(state.cicCal.modo=null); salvaCiclo('Fim da menstruação registrado.'); }
+function cicApagar(iso){ const C=cic(); const p=periodoDe(iso); if(!p) return; if(!confirm('Apagar a menstruação que começou em '+fmtDia(p.inicio)+'?')) return; C.periodos=C.periodos.filter(x=>x.inicio!==p.inicio); salvaCiclo('Menstruação apagada.'); }
+
+// ---- anotações do dia (fluxo, medicamentos, sexo)
+function abrirNota(iso){ const C=cic(); if(iso>todayISO()){ toast('Não dá para anotar no futuro.'); return; } const N=C.notas[iso]||{}; state.cicNota={iso,fluxo:N.fluxo||null,meds:[...(N.meds||[])],sexo:N.sexo?{...N.sexo}:null,editMeds:false}; renderNota(); $('#dlgCicNota').showModal(); }
+function renderNota(){ const S=state.cicNota, C=cic(); const ds=d2(S.iso);
+  $('#cicNotaBody').innerHTML=`<p class="cicnd">${['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][ds.getDay()]}, ${fmtDia(S.iso)} de ${ds.getFullYear()}</p>
+    <h4>Fluxo</h4><div class="cicchips">${FLUXOS.map(([k,l])=>`<button class="cicchip ${S.fluxo===k?'on':''}" data-nfl="${k}" aria-pressed="${S.fluxo===k}">${'<i class="gota"></i>'.repeat(k)} ${l}</button>`).join('')}</div>
+    <h4>Medicamentos <button class="linkbtn" data-nmedit="1">${S.editMeds?'concluir':'editar lista'}</button></h4>
+    <div class="cicchips">${C.meds.map((md,k)=>S.editMeds?`<span class="cicchip">${esc(md)} <button class="iconx" data-nmrm="${k}" aria-label="Tirar ${esc(md)} da lista">✕</button></span>`:`<button class="cicchip ${S.meds.includes(md)?'on':''}" data-nmed="${k}" aria-pressed="${S.meds.includes(md)}">${esc(md)}</button>`).join('')}</div>
+    <div class="cicadd"><input id="nmNovo" placeholder="Outro medicamento" autocomplete="off"><button class="btn ghost small" data-nmadd="1">Adicionar</button></div>
+    <h4>Relação sexual</h4><div class="seg" role="group" aria-label="Relação sexual">${[['nao','Não houve'],['p','Protegida'],['d','Desprotegida']].map(([k,l])=>`<button class="segb" data-nsx="${k}" aria-pressed="${(S.sexo?(S.sexo.prot?'p':'d'):'nao')===k}">${l}</button>`).join('')}</div>
+    ${S.sexo?`<div class="cicvezes"><span>Vezes no dia</span><button class="btn ghost" data-nvz="-1" aria-label="Menos">−</button><b>${S.sexo.vezes||1}</b><button class="btn ghost" data-nvz="1" aria-label="Mais">+</button></div>`:''}
+    ${CIC_AVISO2}${CIC_AVISO}`; }
+async function salvarNota(){ const S=state.cicNota, C=cic(); const n={}; if(S.fluxo) n.fluxo=S.fluxo; if(S.meds.length) n.meds=S.meds; if(S.sexo) n.sexo={prot:!!S.sexo.prot,vezes:S.sexo.vezes||1};
+  if(Object.keys(n).length) C.notas[S.iso]=n; else delete C.notas[S.iso];
+  if(await salvaCiclo('Anotações salvas.')){ $('#dlgCicNota').close(); state.cicNota=null; } }
+
+// ---- Conta → Meu ciclo
+function renderCicloConf(){ const acc=$('#accCiclo'); if(!acc) return; acc.hidden=!ehF(); const el=$('#cicloConf'); if(!el||!ehF()) return; const C=cic(), K=C.config, R=cicCalc(); const G=gravAgora();
+  const step=(k,v,min,max)=>`<div class="cicstep"><button class="btn ghost" data-ccs="${k}.-1" aria-label="Menos" ${v<=min?'disabled':''}>−</button><b>${v}</b><span>dias</span><button class="btn ghost" data-ccs="${k}.1" aria-label="Mais" ${v>=max?'disabled':''}>+</button></div>`;
+  const sw=(k,on,txt,sub)=>`<label class="switch"><input type="checkbox" data-ccw="${k}" ${on?'checked':''}><span class="sl"></span><span>${txt}${sub?` <span class="m">· ${sub}</span>`:''}</span></label>`;
+  el.innerHTML=`<div class="ciccf"><h5>Duração da menstruação</h5>${step('durMenstr',K.durMenstr,1,12)}<p class="note">O sangramento costuma durar entre 4 e 7 dias.</p>${sw('mediaMenstr',K.mediaMenstr,'Usar a média',R.nMenstr>=2?'sua média: '+R.menstr+' dias':'precisa de 2 registros completos')}</div>
+    <div class="ciccf"><h5>Duração do ciclo</h5>${step('durCiclo',K.durCiclo,18,45)}<p class="note">Do primeiro dia de uma menstruação até o dia anterior à próxima. Usamos esse número para prever a próxima menstruação.</p>${sw('mediaCiclo',K.mediaCiclo,'Usar a média',R.nCiclos>=2?'sua média: '+R.ciclo+' dias ('+R.nCiclos+' ciclos)':'precisa de 3 menstruações registradas')}</div>
+    <div class="ciccf"><h5>Ovulação e fertilidade</h5><p class="note" style="margin-top:0">Duração da fase lútea</p>${step('lutea',K.lutea,8,18)}<p class="note">A ovulação costuma acontecer cerca de 14 dias antes da próxima menstruação. O período fértil considerado vai de 5 dias antes até 1 dia depois da ovulação.</p></div>
+    <div class="ciccf"><h5>Gravidez</h5>${sw('gravidez',K.gravidez,'Estou grávida','pausa as previsões de menstruação')}
+      ${K.gravidez?`<div class="cicgf"><label>Semanas<input data-ccg="gravSem" inputmode="numeric" value="${G?G.sem:''}" placeholder="0"></label><label>Dias<input data-ccg="gravDia" inputmode="numeric" value="${G?G.dia:''}" placeholder="0"></label></div><p class="note">Informe quantas semanas de gestação você tem hoje. O app avança sozinho a cada dia.</p>`:''}</div>
+    <div class="actions" style="justify-content:flex-start"><button class="btn" data-cic="cal">Abrir calendário</button><button class="btn ghost" data-ccdel="1">Apagar todos os dados do Meu ciclo</button></div>
+    ${CIC_AVISO2}${CIC_AVISO}</div>`; }
+
+// ---- eventos
+document.addEventListener('click',async e=>{ const t=e.target.closest('button'); if(!t) return;
+  if(t.dataset.cic){ const k=t.dataset.cic; if(k==='notas'){ abrirCiclo(null); abrirNota(todayISO()); } else abrirCiclo(k==='cal'?null:k); return; }
+  if(t.dataset.cicmes){ const S=state.cicCal; const [y,m]=S.mes.split('-').map(Number); const d=new Date(y,m-1+(+t.dataset.cicmes),1); S.mes=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); renderCiclo(); return; }
+  if(t.dataset.cicd){ state.cicCal.sel=t.dataset.cicd; renderCiclo(); return; }
+  if(t.dataset.cicact){ const a=t.dataset.cicact, iso=state.cicCal.sel; if(a==='inicio') cicInicio(iso); else if(a==='fim') cicFim(iso); else if(a==='apagar') cicApagar(iso); else if(a==='notas') abrirNota(iso); return; }
+  const S=state.cicNota;
+  if(S){ if(t.dataset.nfl){ const k=+t.dataset.nfl; S.fluxo=S.fluxo===k?null:k; renderNota(); return; }
+    if(t.dataset.nmed){ const md=cic().meds[+t.dataset.nmed]; S.meds=S.meds.includes(md)?S.meds.filter(x=>x!==md):[...S.meds,md]; renderNota(); return; }
+    if(t.dataset.nmedit){ S.editMeds=!S.editMeds; renderNota(); return; }
+    if(t.dataset.nmrm){ const C=cic(); const md=C.meds[+t.dataset.nmrm]; C.meds.splice(+t.dataset.nmrm,1); S.meds=S.meds.filter(x=>x!==md); renderNota(); return; }
+    if(t.dataset.nmadd){ const v=($('#nmNovo').value||'').trim(); if(!v) return; const C=cic(); if(!C.meds.includes(v)) C.meds.push(v); if(!S.meds.includes(v)) S.meds.push(v); renderNota(); return; }
+    if(t.dataset.nsx){ const k=t.dataset.nsx; S.sexo=k==='nao'?null:{prot:k==='p',vezes:(S.sexo&&S.sexo.vezes)||1}; renderNota(); return; }
+    if(t.dataset.nvz&&S.sexo){ S.sexo.vezes=Math.max(1,Math.min(10,(S.sexo.vezes||1)+(+t.dataset.nvz))); renderNota(); return; }
+    if(t.id==='btnNotaSalvar'){ t.disabled=true; await salvarNota(); t.disabled=false; return; } }
+  if(t.dataset.ccs){ const [k,d]=t.dataset.ccs.split('.'); const K=cic().config; const lim={durMenstr:[1,12],durCiclo:[18,45],lutea:[8,18]}[k]; K[k]=Math.max(lim[0],Math.min(lim[1],(+K[k]||0)+(+d))); salvaCiclo(); return; }
+  if(t.dataset.ccdel){ if(!confirm('Apagar todas as menstruações, anotações e configurações do Meu ciclo? Isso não pode ser desfeito.')) return; state.ciclo={}; cic(); salvaCiclo('Dados do Meu ciclo apagados.'); return; } });
+document.addEventListener('change',e=>{ const t=e.target;
+  if(t.dataset&&t.dataset.ccw){ const K=cic().config; K[t.dataset.ccw]=t.checked; if(t.dataset.ccw==='gravidez'&&t.checked&&K.gravSem==null){ K.gravSem=4; K.gravDia=0; K.gravRef=todayISO(); } salvaCiclo(); }
+  if(t.dataset&&t.dataset.ccg){ const K=cic().config; const G=gravAgora()||{sem:0,dia:0}; const v=Math.max(0,parseInt(t.value,10)||0); const sem=t.dataset.ccg==='gravSem'?Math.min(42,v):G.sem, dia=t.dataset.ccg==='gravDia'?Math.min(6,v):G.dia; K.gravSem=sem; K.gravDia=dia; K.gravRef=todayISO(); salvaCiclo(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target&&e.target.id==='nmNovo'){ e.preventDefault(); const b=document.querySelector('[data-nmadd]'); if(b) b.click(); } });
+
 function vResumo(){
   const ss=allSessions(); const tr=ss.filter(s=>s.kind==='treino'); const runs=ss.filter(s=>s.kind==='corrida');
-  if(!tr.length) return `<div class="empty">Nenhum treino ainda. Toque em Registrar e cole o texto do seu treino.</div>`;
+  if(!tr.length) return cicloCard()+`<div class="empty">Nenhum treino ainda. Toque em Registrar e cole o texto do seu treino.</div>`;
   const last=tr[tr.length-1]; const first=tr[0];
   const ex=exerciseIndex(); const bio=state.bio&&state.bio.evaluations||[]; const b0=bio[0], b1=bio[bio.length-1];
   const yr=tr.filter(s=>s.date>=todayISO().slice(0,4)+'-01-01').length;
@@ -1121,6 +1388,7 @@ function vResumo(){
       <p class="sub">Desde ${fmtD(first.date)}. Último: ${DIA[d2(last.date).getDay()]}, ${fmtD(last.date)}${last.foco?' · '+esc(last.foco):''}.</p>
     </div>
     ${last.band?zoneStrip(last.band.zones):''}
+    ${cicloCard()}
     <div class="kpis">
       <div class="kpi"><span>Treinos em ${todayISO().slice(0,4)}</span><b>${yr}</b></div>
       <div class="kpi"><span>Média por treino</span><b>${kAvg?fmtNum(kAvg,0)+' kcal':'–'}</b></div>
@@ -1535,7 +1803,7 @@ function render(){
   if(state.recovery){ v.innerHTML=vRecovery(); olhos(v); return; }
   if(state.auth){ v.innerHTML=vAuth(); olhos(v); return; }
   if(!state.ready){ v.innerHTML=`<div class="empty">${esc(state.msg||'Carregando…')}</div>`; return; }
-  if(!state.sessions.length && !(state.bio&&state.bio.evaluations.length)){ v.innerHTML=vEmpty(); return; }
+  if(!state.sessions.length && !(state.bio&&state.bio.evaluations.length)){ v.innerHTML=(state.tab==='resumo'?cicloCard():'')+vEmpty(); return; }
   v.innerHTML=state.tab==='resumo'?vResumo():state.tab==='exercicios'?vExercicios():state.tab==='corpo'?vCorpo():vSessoes();
   if(state.tab==='resumo') drawResumo(); if(state.tab==='exercicios') drawEx(); if(state.tab==='corpo') drawCorpo();
 }
@@ -1668,8 +1936,8 @@ function acessoVencido(){ const a=state.acesso; if(!a||a.admin||!a.ativo_ate) re
 // ---------- offline: cache local + fila de sincronização
 const LSD='wodio:data:', LSQ='wodio:fila:';
 function ukey(k){ return k+(user?user.id:''); }
-function saveCache(){ try{ localStorage.setItem(ukey(LSD), JSON.stringify({sessions:state.sessions,bio:state.bio,config:state.config,profile:state.profile,modelos:state.modelos,at:Date.now()})); }catch(e){} }
-function loadCache(){ try{ const x=JSON.parse(localStorage.getItem(ukey('wodio:extra:'))||'null'); if(x){ state.acesso=x.acesso; state.catalogo=x.catalogo; } }catch(e){} try{ const j=JSON.parse(localStorage.getItem(ukey(LSD))||'null'); if(j){ state.sessions=j.sessions||[]; state.bio=j.bio; state.config=j.config||{aliases:{}}; state.profile=j.profile||{}; state.modelos=j.modelos||[]; state.cacheAt=j.at; mesclaCatalogo(); return true; } }catch(e){} return false; }
+function saveCache(){ try{ localStorage.setItem(ukey(LSD), JSON.stringify({sessions:state.sessions,bio:state.bio,config:state.config,profile:state.profile,modelos:state.modelos,ciclo:state.ciclo,at:Date.now()})); }catch(e){} }
+function loadCache(){ try{ const x=JSON.parse(localStorage.getItem(ukey('wodio:extra:'))||'null'); if(x){ state.acesso=x.acesso; state.catalogo=x.catalogo; } }catch(e){} try{ const j=JSON.parse(localStorage.getItem(ukey(LSD))||'null'); if(j){ state.sessions=j.sessions||[]; state.bio=j.bio; state.config=j.config||{aliases:{}}; state.profile=j.profile||{}; state.modelos=j.modelos||[]; state.ciclo=j.ciclo||{}; state.cacheAt=j.at; mesclaCatalogo(); return true; } }catch(e){} return false; }
 function getQ(){ try{ return JSON.parse(localStorage.getItem(ukey(LSQ))||'[]'); }catch(e){ return []; } }
 function setQ(q){ try{ localStorage.setItem(ukey(LSQ),JSON.stringify(q)); }catch(e){} updStatus(); }
 const isNet=e=>!navigator.onLine || /fetch|network|failed|load failed|timeout/i.test(String((e&&(e.message||e.details))||e));
@@ -1683,7 +1951,7 @@ function applyLocal(op){
   if(op.t==='sessions'&&op.k==='upsert') for(const row of op.rows){ state.sessions=state.sessions.filter(s=>s.id!==row.id); state.sessions.push(row.data); }
   if(op.t==='sessions'&&op.k==='delete') state.sessions=state.sessions.filter(s=>s.id!==op.id);
   if(op.t==='bio'){ state.bio=state.bio||{refs:{},evaluations:[]}; for(const row of op.rows) state.bio.evaluations=state.bio.evaluations.filter(e=>e.date!==row.date).concat([row.data]).sort((a,b)=>a.date.localeCompare(b.date)); }
-  if(op.t==='settings'){ if(op.row.aliases) state.config.aliases=op.row.aliases; if(op.row.profile) state.profile=op.row.profile; if(op.row.modelos) state.modelos=op.row.modelos; } }
+  if(op.t==='settings'){ if(op.row.aliases) state.config.aliases=op.row.aliases; if(op.row.profile) state.profile=op.row.profile; if(op.row.modelos) state.modelos=op.row.modelos; if(op.row.ciclo) state.ciclo=op.row.ciclo; } }
 async function write(ops){
   if(navigator.onLine && !getQ().length){ try{ for(const op of ops) await execOp(op); await loadAll(); return 'online'; }catch(e){ if(!isNet(e)) throw e; } }
   setQ(getQ().concat(ops)); for(const op of ops) applyLocal(op); saveCache(); return 'offline'; }
@@ -1886,7 +2154,7 @@ async function loadAll(){
   if(s.error||b.error){ if(loadCache()){ for(const op of getQ()) applyLocal(op); state.ready=true; updStatus(); if(!$('#dlgReg').open) render(); return; }
     state.msg=navigator.onLine?'Não foi possível carregar seus dados. Recarregue a página.':'Sem internet e sem dados salvos neste aparelho ainda. Abra o app uma vez com internet.'; state.ready=false; render(); return; }
   state.sessions=s.data.map(r=>r.data);
-  state.config={aliases:(c.data&&c.data.aliases)||{}}; state.profile=(c.data&&c.data.profile)||{}; state.modelos=(c.data&&c.data.modelos)||[];
+  state.config={aliases:(c.data&&c.data.aliases)||{}}; state.profile=(c.data&&c.data.profile)||{}; state.modelos=(c.data&&c.data.modelos)||[]; state.ciclo=(c.data&&c.data.ciclo)||{};
   try{ const [ac,ct]=await Promise.all([sb.rpc('meu_acesso'),sb.rpc('catalogo')]); if(ac.data) state.acesso=ac.data; if(ct.data) state.catalogo=ct.data; try{ localStorage.setItem(ukey('wodio:extra:'),JSON.stringify({acesso:state.acesso,catalogo:state.catalogo})); }catch(e){} }catch(e){}
   mesclaCatalogo();
   state.bio={refs:(c.data&&c.data.bio_refs)||{},evaluations:b.data.map(r=>r.data)};
@@ -1923,7 +2191,7 @@ async function restoreBackup(id,when){
     for(let k=0;k<rows.length;k+=100){ x=await sb.from('sessions').insert(rows.slice(k,k+100)); if(x.error) throw x.error; }
     x=await sb.from('bio_evaluations').delete().neq('date','1900-01-01'); if(x.error) throw x.error;
     const ev=((j.bio||{}).evaluations||[]).map(e=>({date:e.date,data:e})); if(ev.length){ x=await sb.from('bio_evaluations').insert(ev); if(x.error) throw x.error; }
-    x=await sb.from('settings').upsert({aliases:j.aliases||{},bio_refs:(j.bio||{}).refs||{}}); if(x.error) throw x.error;
+    const stRow={aliases:j.aliases||{},bio_refs:(j.bio||{}).refs||{}}; if(j.ciclo) stRow.ciclo=j.ciclo; x=await sb.from('settings').upsert(stRow); if(x.error) throw x.error;
     $('#dlgConta').close(); await loadAll(); toast('Backup restaurado: '+rows.length+' sessões.');
   }catch(e){ console.error(e); toast('Não foi possível restaurar agora. Tente de novo.'); } }
 function normalizaBlocos(blocks){ const out=[], cnt={}; const R=['','','II','III','IV','V'];
@@ -1967,13 +2235,13 @@ async function importFile(file){
     for(let k=0;k<rows.length;k+=100){ const {error}=await sb.from('sessions').upsert(rows.slice(k,k+100)); if(error) throw error; toast('Importando… '+Math.min(k+100,rows.length)+' de '+rows.length); }
     const ev=((j.bio||{}).evaluations||[]).map(e=>({date:e.date,data:e}));
     if(ev.length){ const {error}=await sb.from('bio_evaluations').upsert(ev); if(error) throw error; }
-    const {error}=await sb.from('settings').upsert({aliases:{...(state.config.aliases||{}),...(j.aliases||{})},bio_refs:(j.bio||{}).refs||(state.bio&&state.bio.refs)||{}}); if(error) throw error;
+    const stRow={aliases:{...(state.config.aliases||{}),...(j.aliases||{})},bio_refs:(j.bio||{}).refs||(state.bio&&state.bio.refs)||{}}; if(j.ciclo&&!((state.ciclo||{}).periodos||[]).length) stRow.ciclo=j.ciclo; const {error}=await sb.from('settings').upsert(stRow); if(error) throw error;
     await loadAll(); toast('Histórico importado: '+rows.length+' sessões.');
   }catch(e){ console.error(e); toast('Esse arquivo não pôde ser importado. Use o arquivo treinos-historico.json.'); }
 }
 async function exportFile(){
   const nome='wodio-backup-'+todayISO()+'.json';
-  const txt=JSON.stringify({app:"WÓD'IO",gerado:new Date().toISOString(),sessions:state.sessions,bio:state.bio,aliases:state.config.aliases,profile:state.profile,modelos:state.modelos},null,1);
+  const txt=JSON.stringify({app:"WÓD'IO",gerado:new Date().toISOString(),sessions:state.sessions,bio:state.bio,aliases:state.config.aliases,profile:state.profile,modelos:state.modelos,ciclo:state.ciclo||{}},null,1);
   const marca=()=>{ try{ localStorage.setItem(ukey('wodio:bkAt'),String(Date.now())); }catch(e){} };
   try{ const f=new File([txt],nome,{type:'application/json'}); if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:"Backup WÓD'IO",text:"Backup dos meus treinos ("+fmtD(todayISO())+")"}); marca(); toast('Backup pronto.'); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
   const blob=new Blob([txt],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); marca(); toast('Backup salvo: '+nome);
@@ -1988,7 +2256,7 @@ document.addEventListener('click',async e=>{
   if(t.id==='btnChangePw'){ $('#dlgConta').close(); state.recovery=true; state.recMsg=''; render(); }
   if(t.id==='btnAuthMode'){ state.authMode=state.authMode==='criar'?'entrar':'criar'; state.authMsg=''; render(); }
   if(t.id==='btnImport'){ $('#fileImport').click(); }
-  if(t.id==='btnMenu'){ renderPerfilCard(); $('#dlgConta').showModal(); listBackups(); renderMembros(); renderStrava(); renderNotif(); }
+  if(t.id==='btnMenu'){ renderPerfilCard(); renderCicloConf(); $('#dlgConta').showModal(); listBackups(); renderMembros(); renderStrava(); renderNotif(); }
   if(t.id==='btnStravaOn'){ state.stravaHistAoConectar=false; $('#dlgStravaHelp').showModal(); }
   if(t.id==='btnStravaHist'){ t.disabled=true; await stravaSync(false,true); t.disabled=false; }
   if(t.id==='btnWelcomeStrava'){ state.stravaHistAoConectar=true; $('#dlgStravaHelp').showModal(); }
