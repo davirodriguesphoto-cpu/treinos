@@ -1190,7 +1190,9 @@ const media=a=>Math.round(a.reduce((x,y)=>x+y,0)/a.length);
 function cicCalc(){ const C=cic(), K=C.config, hoje=todayISO();
   const P=C.periodos.filter(p=>p&&p.inicio).sort((a,b)=>a.inicio<b.inicio?-1:1);
   const ints=[]; for(let i=1;i<P.length;i++){ const d=isoDiff(P[i].inicio,P[i-1].inicio); if(d>=18&&d<=45) ints.push(d); }
-  const iU=ints.slice(-6); const ciclo=K.mediaCiclo&&iU.length>=2?media(iU):K.durCiclo;
+  // média dos últimos 6 ciclos, ignorando os irregulares (mais de 5 dias longe da mediana)
+  const i6=ints.slice(-6); const med=i6.length?[...i6].sort((a,b)=>a-b)[Math.floor(i6.length/2)]:0; const iR=i6.filter(d=>Math.abs(d-med)<=5); const iU=iR.length>=2?iR:i6;
+  const ciclo=K.mediaCiclo&&iU.length>=2?media(iU):K.durCiclo;
   const dU=P.filter(p=>p.fim).map(p=>isoDiff(p.fim,p.inicio)+1).filter(d=>d>=1&&d<=12).slice(-6); const menstr=K.mediaMenstr&&dU.length>=2?media(dU):K.durMenstr;
   const lutea=Math.min(Math.max(+K.lutea||14,8),18);
   const last=P[P.length-1]||null;
