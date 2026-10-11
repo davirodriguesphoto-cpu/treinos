@@ -585,10 +585,6 @@ body[data-dir="dir"] #view{animation:vDir .22s ease}
 .ciclegenda span{display:inline-flex;align-items:center;gap:6px}
 .lg{display:inline-block;width:14px;height:14px;border-radius:50%}.lg.mr{background:var(--cic)}.lg.mp{border:2px dashed var(--cic)}.lg.fe{background:color-mix(in srgb,var(--z1) 35%,transparent)}
 .cicdet{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:6px}
-.ciclo-detail{display:none}
-.ciclo-open .ciclo-detail{display:block}
-.ciclo-toggle{font-size:13px;line-height:1;margin-left:8px;vertical-align:-0.1em}
-.ciclo-toggle:focus-visible{outline:2px solid var(--z2);outline-offset:2px;border-radius:6px}
 .cicacts{display:grid;gap:8px;margin-top:6px}
 .cicnts,.cicchips{display:flex;flex-wrap:wrap;gap:6px}
 .cicchip{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:7px 12px;font-size:14px;display:inline-flex;align-items:center;gap:4px}
@@ -1098,7 +1094,7 @@ if(typeof module!=='undefined') module.exports={parseTreinoPersonal,limpaNomeExe
 </script><script>(function(){
 const P=window.TreinoParser;
 const $=s=>document.querySelector(s);
-const state={sessions:[],bio:null,config:{aliases:{}},ready:false,tab:'resumo',ex:null,exFilter:'',openSess:{},cicloOpen:false,pending:null};
+const state={sessions:[],bio:null,config:{aliases:{}},ready:false,tab:'resumo',ex:null,exFilter:'',openSess:{},pending:null};
 const SB_URL='https://deqernjhaieajlkwacwv.supabase.co', SB_KEY='sb_publishable_uZy72-xMWYhvU9L7iEC1bA_tSFrfGGz';
 let sb=null,user=null;
 const charts={};
@@ -1265,27 +1261,23 @@ function gravLinha(sem){ const s=Math.min(40,Math.max(4,sem)); return GRAV.find(
 // ---- cartão da tela inicial
 function cicloCard(){ if(!ehF()) return ''; const C=cic(), K=C.config;
   const btns=(a,b)=>`<div class="cicbtns">${a}<button class="btn cicsec" data-cic="notas">Anotações</button></div>`;
-  const head=`<div class="cich"><span class="cict">Meu ciclo</span><button class="linkbtn" data-cic="cal">Calendário</button><button class="linkbtn ciclo-toggle" data-ciclo-toggle aria-expanded="${state.cicloOpen}" aria-label="Mostrar detalhes do ciclo"><span class="ciclo-toggle-text">${state.cicloOpen?'▾':'▴'}</span></button></div>`;
+  const head=`<div class="cich"><span class="cict">Meu ciclo</span><button class="linkbtn" data-cic="cal">Calendário</button></div>`;
   const G=gravAgora();
   if(G){ const g=gravLinha(G.sem);
-    return `<section class="cic ${state.cicloOpen?'ciclo-open':''}">${head}<div class="cicgrav">${gIco(g[1],'gico big')}<div><b class="cicbig">${G.sem} semana${G.sem===1?'':'s'}</b>${G.dia?`<span class="cicdias">e ${G.dia} dia${G.dia>1?'s':''}</span>`:''}<span class="m">Tamanho do bebê${G.sem<4?' (a tabela começa na 4ª semana)':G.sem>40?' (reta final!)':''}</span><b class="cicfruta">${esc(g[2])}</b>${g[3]?`<span class="m">${esc(g[3])}</span>`:''}</div></div>
-      ${btns(`<button class="btn cicmain" data-cic="cal">Calendário</button>`)}
-      <div class="ciclo-detail">${CIC_AVISO}</div></section>`; }
+    return `<section class="cic"><div class="cich"><span class="cict">Meu ciclo · gravidez</span></div><div class="cicgrav">${gIco(g[1],'gico big')}<div><b class="cicbig">${G.sem} semana${G.sem===1?'':'s'}</b>${G.dia?`<span class="cicdias">e ${G.dia} dia${G.dia>1?'s':''}</span>`:''}<span class="m">Tamanho do bebê${G.sem<4?' (a tabela começa na 4ª semana)':G.sem>40?' (reta final!)':''}</span><b class="cicfruta">${esc(g[2])}</b>${g[3]?`<span class="m">${esc(g[3])}</span>`:''}</div></div>
+      ${btns(`<button class="btn cicmain" data-cic="cal">Calendário</button>`)}${CIC_AVISO}</section>`; }
   const R=cicCalc(); const hoje=R.hoje;
-  if(!R.last) return `<section class="cic ${state.cicloOpen?'ciclo-open':''}">${head}<p class="cicvazio">Registre o início da sua última menstruação para ver as previsões do ciclo.</p>${btns(`<button class="btn cicmain" data-cic="inicio">Início da menstruação</button>`)}
-      <div class="ciclo-detail">${CIC_AVISO}</div></section>`;
+  if(!R.last) return `<section class="cic">${head}<p class="cicvazio">Registre o início da sua última menstruação para ver as previsões do ciclo.</p>${btns(`<button class="btn cicmain" data-cic="inicio">Início da menstruação</button>`)}${CIC_AVISO}</section>`;
   const J=proxJanela(R); const dH=cicDia(R,hoje);
   const fert=J?(hoje>=J.de?`<b>Até ${fmtDia(J.ate)}</b><span>Período fértil agora</span>`:`<b>${fmtDia(J.de)}</b><span>Próximo período fértil</span>`):`<b>–</b><span>Próximo período fértil</span>`;
   const prevs=`<div class="cicprev"><div><b>${fmtDia(R.atraso>0?hoje:R.prox)}</b><span>${R.atraso>0?'Menstruação atrasada':'Próxima menstruação'}</span></div><div>${fert}</div></div>`;
   if(R.menstruando){ const dia=isoDiff(hoje,R.last.inicio)+1;
-    return `<section class="cic ${state.cicloOpen?'ciclo-open':''}">${head}<div class="cictop"><div><b class="cicbig">${dia}º dia</b><span>de menstruação</span></div><div class="cicniv n-baixo"><b>Baixo</b><span>probabilidade de engravidar</span></div></div><div class="ciclo-detail">${prevs}${CIC_AVISO}</div>
-      ${btns(`<button class="btn cicmain" data-cic="fim">Fim da menstruação</button>`)}
-      </section>`; }
+    return `<section class="cic">${head}<div class="cictop"><div><b class="cicbig">${dia}º dia</b><span>de menstruação</span></div><div class="cicniv n-baixo"><b>Baixo</b><span>probabilidade de engravidar</span></div></div>${prevs}
+      ${btns(`<button class="btn cicmain" data-cic="fim">Fim da menstruação</button>`)}${CIC_AVISO}</section>`; }
   const falta=isoDiff(R.prox,hoje);
   const big=R.atraso>0?`Atraso de ${R.atraso} dia${R.atraso>1?'s':''}`:falta===0?'Pode começar hoje':`Falta${falta>1?'m':''} ${falta} dia${falta>1?'s':''}`;
-  return `<section class="cic ${state.cicloOpen?'ciclo-open':''}">${head}<div class="cictop"><div><b class="cicbig">${big}</b><span>${R.atraso>0?'em relação à previsão':'para a próxima menstruação'}</span></div><div class="cicniv n-${dH.nivel==='Alto'?'alto':dH.nivel==='Médio'?'medio':'baixo'}"><b>${dH.nivel}</b><span>probabilidade de engravidar</span></div></div><div class="ciclo-detail">${prevs}${CIC_AVISO}</div>
-    ${btns(`<button class="btn cicmain" data-cic="inicio">Início da menstruação</button>`)}
-    </section>`; }
+  return `<section class="cic">${head}<div class="cictop"><div><b class="cicbig">${big}</b><span>${R.atraso>0?'em relação à previsão':'para a próxima menstruação'}</span></div><div class="cicniv n-${dH.nivel==='Alto'?'alto':dH.nivel==='Médio'?'medio':'baixo'}"><b>${dH.nivel}</b><span>probabilidade de engravidar</span></div></div>${prevs}
+    ${btns(`<button class="btn cicmain" data-cic="inicio">Início da menstruação</button>`)}${CIC_AVISO}</section>`; }
 
 // ---- calendário
 const DSEMC=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -1353,7 +1345,7 @@ function renderCicloConf(){ const acc=$('#accCiclo'); if(!acc) return; acc.hidde
     <div class="ciccf"><h5>Ovulação e fertilidade</h5><p class="note" style="margin-top:0">Duração da fase lútea</p>${step('lutea',K.lutea,8,18)}<p class="note">A ovulação costuma acontecer cerca de 14 dias antes da próxima menstruação. O período fértil considerado vai de 5 dias antes até 1 dia depois da ovulação.</p></div>
     <div class="ciccf"><h5>Gravidez</h5>${sw('gravidez',K.gravidez,'Estou grávida','pausa as previsões de menstruação')}
       ${K.gravidez?`<div class="cicgf"><label>Semanas<input data-ccg="gravSem" inputmode="numeric" value="${G?G.sem:''}" placeholder="0"></label><label>Dias<input data-ccg="gravDia" inputmode="numeric" value="${G?G.dia:''}" placeholder="0"></label></div><p class="note">Informe quantas semanas de gestação você tem hoje. O app avança sozinho a cada dia.</p>`:''}</div>
-    <div class="actions" style="justify-content:flex-start"><button class="btn primary" data-ciclo-conf-save>Salvar</button><button class="btn" data-cic="cal">Abrir calendário</button><button class="btn ghost" data-ccdel="1">Apagar todos os dados do Meu ciclo</button></div>
+    <div class="actions" style="justify-content:flex-start"><button class="btn" data-cic="cal">Abrir calendário</button><button class="btn ghost" data-ccdel="1">Apagar todos os dados do Meu ciclo</button></div>
     ${CIC_AVISO2}${CIC_AVISO}</div>`; }
 
 // ---- eventos
@@ -1372,8 +1364,7 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
     if(t.dataset.nvz&&S.sexo){ S.sexo.vezes=Math.max(1,Math.min(10,(S.sexo.vezes||1)+(+t.dataset.nvz))); renderNota(); return; }
     if(t.id==='btnNotaSalvar'){ t.disabled=true; await salvarNota(); t.disabled=false; return; } }
   if(t.dataset.ccs){ const [k,d]=t.dataset.ccs.split('.'); const K=cic().config; const lim={durMenstr:[1,12],durCiclo:[18,45],lutea:[8,18]}[k]; K[k]=Math.max(lim[0],Math.min(lim[1],(+K[k]||0)+(+d))); salvaCiclo(); return; }
-  if(t.dataset.ccdel){ if(!confirm('Apagar todas as menstruações, anotações e configurações do Meu ciclo? Isso não pode ser desfeito.')) return; state.ciclo={}; cic(); salvaCiclo('Dados do Meu ciclo apagados.'); return; }
-  if(t.dataset.cicloConfSave){ toast('Alterações salvas com sucesso!'); return; } });
+  if(t.dataset.ccdel){ if(!confirm('Apagar todas as menstruações, anotações e configurações do Meu ciclo? Isso não pode ser desfeito.')) return; state.ciclo={}; cic(); salvaCiclo('Dados do Meu ciclo apagados.'); return; } });
 document.addEventListener('change',e=>{ const t=e.target;
   if(t.dataset&&t.dataset.ccw){ const K=cic().config; K[t.dataset.ccw]=t.checked; if(t.dataset.ccw==='gravidez'&&t.checked&&K.gravSem==null){ K.gravSem=4; K.gravDia=0; K.gravRef=todayISO(); } salvaCiclo(); }
   if(t.dataset&&t.dataset.ccg){ const K=cic().config; const G=gravAgora()||{sem:0,dia:0}; const v=Math.max(0,parseInt(t.value,10)||0); const sem=t.dataset.ccg==='gravSem'?Math.min(42,v):G.sem, dia=t.dataset.ccg==='gravDia'?Math.min(6,v):G.dia; K.gravSem=sem; K.gravDia=dia; K.gravRef=todayISO(); salvaCiclo(); } });
@@ -1840,7 +1831,6 @@ document.addEventListener('click',e=>{
   if(t.dataset.mg){ state.mgSel=state.mgSel===t.dataset.mg?null:t.dataset.mg; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
   if(t.dataset.sf){ state.sessFilter=t.dataset.sf; render(); return; }
   if(t.dataset.sess){ state.openSess[t.dataset.sess]=!state.openSess[t.dataset.sess]; const box=t.parentElement; box.classList.toggle('open'); t.setAttribute('aria-expanded',box.classList.contains('open')); return; }
-  if(t.dataset.cicloToggle){ state.cicloOpen=!state.cicloOpen; render(); return; }
   if(t.dataset.del){ delSession(t.dataset.del); return; }
   if(t.dataset.edit){ openEdit(t.dataset.edit); return; }
   if(t.dataset.copy){ copiarTreino(t.dataset.copy); return; }
