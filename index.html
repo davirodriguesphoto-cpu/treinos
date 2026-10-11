@@ -380,6 +380,8 @@ dialog.painel .mh h3{text-align:center}
 .acc summary::after{content:"▾";color:var(--muted);transition:transform .2s ease}
 .acc[open] summary::after{transform:rotate(180deg)}
 .accb{padding:0 16px 14px;display:grid;gap:6px}
+.acc:not([open]) .accb{display:none}
+.acc[open] .accb{display:block}
 .accb h5{margin:12px 0 2px;font-size:13px}
 .accitem{background:none;border:0;border-bottom:1px solid var(--line);color:var(--text);text-align:left;padding:12px 2px;font-size:15px;display:flex;justify-content:space-between}
 .accitem::after{content:"›";color:var(--muted)}
@@ -1272,12 +1274,10 @@ function cicloCard(){ if(!ehF()) return ''; const C=cic(), K=C.config;
   const fert=J?(hoje>=J.de?`<b>Até ${fmtDia(J.ate)}</b><span>Período fértil agora</span>`:`<b>${fmtDia(J.de)}</b><span>Próximo período fértil</span>`):`<b>–</b><span>Próximo período fértil</span>`;
   const prevs=`<div class="cicprev"><div><b>${fmtDia(R.atraso>0?hoje:R.prox)}</b><span>${R.atraso>0?'Menstruação atrasada':'Próxima menstruação'}</span></div><div>${fert}</div></div>`;
   if(R.menstruando){ const dia=isoDiff(hoje,R.last.inicio)+1;
-    return `<section class="cic">${head}<div class="cictop"><div><b class="cicbig">${dia}º dia</b><span>de menstruação</span></div><div class="cicniv n-baixo"><b>Baixo</b><span>probabilidade de engravidar</span></div></div>${prevs}
-      ${btns(`<button class="btn cicmain" data-cic="fim">Fim da menstruação</button>`)}${CIC_AVISO}</section>`; }
+    return `<section class="cic">${head}<div class="cictop"><div><b class="cicbig">${dia}º dia</b><span>de menstruação</span></div><div class="cicniv n-baixo"><b>Baixo</b><span>probabilidade de engravidar</span></div></div>${prevs}<div class="acc" data-acc="toggle" style="margin-top:10px"><summary>Mais informações</summary><div class="accb"><p>${btns(`<button class="btn cicmain" data-cic="fim">Fim da menstruação</button>`)}<p class="note">Em caso de dúvidas, consulte um profissional de saúde.</p></div></div>${CIC_AVISO}</section>`; }
   const falta=isoDiff(R.prox,hoje);
   const big=R.atraso>0?`Atraso de ${R.atraso} dia${R.atraso>1?'s':''}`:falta===0?'Pode começar hoje':`Falta${falta>1?'m':''} ${falta} dia${falta>1?'s':''}`;
-  return `<section class="cic">${head}<div class="cictop"><div><b class="cicbig">${big}</b><span>${R.atraso>0?'em relação à previsão':'para a próxima menstruação'}</span></div><div class="cicniv n-${dH.nivel==='Alto'?'alto':dH.nivel==='Médio'?'medio':'baixo'}"><b>${dH.nivel}</b><span>probabilidade de engravidar</span></div></div>${prevs}
-    ${btns(`<button class="btn cicmain" data-cic="inicio">Início da menstruação</button>`)}${CIC_AVISO}</section>`; }
+  return `<section class="cic">${head}<div class="cictop"><div><b class="cicbig">${big}</b><span>${R.atraso>0?'em relação à previsão':'para a próxima menstruação'}</span></div><div class="cicniv n-${dH.nivel==='Alto'?'alto':dH.nivel==='Médio'?'medio':'baixo'}"><b>${dH.nivel}</b><span>probabilidade de engravidar</span></div></div>${prevs}<div class="acc" data-acc="toggle" style="margin-top:10px"><summary>Mais informações</summary><div class="accb"><p>${btns(`<button class="btn cicmain" data-cic="inicio">Início da menstruação</button>`)}<p class="note">Em caso de dúvidas, consulte um profissional de saúde.</p></div></div>${CIC_AVISO}</section>`; }
 
 // ---- calendário
 const DSEMC=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -1831,6 +1831,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.mg){ state.mgSel=state.mgSel===t.dataset.mg?null:t.dataset.mg; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
   if(t.dataset.sf){ state.sessFilter=t.dataset.sf; render(); return; }
   if(t.dataset.sess){ state.openSess[t.dataset.sess]=!state.openSess[t.dataset.sess]; const box=t.parentElement; box.classList.toggle('open'); t.setAttribute('aria-expanded',box.classList.contains('open')); return; }
+  if(t.dataset.acc){ const el=t.closest('.acc'); el.open = !el.open; return; }
   if(t.dataset.del){ delSession(t.dataset.del); return; }
   if(t.dataset.edit){ openEdit(t.dataset.edit); return; }
   if(t.dataset.copy){ copiarTreino(t.dataset.copy); return; }
