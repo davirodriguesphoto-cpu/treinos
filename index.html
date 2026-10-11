@@ -1353,7 +1353,7 @@ function renderCicloConf(){ const acc=$('#accCiclo'); if(!acc) return; acc.hidde
     <div class="ciccf"><h5>Ovulação e fertilidade</h5><p class="note" style="margin-top:0">Duração da fase lútea</p>${step('lutea',K.lutea,8,18)}<p class="note">A ovulação costuma acontecer cerca de 14 dias antes da próxima menstruação. O período fértil considerado vai de 5 dias antes até 1 dia depois da ovulação.</p></div>
     <div class="ciccf"><h5>Gravidez</h5>${sw('gravidez',K.gravidez,'Estou grávida','pausa as previsões de menstruação')}
       ${K.gravidez?`<div class="cicgf"><label>Semanas<input data-ccg="gravSem" inputmode="numeric" value="${G?G.sem:''}" placeholder="0"></label><label>Dias<input data-ccg="gravDia" inputmode="numeric" value="${G?G.dia:''}" placeholder="0"></label></div><p class="note">Informe quantas semanas de gestação você tem hoje. O app avança sozinho a cada dia.</p>`:''}</div>
-    <div class="actions" style="justify-content:flex-start"><button class="btn" data-cic="cal">Abrir calendário</button><button class="btn ghost" data-ccdel="1">Apagar todos os dados do Meu ciclo</button></div>
+    <div class="actions" style="justify-content:flex-start"><button class="btn primary" data-ciclo-conf-save>Salvar</button><button class="btn" data-cic="cal">Abrir calendário</button><button class="btn ghost" data-ccdel="1">Apagar todos os dados do Meu ciclo</button></div>
     ${CIC_AVISO2}${CIC_AVISO}</div>`; }
 
 // ---- eventos
@@ -1372,7 +1372,8 @@ document.addEventListener('click',async e=>{ const t=e.target.closest('button');
     if(t.dataset.nvz&&S.sexo){ S.sexo.vezes=Math.max(1,Math.min(10,(S.sexo.vezes||1)+(+t.dataset.nvz))); renderNota(); return; }
     if(t.id==='btnNotaSalvar'){ t.disabled=true; await salvarNota(); t.disabled=false; return; } }
   if(t.dataset.ccs){ const [k,d]=t.dataset.ccs.split('.'); const K=cic().config; const lim={durMenstr:[1,12],durCiclo:[18,45],lutea:[8,18]}[k]; K[k]=Math.max(lim[0],Math.min(lim[1],(+K[k]||0)+(+d))); salvaCiclo(); return; }
-  if(t.dataset.ccdel){ if(!confirm('Apagar todas as menstruações, anotações e configurações do Meu ciclo? Isso não pode ser desfeito.')) return; state.ciclo={}; cic(); salvaCiclo('Dados do Meu ciclo apagados.'); return; } });
+  if(t.dataset.ccdel){ if(!confirm('Apagar todas as menstruações, anotações e configurações do Meu ciclo? Isso não pode ser desfeito.')) return; state.ciclo={}; cic(); salvaCiclo('Dados do Meu ciclo apagados.'); return; }
+  if(t.dataset.cicloConfSave){ toast('Alterações salvas com sucesso!'); return; } });
 document.addEventListener('change',e=>{ const t=e.target;
   if(t.dataset&&t.dataset.ccw){ const K=cic().config; K[t.dataset.ccw]=t.checked; if(t.dataset.ccw==='gravidez'&&t.checked&&K.gravSem==null){ K.gravSem=4; K.gravDia=0; K.gravRef=todayISO(); } salvaCiclo(); }
   if(t.dataset&&t.dataset.ccg){ const K=cic().config; const G=gravAgora()||{sem:0,dia:0}; const v=Math.max(0,parseInt(t.value,10)||0); const sem=t.dataset.ccg==='gravSem'?Math.min(42,v):G.sem, dia=t.dataset.ccg==='gravDia'?Math.min(6,v):G.dia; K.gravSem=sem; K.gravDia=dia; K.gravRef=todayISO(); salvaCiclo(); } });
