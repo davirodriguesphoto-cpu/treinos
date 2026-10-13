@@ -1179,10 +1179,14 @@ function ladoItem(i){ return !!(i.perSide||(i.modo&&i.modo!=='padrao')); }
 function repsVez(i){ if(i.reps==null) return null; const r=+i.reps||0; return ladoItem(i)?r+(i.repsE!=null?(+i.repsE||0):r):r; }
 function modoItem(i){ const m=i.modo&&i.modo!=='padrao'?i.modo:/alternad/i.test(i.note||'')?'alternado':/unilateral/i.test(i.note||'')?'unilateral':i.perSide?'unilateral':'padrao'; return {padrao:'Padrão',unilateral:'Unilateral',alternado:'Alternado'}[m]; }
 function itemVolume(i,b){ if(i.ladder) return i.ladder.reduce((a,x)=>a+x.reps*x.loadKg,0)*(i.sets||1); const r=repsVez(i); if(!i.loadKg||!r) return 0; return i.loadKg*r*multItem(i,b); }
+function distJaSomada(i){ return !!(i.distAuto||trechoDe(i)!=null); }
+function distPorRep(i){ return i.reps!=null&&+i.reps>0&&i.distM&&!distJaSomada(i); }
 function itemTotals(i,b){ const m=multItem(i,b); const lados=ladoItem(i)?2:1; const t={reps:0,timeSec:0,distM:0};
   if(i.ladder) t.reps=i.ladder.reduce((a,x)=>a+x.reps,0)*(i.sets||1); else if(i.reps!=null) t.reps=repsVez(i)*m;
-  if(i.timeSec&&i.reps==null) t.timeSec=i.timeSec*m*lados; if(i.distM) t.distM=i.distM*m*(i.reps==null?lados:1); return t; }
-function totalTxt(i,b){ if(i.ladder) return ''; const m=multItem(i,b); if(!ladoItem(i)&&m===1) return ''; const p=fmtTotals(itemTotals(i,b),true); return p.length?` <span class="m">= ${p.join(' · ')}</span>`:''; }
+  if(i.timeSec&&i.reps==null) t.timeSec=i.timeSec*m*lados; if(i.distM) t.distM=distPorRep(i)?i.distM*repsVez(i)*m:i.distM*m*(i.reps==null?lados:1); return t; }
+// coluna "Reps total": distância quando tem, senão repetições; mais o tempo
+function totalCel(tt){ const p=[]; if(tt.distM) p.push(tt.distM>=1000?fmtNum(tt.distM/1000,2)+' km':fmtNum(tt.distM,0)+' m'); else if(tt.reps) p.push(fmtNum(tt.reps,0)+' reps'); if(tt.timeSec) p.push(tt.timeSec>=3600?fmtNum(tt.timeSec/3600,1)+' h':tt.timeSec>=60?mmss(tt.timeSec):tt.timeSec+'"'); return p.join(' · ')||'–'; }
+function totalTxt(i,b){ if(i.ladder) return ''; const m=multItem(i,b); if(!ladoItem(i)&&m===1&&!distPorRep(i)) return ''; const p=fmtTotals(itemTotals(i,b),true); return p.length?` <span class="m">= ${p.join(' · ')}</span>`:''; }
 // corrida/caminhada dentro do treino (Corrida Box, Esteira…) entra nos km
 const CORRIDA_ITEM=/^(corrida|esteira|caminhada|trote)/i;
 function ehCorridaItem(n){ return CORRIDA_ITEM.test(String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()); }
@@ -1211,7 +1215,7 @@ function zoneStrip(z){ const t=zoneSum(z); if(!t) return '<div class="zones" ari
   const p=k=>(100*(z[k]||0)/t).toFixed(2)+'%';
   return `<div class="zones" role="img" aria-label="Zonas de FC: leve ${mmss(z.leve)}, intensivo ${mmss(z.intensivo)}, aeróbico ${mmss(z.aerobico)}, anaeróbico ${mmss(z.anaerobico)}, VO2 ${mmss(z.vo2)}"><span class="zl" style="width:${p('leve')}"></span><span class="zi" style="width:${p('intensivo')}"></span><span class="za" style="width:${p('aerobico')}"></span><span class="zn" style="width:${p('anaerobico')}"></span><span class="zv" style="width:${p('vo2')}"></span></div>`; }
 const zoneLegend=`<div class="legend"><span><i class="zl"></i>Leve</span><span><i class="zi"></i>Intensivo</span><span><i class="za"></i>Aeróbico</span><span><i class="zn"></i>Anaeróbico</span><span><i class="zv"></i>VO₂ máx</span></div>`;
-function qty(i){ const p=[]; if(i.sets) p.push(i.sets+'×'); else if(i._rounds) p.push(i._rounds+'×'); if(i.reps!=null&&!i.ladder) p.push(i.repsE!=null&&i.repsE!==i.reps?i.reps+'D/'+i.repsE+'E':i.reps+(i.perSide?'/lado':'')); if(i.ladder) p.push(i.ladder.map(x=>x.reps+'×'+fmtNum(x.loadKg)+'kg').join(' · ')); if(i.timeSec) p.push((i.timeSec>=60?mmss(i.timeSec):i.timeSec+'"')+(i.perSide&&i.reps==null?'/lado':'')); if(i.distM) p.push((i.distM>=1000?fmtNum(i.distM/1000,2)+' km':i.distM+' m')+(i.perSide?'/lado':'')); if(i.cal) p.push(i.cal+' cal'); if(i.scheme) p.push('('+i.scheme+')'); return p.join(' '); }
+function qty(i){ const p=[]; if(i.sets) p.push(i.sets+'×'); else if(i._rounds) p.push(i._rounds+'×'); if(i.reps!=null&&!i.ladder) p.push((i.repsE!=null&&i.repsE!==i.reps?i.reps+'D/'+i.repsE+'E':i.reps+(i.perSide?'/lado':''))+(distPorRep(i)?' ×':'')); if(i.ladder) p.push(i.ladder.map(x=>x.reps+'×'+fmtNum(x.loadKg)+'kg').join(' · ')); if(i.timeSec) p.push((i.timeSec>=60?mmss(i.timeSec):i.timeSec+'"')+(i.perSide&&i.reps==null?'/lado':'')); if(i.distM) p.push((i.distM>=1000?fmtNum(i.distM/1000,2)+' km':i.distM+' m')+(i.perSide?'/lado':'')); if(i.cal) p.push(i.cal+' cal'); if(i.scheme) p.push('('+i.scheme+')'); return p.join(' '); }
 function sparkSVG(vals,color){ if(vals.length<2) return ''; const w=90,h=28,mn=Math.min(...vals),mx=Math.max(...vals),r=mx-mn||1;
   const pts=vals.map((v,k)=>(k/(vals.length-1)*w).toFixed(1)+','+(h-3-(v-mn)/r*(h-6)).toFixed(1)).join(' ');
   return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" points="${pts}"/></svg>`; }
@@ -1682,12 +1686,12 @@ function vCorridaLivre(){
 function vCorridaBox(e){
   const K=kmStats(); let maior=null;
   for(const r of e.sessions) for(const i of r.items){ const d=itemTotals(i).distM||i.distM||0; if(!maior||d>maior.d) maior={d,date:r.date,i}; }
-  const rows=[...e.sessions].reverse().map(r=>`<tr><td>${fmtD(r.date)}${maior&&r.date===maior.date?' <span class="tag new">maior distância</span>':''}</td><td>${r.items.map(i=>i.block==='box'?fmtNum((i.distM||0)/1000,2)+' km':esc(qty(i))).join('<br>')}</td><td>${esc([...new Set(r.items.map(i=>i.block==='box'?'registrado no adidas':i.block))].join(', '))}</td></tr>`).join('');
+  const rows=[...e.sessions].reverse().map(r=>r.items.map((i,k)=>`<tr class="${k?'cont':''}"><td>${k?'':fmtD(r.date)+(maior&&r.date===maior.date?' <span class="tag new">maior distância</span>':'')}</td><td>${i.block==='box'?'corrida no box':esc(qty(i)||'–')}</td><td><b>${totalCel(itemTotals(i))}</b></td><td>${esc(i.block==='box'?'registrado no relógio':i.block||'')}</td></tr>`).join('')).join('');
   return `<p style="margin:10px 0 0"><button class="btn accent" id="exBack">‹ Todos os exercícios</button></p>
   <h2>Corrida Box</h2><p class="sub">Corrida dentro dos treinos na academia.</p>
   <div class="lifetime km"><div><b>${maior?(maior.d>=1000?fmtNum(maior.d/1000,2)+' km':fmtNum(maior.d,0)+' m'):'–'}</b><span>maior distância${maior?' · '+fmtD(maior.date):''}</span></div><div><b>${fmtNum(K.treino,1)}</b><span>km no box</span></div><div><b>${e.count}</b><span>treinos com corrida</span></div></div>
   <div class="panel"><h3>Quilômetros por mês</h3><div class="chart"><canvas id="cKm" aria-label="Quilômetros por mês"></canvas></div></div>
-  <h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Feito</th><th>Bloco</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  <h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Reps</th><th>Reps total</th><th>Bloco</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function drawPace(){ const runs=allSessions().filter(s=>s.kind==='corrida'&&s.local!=='box'&&s.pace&&s.distKm>=1);
   mk('cPace',{type:'line',data:{datasets:[{data:runs.map(r=>({x:d2(r.date).getTime(),y:r.pace/60})),borderColor:css('--z2'),backgroundColor:css('--z2'),pointRadius:2.5,tension:.25}]},
@@ -1703,16 +1707,18 @@ function drawKm(only){
 function vExDetail(e){
   if(e.name==='Corrida Box') return vCorridaBox(e); if(e.name==='Corrida Livre') return vCorridaLivre();
   const hasLoad=e.loaded.length>0;
-  const rows=[...e.sessions].reverse().map(r=>{ const L=[]; let prMarcado=false;
+  if(!hasLoad){ const rows=[...e.sessions].reverse().map(r=>r.items.map((i,k)=>`<tr class="${k?'cont':''}"><td>${k?'':fmtD(r.date)}</td><td>${esc(qty(i)||'–')}</td><td><b>${totalCel(itemTotals(i))}</b></td><td>${esc(i.block||'')}</td></tr>`).join('')).join('');
+    e._tabela=`<h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Reps</th><th>Reps total</th><th>Bloco</th></tr></thead><tbody>${rows}</tbody></table></div>`; }
+  const rows=hasLoad?[...e.sessions].reverse().map(r=>{ const L=[]; let prMarcado=false;
     for(const i of r.items){ if(i.ladder&&i.ladder.length>1){ for(const st of i.ladder){ const ehPr=r.pr&&!prMarcado&&st.loadKg===r.max; if(ehPr) prMarcado=true;
           L.push(`<tr class="${L.length?'cont':''}"><td>${fmtD(r.date)}${ehPr?' <span class="tag new">recorde</span>':''}</td><td>${st.reps} reps<br><span class="m">${st.reps} × ${fmtNum(st.loadKg)} kg</span></td><td>Padrão</td><td>${st.loadKg?fmtNum(st.loadKg)+' kg':'–'}</td><td>${st.reps&&st.loadKg?fmtNum(st.reps*st.loadKg,0)+' kg':'–'}</td><td>${esc(i.block||'')}</td></tr>`); } }
       else { const ehPr=r.pr&&!prMarcado; if(ehPr) prMarcado=true; const kg=i.loadKg; const tt=itemTotals(i);
         L.push(`<tr class="${L.length?'cont':''}"><td>${fmtD(r.date)}${ehPr?' <span class="tag new">recorde</span>':''}</td><td>${tt.reps?`<b>${fmtNum(tt.reps,0)} reps</b>`:esc(fmtTotals(tt,true).join(' · ')||qty(i))}${qty(i)?`<br><span class="m">${esc(qty(i))}</span>`:''}</td><td>${modoItem(i)}</td><td>${kg!=null?fmtNum(kg)+' kg':'–'}</td><td>${kg&&tt.reps?fmtNum(kg*tt.reps,0)+' kg':'–'}</td><td>${esc(i.block||'')}</td></tr>`); } }
-    return L.join(''); }).join('');
+    return L.join(''); }).join(''):'';
   return `<p style="margin:10px 0 0"><button class="btn accent" id="exBack">‹ Todos os exercícios</button></p>
   <h2>${esc(e.name)}</h2>${fmtTotals(e.tot,true).length?`<div class="lifetime">${fmtTotals(e.tot,true).map(x=>{const [n,...u]=x.split(' ');const uu=u.join(' '); return `<div><b>${n}</b><span>${uu==='reps'?'repetições':uu==='h'?'horas':uu==='min'?'minutos':uu}</span></div>`}).join('')}<div><b>${e.count}</b><span>${e.count>1?'sessões':'sessão'}</span></div></div>`:''}${hasLoad?`<p class="sub">Carga de ${fmtNum(e.first)} kg na primeira vez para ${fmtNum(e.best)} kg na melhor.</p>`:''}
   ${hasLoad?`<div class="panel"><div class="chips exr" role="group" aria-label="Período do gráfico">${[['3','3 meses'],['6','6 meses'],['12','1 ano'],['tudo','Tudo']].map(([k,l])=>`<button class="chip" data-exr="${k}" aria-pressed="${(state.exRange||'tudo')===k}">${l}</button>`).join('')}</div><div class="chartscroll" id="exScroll"><div class="chart tall" id="exChartBox"><canvas id="cEx" aria-label="Evolução de carga"></canvas></div></div><p class="note" style="margin:4px 0 0">Arraste para o lado para ver todo o período. Toque num ponto para ver os valores.</p><div class="legend"><span><i style="background:var(--load)"></i>Carga máxima na sessão</span><span><i style="background:var(--z2);opacity:.5"></i>Volume (carga × reps)</span><span><i style="background:var(--text)"></i>Recorde</span></div></div>`:'<p class="sub">Esse exercício não tem carga registrada; o histórico abaixo mostra reps e tempo.</p>'}
-  <h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Reps total</th><th>Modo</th><th>Carga máx.</th><th>Volume</th><th>Bloco</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  ${hasLoad?`<h2>Histórico</h2><div class="tablewrap"><table><thead><tr><th>Data</th><th>Reps total</th><th>Modo</th><th>Carga máx.</th><th>Volume</th><th>Bloco</th></tr></thead><tbody>${rows}</tbody></table></div>`:e._tabela}`;
 }
 function drawEx(){
   const ex=exerciseIndex(); const e=state.ex&&ex[state.ex]; if(e&&(e.name==='Corrida Box'||e.name==='Corrida Livre')){ drawKm(e.name==='Corrida Livre'?'l':'t'); if(e.name==='Corrida Livre') drawPace(); return; } if(!e||!e.loaded.length) return;
