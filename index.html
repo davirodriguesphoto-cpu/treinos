@@ -817,6 +817,18 @@ dialog.sheet{border-radius:28px}
 .chip.zchip[aria-pressed="true"]{background:var(--surface);color:var(--text);border-color:var(--glassb)}
 .wk b{border-color:var(--line)}
 .wk.fut b{background:transparent}
+.cic .cictop{grid-template-columns:1fr auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cic .cicbig{white-space:nowrap}
+.cic .cicniv b{display:inline-flex;align-items:center;justify-content:flex-end;gap:2px}
+.cic .cictog{position:relative;width:26px;height:26px;margin-left:4px;border:0;background:none;box-shadow:none;font-size:18px;color:var(--cic);align-self:auto}
+.cic .cictog::after{content:"";position:absolute;inset:-10px}
+.cic .cicgrav+.cictog,.cic .cictop>.cictog{align-self:center}
+.acc[open] details.ciccf:not([open])>summary::after{transform:none}
+.acc details.ciccf[open]>summary::after{transform:rotate(180deg)}
+.cicgf{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.cicgf label{min-width:0}.cicgf input,.cicadd input{box-sizing:border-box}
+#cicloConf,.ccsubs,.ccb,.ccit{min-width:0;max-width:100%}
+.ccacts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ccacts.tres{grid-template-columns:repeat(3,minmax(0,1fr))}.ccacts .btn{min-width:0;white-space:normal;line-height:1.15}
+.cccal{box-sizing:border-box}
 </style>
 </head>
 <body>
@@ -1156,7 +1168,7 @@ if(typeof module!=='undefined') module.exports=api; else root.TreinoParser=api;
 })(this);
 // calorias do print: procura o número junto de "kcal" (na mesma linha ou na de baixo) e o rótulo "total"/"ativa" por perto.
 // Sem rótulo, com dois valores: o menor é a ativa e o maior é o total.
-function kcalDoPrint(t,L){ const NUM='(\\d{1,2}[.,\\s]\\d{3}|\\d{2,4})';
+function kcalDoPrint(t,L){ const NUM='(\\d{1,2}[.,\\s]\\d{3}|\\d \\d{2}(?!\\d)|\\d{2,4})';
   const numero=s=>{ const v=+String(s).replace(/[.,\s](?=\d{3}$)/,'').replace(/\D/g,''); return v>=10&&v<=9999?v:null; };
   const rot=x=>/tota[li]/i.test(x||'')?'total':/ativ|activ|movimento/i.test(x||'')?'ativa':null;
   const semNum=s=>!!s&&!/\d/.test(s); const ehValor=s=>!!s&&(/\d\s*(?:k\s*c|keal)/i.test(s)||/^[\d.,\s]+$/.test(s));
@@ -1527,7 +1539,7 @@ function cicloCard(){ if(!ehF()) return ''; const C=cic(), K=C.config; const ab=
   const caixa=(topo,mais)=>`<section class="cic${ab?' aberto':''}">${topo}<div class="cicmais"${ab?'':' hidden'}>${mais}${CIC_AVISO}</div></section>`;
   const G=gravAgora();
   if(G){ const g=gravLinha(G.sem);
-    return caixa(`${head('Meu ciclo · gravidez')}<div class="cictop"><div class="cicgrav">${gIco(g[1],'gico big')}<div><b class="cicbig">${G.sem} semana${G.sem===1?'':'s'}</b>${G.dia?`<span class="cicdias">e ${G.dia} dia${G.dia>1?'s':''}</span>`:''}<b class="cicfruta">${esc(g[2])}</b></div></div>${tog}</div>`,
+    return caixa(`${head('Meu ciclo · gravidez')}<div class="cictop" data-cictog="1"><div class="cicgrav">${gIco(g[1],'gico big')}<div><b class="cicbig">${G.sem} semana${G.sem===1?'':'s'}</b>${G.dia?`<span class="cicdias">e ${G.dia} dia${G.dia>1?'s':''}</span>`:''}<b class="cicfruta">${esc(g[2])}</b></div></div>${tog}</div>`,
       `<div class="cicgravmais"><span class="m">Tamanho do bebê${G.sem<4?' (a tabela começa na 4ª semana)':G.sem>40?' (reta final!)':''}: ${esc(g[2])}${g[3]?' · '+esc(g[3]):''}</span></div>${btns(`<button class="btn cicmain" data-cic="cal">Calendário</button>`)}`); }
   const R=cicCalc(); const hoje=R.hoje;
   if(!R.last) return `<section class="cic aberto">${head()}<p class="cicvazio">Registre o início da sua última menstruação para ver as previsões do ciclo.</p>${btns(`<button class="btn cicmain" data-cic="inicio">Início da menstruação</button>`)}${CIC_AVISO}</section>`;
@@ -1535,15 +1547,15 @@ function cicloCard(){ if(!ehF()) return ''; const C=cic(), K=C.config; const ab=
   const fert=J?(hoje>=J.de?`<b>Até ${fmtDia(J.ate)}</b><span>Período fértil agora</span>`:`<b>${fmtDia(J.de)}</b><span>Próximo período fértil</span>`):`<b>–</b><span>Próximo período fértil</span>`;
   const prevs=`<div class="cicprev"><div><b>${fmtDia(R.atraso>0?hoje:R.prox)}</b><span>${R.atraso>0?'Menstruação atrasada':'Próxima menstruação'}</span></div><div>${fert}</div></div>`;
   if(R.menstruando){ const dia=isoDiff(hoje,R.last.inicio)+1;
-    return caixa(`${head()}<div class="cictop"><div><b class="cicbig">${dia}º dia</b><span>de menstruação</span></div><div class="cicniv n-baixo"><b>Baixo</b><span>probabilidade de engravidar</span></div>${tog}</div>`,
+    return caixa(`${head()}<div class="cictop" data-cictog="1"><div><b class="cicbig">${dia}º dia</b><span>de menstruação</span></div><div class="cicniv n-baixo"><b>Baixo${tog}</b><span>probabilidade de engravidar</span></div></div>`,
       `${prevs}${btns(`<button class="btn cicmain" data-cic="fim">Fim da menstruação</button>`)}`); }
   const falta=isoDiff(R.prox,hoje);
   const big=R.atraso>0?`Atraso de ${R.atraso} dia${R.atraso>1?'s':''}`:falta===0?'Pode começar hoje':`Falta${falta>1?'m':''} ${falta} dia${falta>1?'s':''}`;
-  return caixa(`${head()}<div class="cictop"><div><b class="cicbig">${big}</b><span>${R.atraso>0?'em relação à previsão':'para a próxima menstruação'}</span></div><div class="cicniv n-${dH.nivel==='Alto'?'alto':dH.nivel==='Médio'?'medio':'baixo'}"><b>${dH.nivel}</b><span>probabilidade de engravidar</span></div>${tog}</div>`,
+  return caixa(`${head()}<div class="cictop" data-cictog="1"><div><b class="cicbig">${big}</b><span>${R.atraso>0?'em relação à previsão':'para a próxima menstruação'}</span></div><div class="cicniv n-${dH.nivel==='Alto'?'alto':dH.nivel==='Médio'?'medio':'baixo'}"><b>${dH.nivel}${tog}</b><span>probabilidade de engravidar</span></div></div>`,
     `${prevs}${btns(`<button class="btn cicmain" data-cic="inicio">Início da menstruação</button>`)}`); }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-cictog]'); if(!b) return; const sec=b.closest('.cic'); if(!sec) return;
   const ab=!sec.classList.contains('aberto'); sec.classList.toggle('aberto',ab); const m=sec.querySelector('.cicmais'); if(m) m.hidden=!ab;
-  b.setAttribute('aria-expanded',ab); b.setAttribute('aria-label',(ab?'Esconder':'Mostrar')+' detalhes do ciclo');
+  const bt=sec.querySelector('button.cictog'); if(bt){ bt.setAttribute('aria-expanded',ab); bt.setAttribute('aria-label',(ab?'Esconder':'Mostrar')+' detalhes do ciclo'); }
   try{ localStorage.setItem(ukey('wodio:cicAberto'),ab?'1':'0'); }catch(e){} });
 
 // ---- calendário
