@@ -1236,8 +1236,7 @@ html{accent-color:var(--acc1);caret-color:var(--acc1)}
 .bodysvg [data-mg]{transition:fill .2s ease}
 @media (prefers-reduced-motion:reduce){.bodysvg [data-mg]{transition:none}}
 /* aba Treino: filtro de categoria */
-.catrow{display:grid;gap:6px;margin:10px 0 4px}
-.catrow .ccl{font-size:13px;font-weight:600;color:var(--muted)}
+.scatsel{margin:10px 0 4px}
 .chips.scrollx{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;-webkit-overflow-scrolling:touch}
 .chips.scrollx::-webkit-scrollbar{display:none}
 .chips.scrollx .chip{flex:none}

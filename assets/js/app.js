@@ -807,6 +807,7 @@ function vTipos(){
     return `<div class="tipo ${open?'open':''}"><button class="tipohead" data-tipo="${esc(G.k)}" aria-expanded="${open}"><span class="t">${esc(G.label)}</span><span class="m">${G.list.length} ${G.list.length>1?'sessões':'sessão'} · última em ${fmtD(last.date)}</span><span class="chev" aria-hidden="true">${open?'▴':'▾'}</span></button>
     ${open?`<div class="tipobody"><p class="note" style="margin:4px 0 8px">Total: ${fmtNum(kc,0)} kcal${(()=>{const ex=[...new Set(G.list.map(s=>s.focoExtra).filter(Boolean))]; return ex.length?' · '+(G.k==='tecnica'?'técnicas':'ênfases')+': '+ex.map(esc).join(', '):'';})()}</p>${[...G.list].reverse().map(sessHTML).join('')}</div>`:''}</div>`; }).join('')}`;
 }
+document.addEventListener('change',e=>{ const t=e.target; if(t&&t.matches&&t.matches('select[data-scatsel]')){ state.scat=t.value||null; render(); } });
 // categorias dos treinos (o "foco"), da mais recente pra mais antiga
 function catsTreino(){ const g={}; for(const s of allSessions()){ if(s.kind!=='treino'||s.soRelogio) continue; for(const f of (s.focos||(s.foco?[s.foco]:[]))){ const k=focoKey(f); if(!k) continue; const G=g[k]=g[k]||{k,nomes:{},n:0,ult:''}; G.n++; G.nomes[f]=(G.nomes[f]||0)+1; if(s.date>G.ult) G.ult=s.date; } }
   return Object.values(g).map(G=>{ const n=Object.entries(G.nomes).sort((a,b)=>b[1]-a[1])[0][0]; return {...G,label:n.toLowerCase().split(' ').map(w=>w?w.charAt(0).toUpperCase()+w.slice(1):w).join(' ')}; }).sort((a,b)=>a.ult<b.ult?1:a.ult>b.ult?-1:b.n-a.n); }
@@ -818,10 +819,10 @@ function vSessoes(){
   const viewChips=`<div class="chips" role="group" aria-label="Ver por">${[['periodo','Por período'],['tipo','Por tipo de treino']].map(([k,l])=>`<button class="chip" data-sview="${k}" aria-pressed="${vmode===k}">${l}</button>`).join('')}</div>`;
   if(vmode==='tipo') return `<h2 style="margin-top:12px">Treinos</h2>${viewChips}`+vTipos()+zoneLegend;
   const cats=catsTreino(); const sc=state.scat&&cats.some(c=>c.k===state.scat)?state.scat:null;
-  const catChips=cats.length?`<div class="catrow"><span class="ccl">Categoria</span><div class="chips scrollx" role="group" aria-label="Filtrar por categoria"><button class="chip" data-scat="" aria-pressed="${!sc}">Todas</button>${cats.map(c=>`<button class="chip" data-scat="${esc(c.k)}" aria-pressed="${sc===c.k}">${esc(c.label)} <span class="m">${c.n}</span></button>`).join('')}</div></div>`:'';
+  const catChips=cats.length?`<div class="cats scatsel"><div class="catrow"><label>Categoria<select data-scatsel aria-label="Filtrar treinos por categoria"><option value="" ${!sc?'selected':''}>Todas as categorias</option>${cats.map(c=>`<option value="${esc(c.k)}" ${sc===c.k?'selected':''}>${esc(c.label)} (${c.n})</option>`).join('')}</select></label></div></div>`:'';
   if(sc){ const C=cats.find(c=>c.k===sc); const lista=all.filter(s=>temCat(s,sc)).reverse(); const kcT=lista.reduce((x,s)=>x+((s.band||s).kcalTotal||0),0);
     let h=`<h2 style="margin-top:12px">Treinos</h2>${viewChips}${catChips}
-    <p class="sub">${lista.length} ${pl(lista.length,'treino','treinos')} de <b>${esc(C.label)}</b>, de todas as datas. O primeiro foi em ${fmtD(lista[lista.length-1].date)} e o último em ${fmtD(lista[0].date)}.${kcT?' Somando '+fmtNum(kcT,0)+' kcal.':''}</p>`;
+    <p class="sub">${lista.length} ${pl(lista.length,'treino','treinos')} de <b>${esc(C.label)}</b>, de todas as datas. ${lista.length>1?`O primeiro foi em ${fmtD(lista[lista.length-1].date)} e o último em ${fmtD(lista[0].date)}.`:`Foi em ${fmtD(lista[0].date)}.`}${kcT?' Somando '+fmtNum(kcT,0)+' kcal.':''}</p>`;
     let cur=''; for(const s of lista){ const m=s.date.slice(0,7); if(m!==cur){ cur=m; h+=`<div class="month">${MES[+m.slice(5)-1]} ${m.slice(0,4)}</div>`; } h+=sessHTML(s); }
     return h+legZ(lista); }
   const SP=state.sper||(state.sper={mode:'mes',ref:todayISO()}); const r=d2(SP.ref);
@@ -943,7 +944,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.mgtodos){ state.mgTodos=!state.mgTodos; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
   if(t.dataset.mg){ state.mgSel=state.mgSel===t.dataset.mg?null:t.dataset.mg; const sy=window.scrollY; render(); window.scrollTo(0,sy); return; }
   if(t.dataset.sf){ state.sessFilter=t.dataset.sf; render(); return; }
-  if(t.dataset.scat!=null){ state.scat=t.dataset.scat||null; render(); return; }
+
   if(t.dataset.sess){ state.openSess[t.dataset.sess]=!state.openSess[t.dataset.sess]; const box=t.parentElement; box.classList.toggle('open'); t.setAttribute('aria-expanded',box.classList.contains('open')); return; }
   if(t.dataset.del){ delSession(t.dataset.del); return; }
   if(t.dataset.edit){ openEdit(t.dataset.edit); return; }
