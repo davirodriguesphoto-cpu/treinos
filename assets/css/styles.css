@@ -1228,3 +1228,24 @@ html{accent-color:var(--acc1);caret-color:var(--acc1)}
 .ig-col{position:absolute;left:0;right:0;top:0;display:block;will-change:transform}
 .ig-col>span{display:block;height:var(--h);line-height:var(--h);text-align:center}
 @media (prefers-reduced-motion: reduce){.herohead.ig-borda::after,.ig-luz,.ig-tambor{display:none}.ig-d.rodando{color:inherit}}
+
+/* mapa muscular com os bonecos novos */
+.bodysvg .bsil{fill:var(--bodybase)}
+.bodysvg .blines2{pointer-events:none}
+.bodysvg .blines2 path{fill:color-mix(in srgb,var(--text) 60%,transparent)}
+.bodysvg [data-mg]{transition:fill .2s ease}
+@media (prefers-reduced-motion:reduce){.bodysvg [data-mg]{transition:none}}
+/* aba Treino: filtro de categoria */
+.catrow{display:grid;gap:6px;margin:10px 0 4px}
+.catrow .ccl{font-size:13px;font-weight:600;color:var(--muted)}
+.chips.scrollx{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.chips.scrollx::-webkit-scrollbar{display:none}
+.chips.scrollx .chip{flex:none}
+.chips.scrollx .chip .m{opacity:.7;font-weight:600;margin-left:2px}
+/* ícones novos da barra (desenho cheio) */
+.tabs .tabico{width:24px;height:24px}
+/* frequência cardíaca e calorias: só um painel quando o outro não tem dado */
+.fcgrid.um{grid-template-columns:1fr}
+/* Meu ciclo: chave de acompanhar */
+.ccliga{display:grid;gap:6px;padding:4px 0 12px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.ccliga .note{margin:0}

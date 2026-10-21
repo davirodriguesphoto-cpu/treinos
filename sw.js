@@ -1,7 +1,7 @@
-// WÓD'IO · service worker (v9, para a estrutura com assets/)
+// WÓD'IO · service worker (v10, para a estrutura com assets/)
 // Arquivos do próprio site: rede primeiro, cache só sem internet (evita misturar index novo com JS antigo).
 // Bibliotecas de CDN: cache primeiro, atualizando por trás.
-const C='wodio-v9';
+const C='wodio-v10';
 const SHELL=['/','/index.html','/manifest.webmanifest','/assets/css/styles.css','/assets/js/parsers.js','/assets/js/app.js','/assets/icons/favicon.svg','/assets/icons/favicon-32.png','/assets/icons/icon-192.png','/assets/icons/icon-512.png','/assets/icons/icon-maskable-512.png','/assets/icons/apple-touch-icon.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(C).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
