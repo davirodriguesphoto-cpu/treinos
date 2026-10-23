@@ -147,6 +147,18 @@ figure.duo{margin:0;display:grid;gap:14px;justify-items:center}
 figure.duo figcaption{font-size:14px;color:var(--muted);text-align:center;max-width:34ch;line-height:1.45}
 figure.duo figcaption b{color:var(--text)}
 @media (max-width:860px){figure.duo{justify-items:start}figure.duo figcaption{text-align:left}}
+/* tela bloqueada com a notificação (ilustração) */
+.aparelho.bloqueio{display:grid;align-content:start;gap:18px;padding:46px 18px 18px;background:
+  radial-gradient(80% 60% at 20% 10%,rgba(255,138,61,.35),transparent 60%),radial-gradient(80% 70% at 90% 80%,rgba(139,92,246,.45),transparent 60%),linear-gradient(160deg,#1A1F2E,#0B0E15)}
+.aparelho.bloqueio::before{content:"";position:absolute;inset:9px;border-radius:30px;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.bloqueio .hora{text-align:center;color:#fff;margin-top:22px}
+.bloqueio .hora small{display:block;font-size:12px;opacity:.8}
+.bloqueio .hora b{display:block;font:600 64px/1 var(--num);letter-spacing:.01em}
+.bloqueio .notif{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:18px;background:rgba(30,34,46,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 10px 24px rgba(0,0,0,.3)}
+.bloqueio .notif img{width:34px;height:34px;border-radius:9px;flex:none;border:0;object-fit:cover;background:none}
+.bloqueio .notif p{margin:0;font-size:12.5px;line-height:1.35;color:#E9ECF3}
+.bloqueio .notif p:first-child{display:flex;justify-content:space-between;gap:8px;margin-bottom:2px}
+.bloqueio .notif p:first-child span{color:var(--muted);font-size:11px}
 /* perguntas */
 details.faq{border:1px solid var(--line);background:var(--surface);border-radius:18px;margin:10px 0;max-width:760px}
 details.faq summary{cursor:pointer;list-style:none;padding:15px 18px;font-weight:800;display:flex;justify-content:space-between;gap:12px}
@@ -178,7 +190,7 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
     <div class="grupo"><button class="gt" type="button" aria-expanded="false" aria-controls="g3">Evolução<i aria-hidden="true"></i></button>
       <div class="gl" id="g3"><div><a href="#exercicios"><span>12</span>Exercícios e recordes</a><a href="#corpo"><span>13</span>Corpo e bioimpedância</a><a href="#ciclo"><span>14</span>Meu ciclo</a></div></div></div>
     <div class="grupo"><button class="gt" type="button" aria-expanded="false" aria-controls="g4">Conta<i aria-hidden="true"></i></button>
-      <div class="gl" id="g4"><div><a href="#conta"><span>15</span>Conta, Strava e backup</a><a href="#duvidas"><span>16</span>Dúvidas rápidas</a></div></div></div>
+      <div class="gl" id="g4"><div><a href="#conta"><span>15</span>Conta, Strava e backup</a><a href="#chamado"><span>16</span>O chamado das 5h</a><a href="#duvidas"><span>17</span>Dúvidas rápidas</a></div></div></div>
   </nav>
   <a class="abrir" href="./">Abrir o app</a>
 </aside>
@@ -521,7 +533,7 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
         <li><b>Como usar o WÓD<span class="ap">'</span>IO</b> (no fim, antes do Sair): abre este manual.</li>
         <li><b>Perfil:</b> nome, foto, sexo, altura e nascimento.</li>
         <li><b>Dados:</b> <b>Baixar backup</b> gera um arquivo com todos os seus treinos, corridas e avaliações. Além disso, o sistema guarda uma cópia toda madrugada e mantém os últimos 30 dias.</li>
-        <li><b>Notificações:</b> <b>O chamado das 5h</b>, uma cutucada por dia às 5h da manhã, com uma frase diferente. No iPhone, só funciona com o app instalado na Tela de Início.</li>
+        <li><b>Notificações:</b> liga e desliga <a href="#chamado">O chamado das 5h</a>.</li>
         <li><b>Strava</b> <span class="tag beta">Beta teste</span> Conecte a sua conta para trazer tempo, kcal e batimentos do relógio para os treinos com <b>Sincronizar com o Strava</b>. <b>Apenas 10 vagas disponíveis no total.</b></li>
       </ul>
       <p>O botão da lua, no topo, troca entre o tema escuro e o claro.</p>
@@ -530,8 +542,38 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
   </div>
 </section>
 
+<section id="chamado">
+  <span class="num">16</span>
+  <div class="par">
+    <div>
+      <h2>O chamado das 5h</h2>
+      <p>Todo dia, às <b>5h da manhã</b>, o horário dos guerreiros, o WÓD<span class="ap">'</span>IO manda uma notificação com uma frase para tirar você da cama, sempre terminando em <b>BORA TREINAR!</b> Cada dia vem uma frase diferente, e algumas têm versão masculina e feminina, de acordo com o seu perfil.</p>
+      <h3>Como ativar</h3>
+      <ol class="passos">
+        <li>Ao abrir o app, aparece o convite <b>O chamado das 5h</b>. Toque em <b>ATIVAR</b>.</li>
+        <li>O celular pergunta se o WÓD<span class="ap">'</span>IO pode enviar notificações. Toque em <b>Permitir</b>. Sem essa autorização, a notificação não chega.</li>
+        <li>Pronto: amanhã às 5h chega a primeira.</li>
+      </ol>
+      <ul class="lista">
+        <li><b>Agora não:</b> o convite volta no dia seguinte.</li>
+        <li><b>Nunca permitir:</b> o app não pergunta mais. Dá para ativar quando quiser em <b>Conta → Notificações</b>.</li>
+        <li><b>Para desligar:</b> em Conta → Notificações, desligue a chave <b>Chamado das 5h</b>.</li>
+      </ul>
+      <div class="dica"><b>iPhone:</b> as notificações só funcionam com o app instalado na Tela de Início (veja <a href="#comecar">Primeiros passos</a>).</div>
+      <div class="dica aviso"><b>Tocou em "Não permitir" sem querer?</b> Depois de bloqueadas, o app não consegue pedir de novo. Libere nas <b>Configurações</b> do celular → <b>Apps</b> → <b>WÓD<span class="ap">'</span>IO</b> → <b>Notificações</b>. Se o app não aparecer lá, no Chrome: ⋮ → Configurações → Configurações do site → Notificações → toque no endereço do WÓD<span class="ap">'</span>IO → <b>Permitir</b>. Depois, volte em Conta → Notificações e ligue a chave.</div>
+    </div>
+    <div class="tels">
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/chamado-5h.jpg" alt="Convite O chamado das 5h com os botões Ativar, Agora não e Nunca permitir" loading="lazy"></div><figcaption>O convite: toque em ATIVAR.</figcaption></figure>
+      <figure class="tel"><div class="aparelho bloqueio" aria-label="Ilustração da notificação na tela bloqueada">
+        <div class="hora"><small>Sexta-feira, 24 de outubro</small><b>5:00</b></div>
+        <div class="notif"><img src="assets/icons/icon-192.png" alt=""><div><p><b>WÓD<span class="ap">'</span>IO</b><span>agora</span></p><p>Inha, inha, inha, olha a pelanquinha. BORA TREINAR!</p></div></div>
+      </div><figcaption>Às 5h, na tela do celular.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
 <section id="duvidas">
-  <span class="num">16</span><h2>Dúvidas rápidas</h2>
+  <span class="num">17</span><h2>Dúvidas rápidas</h2>
   <details class="faq"><summary>Esqueci de registrar ontem. Dá para lançar depois?</summary><div><p>Dá. Em qualquer registro, escolha a data e o horário no começo. Só não vale data no futuro.</p></div></details>
   <details class="faq"><summary>Fiquei sem internet no box. Perdi o treino?</summary><div><p>Não. O treino fica salvo no aparelho e sincroniza sozinho quando a internet voltar.</p></div></details>
   <details class="faq"><summary>Saí do app no meio do registro.</summary><div><p>O que você estava anotando aparece na tela inicial como <span class="tag">não salvo</span>, ou como <span class="tag">em andamento</span> se você tocou em Continuar depois. É só tocar para continuar.</p></div></details>
