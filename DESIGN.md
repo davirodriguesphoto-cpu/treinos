@@ -435,9 +435,15 @@ No Crossfit, o modo do exercício tem quatro opções em grade 2×2: **Padrão |
 Na tela de conclusão ("Compartilhar", acima de Ver treino/Fechar) e em toda sessão aberta. A janela mostra a prévia e permite escolher:
 - **Formato:** Stories 9:16 (1080×1920) ou Feed 3:4 (1080×1440).
 - **Fundo:** o fundo do app (marinho com os brilhos laranja, roxo e coral) ou uma foto da pessoa, com um véu escuro que começa logo acima do bloco de informações.
+- **Enquadrar:** com foto, a própria prévia vira a área de recorte, já no formato escolhido. Arrastar posiciona; pinça, rodinha ou o controle Zoom (1× a 4×) aproximam; as setas do teclado também movem. A foto sempre cobre o quadro inteiro, sem sobrar borda.
 - **O que aparece:** chips com kcal, tempo, exercícios, FC média (desligada por padrão), WOD, recorde e semana, conforme o treino tiver.
 
 O card leva no topo o selo do app, como o do relógio: o ícone (carinha laranja num quadrado marinho de cantos arredondados, contorno branco sutil e sombra leve) ao lado do WÓD'IO com o apóstrofo turquesa. Embaixo vêm a data e o tipo, "Tá pago." (Manrope 800), o número principal em Barlow 240px, até três números secundários, o WOD, o recorde (caixa laranja com o ganho em verde) e a semana em bolinhas. Não leva nome nem foto de perfil. A imagem é montada no aparelho, e a foto não é enviada nem salva. Onde o celular permite, abre a folha de compartilhar do sistema; nos outros, baixa o PNG.
+
+### Ações da sessão
+Numa linha só, à direita: **Compartilhar** (pílula ghost) e **Editar** (pílula), as duas com ícone de traço 18px antes do texto, e um botão **⋯** (44px). Os ⋯ abrem um menu flutuante (fundo elevado, cantos de 18px, sombra suave, abre para cima com um fade curto) com ícone e nome em cada item: Anexar print (só na corrida), Copiar treino e Exportar .txt. Depois de uma linha fina vem **Excluir** em vermelho, sempre por último e longe do Editar. O menu fecha com Esc (o foco volta para os ⋯), ao tocar fora, ao rolar e ao escolher um item. As setas do teclado navegam entre os itens.
+
+**A Regra do Ícone Com Nome.** Toda ação leva ícone e nome juntos. O único ícone sozinho é o ⋯, que tem nome para o leitor de tela ("Mais ações"). Copiar e exportar fazem coisas parecidas e, sem nome, se confundem.
 
 ### Outros treinos
 Os tipos aparecem ordenados pelo uso, quatro de cada vez, com "Mais atividades" (chip tracejado) para o resto; o tipo já vem marcado com o último usado. Dentro dos editores, "Anexar print" e "Sincronizar com o Strava" são ações de apoio (vidro e contorno laranja do Strava), e o único destaque é o FINALIZAR.
