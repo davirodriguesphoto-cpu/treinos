@@ -107,8 +107,10 @@ b,strong{font-weight:800}
 figure.tel{margin:0;display:grid;gap:10px;justify-items:center;width:min(250px,72vw)}
 .aparelho{position:relative;width:100%;aspect-ratio:375/812;border-radius:38px;padding:9px;background:linear-gradient(160deg,#2A3142,#11151F 40%,#0A0D14);
   box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12)}
-.aparelho::after{content:"";position:absolute;top:16px;left:50%;width:30%;height:16px;margin-left:-15%;border-radius:999px;background:#05070B;box-shadow:0 0 0 1px rgba(255,255,255,.05)}
-.aparelho img{display:block;width:100%;height:100%;object-fit:cover;object-position:top;border-radius:30px;background:#0E111A}
+.aparelho::after{content:"";position:absolute;top:14px;left:50%;width:26%;height:13px;margin-left:-13%;border-radius:999px;background:#05070B;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+/* faixa de status no topo da tela (os prints não têm barra de status), para o recorte não cobrir o app */
+.aparelho img{display:block;width:100%;height:100%;object-fit:cover;object-position:top;border-radius:30px;background:#0E111A;border-top:24px solid #0E111A}
+.aparelho img.claro{background:#F4F2FA;border-top-color:#F4F2FA}
 .aparelho.story img{object-fit:cover}
 figure.tel figcaption{font-size:13px;color:var(--muted);text-align:center;max-width:24ch;line-height:1.4}
 
@@ -119,7 +121,8 @@ figure.tel figcaption{font-size:13px;color:var(--muted);text-align:center;max-wi
 .capa .cabeca img{width:68px;height:68px;border-radius:18px;border:1px solid var(--line)}
 .capa .cabeca .wm{font-size:52px}
 .capa .cabeca small{display:block;color:var(--muted);letter-spacing:.14em;font-size:13px}
-.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:22px 0 8px;max-width:760px}
+.grade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:22px 0 8px;max-width:640px}
+@media (max-width:480px){.grade{grid-template-columns:minmax(0,1fr)}}
 .cartao{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .2s,transform .2s var(--ease)}
 .cartao:hover{border-color:color-mix(in srgb,var(--acc1) 45%,var(--line));transform:translateY(-2px)}
 .cartao b{display:block;font-size:16px;margin-bottom:2px}
@@ -128,6 +131,14 @@ figure.tel figcaption{font-size:13px;color:var(--muted);text-align:center;max-wi
 .numeros div b{display:block;font:700 44px/1 var(--num);letter-spacing:.01em}
 .numeros div span{font-size:13px;color:var(--muted)}
 
+/* capa: os dois temas, um sobre o outro */
+figure.duo{margin:0;display:grid;gap:14px;justify-items:center}
+.duo-tels{display:grid;grid-template-columns:repeat(2,min(210px,40vw));align-items:start}
+.duo-tels .aparelho:first-child{z-index:1}
+.duo-tels .aparelho:last-child{margin-left:-28%;margin-top:42px;transform:rotate(4deg)}
+figure.duo figcaption{font-size:14px;color:var(--muted);text-align:center;max-width:34ch;line-height:1.45}
+figure.duo figcaption b{color:var(--text)}
+@media (max-width:860px){figure.duo{justify-items:start}figure.duo figcaption{text-align:left}}
 /* perguntas */
 details.faq{border:1px solid var(--line);background:var(--surface);border-radius:18px;margin:10px 0;max-width:760px}
 details.faq summary{cursor:pointer;list-style:none;padding:15px 18px;font-weight:800;display:flex;justify-content:space-between;gap:12px}
@@ -185,7 +196,13 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
         <a class="cartao" href="#compartilhar"><b>Compartilhar</b><span>Card pronto para Stories ou feed, com a sua foto.</span></a>
       </div>
     </div>
-    <figure class="tel"><div class="aparelho"><img src="assets/manual/resumo.jpg" alt="Tela inicial do WÓD'IO com 251 treinos e a semana marcada" loading="eager"></div><figcaption>A tela inicial: tudo o que importa, de relance.</figcaption></figure>
+    <figure class="duo">
+      <div class="duo-tels">
+        <div class="aparelho"><img src="assets/manual/resumo.jpg" alt="Tela inicial no tema escuro" loading="eager"></div>
+        <div class="aparelho"><img class="claro" src="assets/manual/mary-resumo-claro.jpg" alt="Tela inicial no tema claro" loading="eager"></div>
+      </div>
+      <figcaption><b>Escuro ou claro, você escolhe.</b> O botão da lua (ou do sol), no topo do app, troca o tema quando você quiser.</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -221,6 +238,7 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
       </ul>
       <p>Depois de treinar, a saudação muda para <b>"Tá pago hoje"</b>. Se você começou a anotar um treino e saiu sem salvar, ele aparece aqui como <span class="tag">não salvo</span> para você continuar.</p>
       <p>Na barra de baixo ficam as quatro áreas (<b>Resumo, Exercícios, Corpo e Treino</b>) e o botão <b>+</b> do meio, que registra um treino.</p>
+      <p>No topo, ao lado da sua foto, o botão da <b>lua</b> (ou do <b>sol</b>) troca entre o <b>tema escuro</b> e o <b>tema claro</b>. Toque de novo para voltar.</p>
     </div>
     <div class="tels">
       <figure class="tel"><div class="aparelho"><img src="assets/manual/resumo.jpg" alt="Resumo com placar, semana e indicadores" loading="lazy"></div><figcaption>Placar, semana e indicadores.</figcaption></figure>
@@ -429,6 +447,7 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
       <h2>Corpo e bioimpedância</h2>
       <h3>Grupos musculares</h3>
       <p>O mapa mostra quanto cada músculo foi trabalhado no período (Hoje, 7 dias, 30 dias…), em séries e em porcentagem do total. Quanto mais laranja, mais trabalhado.</p>
+      <p>Tem <b>versão masculina e feminina</b>: o app mostra o corpo de acordo com o sexo do seu perfil.</p>
       <h3>Bioimpedância</h3>
       <p>Peso, músculo, gordura, IMC, gordura visceral, metabolismo basal e medidas, sempre com a diferença desde a primeira avaliação e a faixa de referência.</p>
       <h3>Nova avaliação pela foto do laudo</h3>
@@ -440,7 +459,8 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
       <p class="muted">A foto é lida no próprio celular e não fica salva. Valores de referência ("peso ideal", "alvo") são ignorados.</p>
     </div>
     <div class="tels">
-      <figure class="tel"><div class="aparelho"><img src="assets/manual/corpo-mapa.jpg" alt="Mapa de grupos musculares" loading="lazy"></div><figcaption>O mapa muscular do período.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/corpo-mapa.jpg" alt="Mapa muscular masculino" loading="lazy"></div><figcaption>Mapa masculino (John).</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img class="claro" src="assets/manual/corpo-mapa-mary.jpg" alt="Mapa muscular feminino" loading="lazy"></div><figcaption>Mapa feminino (Mary).</figcaption></figure>
       <figure class="tel"><div class="aparelho"><img src="assets/manual/corpo-bio.jpg" alt="Painel de bioimpedância" loading="lazy"></div><figcaption>Bioimpedância: −15 kg desde jan/25.</figcaption></figure>
       <figure class="tel"><div class="aparelho"><img src="assets/manual/nova-avaliacao.jpg" alt="Nova avaliação com botão Ler foto do laudo" loading="lazy"></div><figcaption>Nova avaliação pela foto.</figcaption></figure>
     </div>
@@ -455,13 +475,16 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
       <p>No perfil feminino, a tela inicial ganha o cartão <b>Meu ciclo</b>, com quantos dias faltam para a próxima menstruação e a probabilidade de engravidar no dia.</p>
       <ul class="lista">
         <li>No <b>Calendário</b>, marque o início da menstruação e veja o período previsto, o período fértil e a ovulação.</li>
-        <li>Em <b>Anotações</b>, registre sintomas e remédios do dia.</li>
+        <li>Em <b>Anotações</b>, registre o dia: o <b>fluxo</b>, os <b>medicamentos</b> e a <b>relação sexual</b>, marcando se foi <b>protegida</b> ou <b>desprotegida</b> e quantas vezes.</li>
       </ul>
+      <h3>Gravidez</h3>
+      <p>Em <b>Conta → Meu ciclo</b>, ligue <b>Estou grávida</b> e informe as semanas e os dias de gestação de hoje. As previsões de menstruação ficam pausadas, o app avança a gestação sozinho a cada dia e o cartão da tela inicial passa a mostrar as semanas e o tamanho do bebê.</p>
+      <p class="muted">Não menstrua, por exemplo na menopausa ou com medicamentos que interrompem o ciclo? Em Conta → Meu ciclo, desligue <b>Acompanhar meu ciclo</b>. O cartão sai da tela inicial e os seus registros continuam guardados.</p>
       <div class="dica aviso"><b>Importante:</b> as datas são estimativas para acompanhamento. O app não é método contraceptivo. Em caso de dúvida, consulte o seu ginecologista.</div>
     </div>
     <div class="tels">
-      <figure class="tel"><div class="aparelho"><img src="assets/manual/mary-resumo-claro.jpg" alt="Tela inicial da Mary no tema claro com o cartão Meu ciclo" loading="lazy"></div><figcaption>Mary, no tema claro.</figcaption></figure>
-      <figure class="tel"><div class="aparelho"><img src="assets/manual/mary-ciclo.jpg" alt="Calendário do Meu ciclo" loading="lazy"></div><figcaption>O calendário do ciclo.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img class="claro" src="assets/manual/mary-resumo-claro.jpg" alt="Tela inicial da Mary no tema claro com o cartão Meu ciclo" loading="lazy"></div><figcaption>Mary, no tema claro.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img class="claro" src="assets/manual/mary-ciclo.jpg" alt="Calendário do Meu ciclo" loading="lazy"></div><figcaption>O calendário do ciclo.</figcaption></figure>
     </div>
   </div>
 </section>

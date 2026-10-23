@@ -449,6 +449,11 @@ Acima da lista de exercícios fica uma linha com a contagem ("11 exercícios", r
 - **Navegação:** menu lateral fixo em acordeão, com 5 grupos (Começando, Registrar, Depois do treino, Evolução, Conta) e as 17 seções numeradas. Só um grupo fica aberto por vez: abrir um fecha o outro, e a rolagem abre sozinha o grupo da seção que está na tela, que fica destacada. No celular, o menu abre por cima, a partir do botão "Menu" no topo.
 - **Strava:** aparece no manual como **Beta teste**, com o aviso "Apenas 10 vagas disponíveis no total".
 - **Telas:** prints reais do app em mockups de celular. Mostram John (escuro) e Mary (claro), com os totais do Davi.
+- **Capa:** os dois temas sobrepostos (John escuro na frente, Mary clara atrás, inclinada 4°), com a legenda sobre o botão da lua/sol.
+- **Mockup:** tem uma faixa de status de 24px no topo da tela, para o recorte da câmera não cobrir o app.
+- **Seções:**
+  - Corpo mostra os mapas masculino e feminino;
+  - Meu ciclo cobre relação sexual, gravidez e como desligar o acompanhamento.
 - **Para atualizar os prints:** use o ambiente de teste com `?john` ou `?mary`.
 
 ### Ações da sessão
