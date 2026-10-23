@@ -446,7 +446,8 @@ Acima da lista de exercícios fica uma linha com a contagem ("11 exercícios", r
 ### Manual do usuário
 `manual.html`, na raiz, é publicado junto com o app. Dá para mandar o link como apresentação, e ele também abre pela Conta, no cartão **Como usar o WÓD'IO** (ícone de livro laranja, logo abaixo do cartão do perfil). O cartão abre numa aba nova porque o app instalado no iPhone não tem botão de voltar.
 - **Visual:** o mesmo mundo do app, com fundo marinho e os brilhos laranja e roxo, Manrope no texto, Barlow só nos números e o apóstrofo turquesa.
-- **Navegação:** menu lateral fixo com as 17 seções numeradas, marcando a seção que está na tela. No celular, ele vira um menu que abre por cima, a partir do botão "Menu" no topo.
+- **Navegação:** menu lateral fixo em acordeão, com 5 grupos (Começando, Registrar, Depois do treino, Evolução, Conta) e as 17 seções numeradas. Só um grupo fica aberto por vez: abrir um fecha o outro, e a rolagem abre sozinha o grupo da seção que está na tela, que fica destacada. No celular, o menu abre por cima, a partir do botão "Menu" no topo.
+- **Strava:** aparece no manual como **Beta teste**, com o aviso "Apenas 10 vagas disponíveis no total".
 - **Telas:** prints reais do app em mockups de celular. Mostram John (escuro) e Mary (claro), com os totais do Davi.
 - **Para atualizar os prints:** use o ambiente de teste com `?john` ou `?mary`.
 
