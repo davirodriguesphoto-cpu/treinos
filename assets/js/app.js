@@ -92,8 +92,11 @@ async function compDesenha(){ const C=state.comp; const cv=$('#compCv'); if(!C||
   else { g.fillStyle='#0E111A'; g.fillRect(0,0,W,H);
     for(const [x,y,r,c] of [[W*.1,H*.06,W*.9,'rgba(255,138,61,.22)'],[W*.95,H*.62,W*.85,'rgba(139,92,246,.20)'],[W*.2,H*.98,W*.7,'rgba(242,84,107,.12)']]){ const v=g.createRadialGradient(x,y,0,x,y,r); v.addColorStop(0,c); v.addColorStop(1,'rgba(14,17,26,0)'); g.fillStyle=v; g.fillRect(0,0,W,H); } }
   // logo: carinha + WÓD'IO com o apóstrofo turquesa
-  const fh=Math.round(92*k), fw=Math.round(fh*503.5/462.1); if(face) g.drawImage(face,pad,pad,fw,fh);
-  fonte(700,84,BC,1); g.textBaseline='alphabetic'; esp('0px'); let x=pad+fw+Math.round(22*k); const yb=pad+Math.round(74*k);
+  // como o selo do relógio: o ícone do app (carinha no quadrado marinho) + o nome
+  const ic=Math.round(104*k); g.save(); g.shadowColor='rgba(0,0,0,.35)'; g.shadowBlur=Math.round(18*k); g.shadowOffsetY=Math.round(6*k);
+  rr(pad,pad,ic,ic,Math.round(26*k)); g.fillStyle='#121722'; g.fill(); g.restore(); rr(pad,pad,ic,ic,Math.round(26*k)); g.lineWidth=2; g.strokeStyle='rgba(255,255,255,.16)'; g.stroke();
+  const fw=Math.round(ic*.74), fh=Math.round(fw*462.1/503.5); if(face) g.drawImage(face,pad+(ic-fw)/2,pad+(ic-fh)/2,fw,fh);
+  fonte(700,84,BC,1); g.textBaseline='alphabetic'; esp('0px'); let x=pad+ic+Math.round(24*k); const yb=pad+Math.round(ic/2+28*k);
   for(const [t,c] of [['WÓD',L1],["'",TQ],['IO',L1]]){ g.fillStyle=c; g.fillText(t,x,yb); x+=g.measureText(t).width; }
   // bloco de informações, empilhado a partir do rodapé
   const D=C.d, on=C.on, N=D.nums.filter(n=>on.has(n[0])), hero=N[0], resto=N.slice(1,4), B=[]; const largura=W-2*pad;

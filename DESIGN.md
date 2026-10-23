@@ -437,7 +437,7 @@ Na tela de conclusão ("Compartilhar", acima de Ver treino/Fechar) e em toda ses
 - **Fundo:** o fundo do app (marinho com os brilhos laranja, roxo e coral) ou uma foto da pessoa, com um véu escuro que começa logo acima do bloco de informações.
 - **O que aparece:** chips com kcal, tempo, exercícios, FC média (desligada por padrão), WOD, recorde e semana, conforme o treino tiver.
 
-O card leva no topo a carinha e o WÓD'IO com o apóstrofo turquesa. Embaixo vêm a data e o tipo, "Tá pago." (Manrope 800), o número principal em Barlow 240px, até três números secundários, o WOD, o recorde (caixa laranja com o ganho em verde) e a semana em bolinhas. Não leva nome nem foto de perfil. A imagem é montada no aparelho, e a foto não é enviada nem salva. Onde o celular permite, abre a folha de compartilhar do sistema; nos outros, baixa o PNG.
+O card leva no topo o selo do app, como o do relógio: o ícone (carinha laranja num quadrado marinho de cantos arredondados, contorno branco sutil e sombra leve) ao lado do WÓD'IO com o apóstrofo turquesa. Embaixo vêm a data e o tipo, "Tá pago." (Manrope 800), o número principal em Barlow 240px, até três números secundários, o WOD, o recorde (caixa laranja com o ganho em verde) e a semana em bolinhas. Não leva nome nem foto de perfil. A imagem é montada no aparelho, e a foto não é enviada nem salva. Onde o celular permite, abre a folha de compartilhar do sistema; nos outros, baixa o PNG.
 
 ### Outros treinos
 Os tipos aparecem ordenados pelo uso, quatro de cada vez, com "Mais atividades" (chip tracejado) para o resto; o tipo já vem marcado com o último usado. Dentro dos editores, "Anexar print" e "Sincronizar com o Strava" são ações de apoio (vidro e contorno laranja do Strava), e o único destaque é o FINALIZAR.
