@@ -443,6 +443,13 @@ O card leva no topo o selo do app, como o do relógio: o ícone (carinha laranja
 ### Treino de musculação
 Acima da lista de exercícios fica uma linha com a contagem ("11 exercícios", rótulo 13px em tom suave) e "+ exercício" à direita, além do botão no fim da lista. O exercício novo sempre entra no fim, para manter a ordem, e a tela rola até ele (sem animação com redução de movimento).
 
+### Manual do usuário
+`manual.html`, na raiz, é publicado junto com o app. Dá para mandar o link como apresentação, e ele também abre pela Conta, no cartão **Como usar o WÓD'IO** (ícone de livro laranja, logo abaixo do cartão do perfil). O cartão abre numa aba nova porque o app instalado no iPhone não tem botão de voltar.
+- **Visual:** o mesmo mundo do app, com fundo marinho e os brilhos laranja e roxo, Manrope no texto, Barlow só nos números e o apóstrofo turquesa.
+- **Navegação:** menu lateral fixo com as 17 seções numeradas, marcando a seção que está na tela. No celular, ele vira um menu que abre por cima, a partir do botão "Menu" no topo.
+- **Telas:** prints reais do app em mockups de celular. Mostram John (escuro) e Mary (claro), com os totais do Davi.
+- **Para atualizar os prints:** use o ambiente de teste com `?john` ou `?mary`.
+
 ### Ações da sessão
 Numa linha só, à direita: **Compartilhar** (pílula ghost) e **Editar** (pílula), as duas com ícone de traço 18px antes do texto, e um botão **⋯** (44px). Os ⋯ abrem um menu flutuante (fundo elevado, cantos de 18px, sombra suave, abre para cima com um fade curto) com ícone e nome em cada item: Anexar print (só na corrida), Copiar treino e Exportar .txt. Depois de uma linha fina vem **Excluir** em vermelho, sempre por último e longe do Editar. O menu fecha com Esc (o foco volta para os ⋯), ao tocar fora, ao rolar e ao escolher um item. As setas do teclado navegam entre os itens.
 

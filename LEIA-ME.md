@@ -161,6 +161,15 @@ A ignição não roda ao voltar do segundo plano, ao trocar de aba, nem com "red
   - A imagem é montada no aparelho, e a foto não é enviada nem salva.
   - No celular, abre a folha de compartilhar (WhatsApp, Instagram…). No computador, baixa o PNG.
 
+### 3.13 Manual do usuário (23/10)
+- **`manual.html`:** um manual com menu lateral e 17 seções, do "o que é" às dúvidas rápidas. Usa prints reais do app em mockups de celular, com John (escuro) e Mary (claro) e os seus totais. Os prints ficam em `assets/manual/`.
+- **Dois acessos:** pelo link `seusite/manual.html`, para mandar como apresentação, ou pela Conta, no cartão **Como usar o WÓD'IO**.
+- **Outras mudanças desta rodada:**
+  - "+ exercício" também no topo da musculação;
+  - ações da sessão em pílulas com o menu ⋯;
+  - enquadramento da foto no compartilhar.
+- **Correção no `sw.js` (v12):** páginas que não são o app (como o manual) deixaram de sobrescrever o app guardado para uso sem internet.
+
 ## 4. Regras que não devem ser quebradas
 
 - Manter a identidade e a composição atual: ela foi aprovada.

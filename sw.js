@@ -1,7 +1,7 @@
-// WÓD'IO · service worker (v11, para a estrutura com assets/)
+// WÓD'IO · service worker (v12, para a estrutura com assets/)
 // Arquivos do próprio site: rede primeiro, cache só sem internet (evita misturar index novo com JS antigo).
 // Bibliotecas de CDN: cache primeiro, atualizando por trás.
-const C='wodio-v11';
+const C='wodio-v12';
 const SHELL=['/','/index.html','/manifest.webmanifest','/assets/css/styles.css','/assets/js/parsers.js','/assets/js/app.js','/assets/icons/favicon.svg','/assets/icons/favicon-32.png','/assets/icons/icon-192.png','/assets/icons/icon-512.png','/assets/icons/icon-maskable-512.png','/assets/icons/apple-touch-icon.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(C).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
@@ -10,7 +10,9 @@ self.addEventListener('fetch',e=>{
   const u=new URL(req.url); if(u.hostname.endsWith('supabase.co')) return;
   const guarda=(chave,r)=>{ if(r&&(r.ok||r.type==='opaque')){ const cp=r.clone(); caches.open(C).then(c=>c.put(chave,cp)); } return r; };
   if(req.mode==='navigate'){
-    e.respondWith(fetch(req).then(r=>guarda('/index.html',r)).catch(()=>caches.match('/index.html').then(r=>r||caches.match('/'))));
+    // só a raiz e o index viram o "/index.html" do cache; outras páginas (ex.: manual.html) guardam com o próprio endereço
+    const raiz=u.pathname==='/'||u.pathname==='/index.html';
+    e.respondWith(fetch(req).then(r=>guarda(raiz?'/index.html':req,r)).catch(()=>caches.match(raiz?'/index.html':req).then(r=>r||caches.match('/index.html')||caches.match('/'))));
     return;
   }
   if(u.origin===self.location.origin){

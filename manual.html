@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Manual do WÓD'IO</title>
+<meta name="description" content="Como usar o WÓD'IO: registrar treinos de Crossfit, Hyrox, musculação e corrida, acompanhar a evolução, o corpo e compartilhar o treino.">
+<meta name="theme-color" content="#0E111A">
+<link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0E111A;--raised:#161B27;--surface:rgba(255,255,255,.05);--line:rgba(255,255,255,.10);
+  --text:#EEF1F7;--muted:#A3ABBD;--acc1:#FF8A3D;--acc2:#F2546B;--roxo:#8B5CF6;--tq:#2EC4B6;--good:#4ADE80;
+  --grad:linear-gradient(135deg,var(--acc1),var(--acc2));
+  --ui:Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;--num:"Barlow Condensed",sans-serif;
+  --side:280px;--ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px;accent-color:var(--acc1)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--ui);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background:radial-gradient(60vw 50vw at 0% 0%,rgba(255,138,61,.14),transparent 60%),radial-gradient(60vw 60vw at 100% 70%,rgba(139,92,246,.13),transparent 60%)}
+::selection{background:color-mix(in srgb,var(--acc1) 34%,transparent)}
+a{color:var(--acc1)}
+.ap{color:var(--tq)}
+.wm{font:italic 700 1em/1 var(--num);color:var(--acc1);letter-spacing:.01em}
+
+/* ---------- menu lateral ---------- */
+.side{position:fixed;inset:0 auto 0 0;width:var(--side);padding:28px 18px 24px;border-right:1px solid var(--line);background:rgba(14,17,26,.82);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);overflow-y:auto;z-index:30;display:flex;flex-direction:column;gap:18px}
+.marca{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+.marca img{width:44px;height:44px;border-radius:12px;border:1px solid var(--line)}
+.marca b{font-size:30px}
+.marca small{display:block;font-size:12px;color:var(--muted);letter-spacing:.06em;margin-top:2px}
+.side nav{display:grid;gap:2px}
+.side nav p{margin:14px 10px 4px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.side nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;color:var(--text);text-decoration:none;font-weight:600;font-size:15px;transition:background .2s,color .2s}
+.side nav a:hover{background:var(--surface)}
+.side nav a[aria-current="true"]{background:color-mix(in srgb,var(--acc1) 16%,transparent);color:#FFB37A}
+.side nav a span{font:600 15px var(--num);color:var(--muted);width:22px}
+.side nav a[aria-current="true"] span{color:var(--acc1)}
+.side .abrir{margin-top:auto;display:block;text-align:center;padding:13px 16px;border-radius:999px;background:var(--grad);color:#1C0F06;font-weight:800;text-decoration:none}
+
+/* ---------- topo no celular ---------- */
+.topo{display:none}
+@media (max-width:1023px){
+  .side{transform:translateX(-102%);transition:transform .32s var(--ease);width:min(86vw,320px);box-shadow:20px 0 60px rgba(0,0,0,.4)}
+  body.menu .side{transform:none}
+  .veu{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:25;opacity:0;pointer-events:none;transition:opacity .3s}
+  body.menu .veu{opacity:1;pointer-events:auto}
+  .topo{display:flex;position:sticky;top:0;z-index:20;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;
+    background:rgba(14,17,26,.86);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+  .topo .marca b{font-size:24px}.topo .marca img{width:34px;height:34px;border-radius:10px}
+  .btnmenu{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:700 14px var(--ui);cursor:pointer}
+}
+@media (prefers-reduced-motion:reduce){.side,.veu{transition:none}}
+
+/* ---------- conteúdo ---------- */
+main{margin-left:var(--side);padding:56px clamp(20px,5vw,72px) 96px;max-width:calc(var(--side) + 1100px)}
+@media (max-width:1023px){main{margin-left:0;padding:28px 16px 80px}html{scroll-padding-top:84px}}
+section{padding:40px 0 24px;border-top:1px solid var(--line)}
+section:first-of-type{border-top:0;padding-top:0}
+.num{font:700 15px var(--num);color:var(--acc1);letter-spacing:.06em}
+h1{font-size:clamp(36px,6vw,60px);line-height:1.05;letter-spacing:-.025em;margin:6px 0 16px;font-weight:800}
+h2{font-size:clamp(26px,3.6vw,34px);line-height:1.15;letter-spacing:-.02em;margin:4px 0 12px;font-weight:800}
+h3{font-size:19px;margin:28px 0 6px;font-weight:800}
+p{margin:0 0 14px;max-width:68ch}
+.lead{font-size:clamp(17px,2vw,20px);color:#CDD3E0;max-width:60ch}
+.muted{color:var(--muted)}
+ol.passos{counter-reset:p;list-style:none;padding:0;margin:8px 0 18px;display:grid;gap:10px;max-width:68ch}
+ol.passos li{counter-increment:p;position:relative;padding-left:44px}
+ol.passos li::before{content:counter(p);position:absolute;left:0;top:-1px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--acc1) 18%,transparent);color:#FFB37A;font:700 17px var(--num)}
+ul.lista{padding-left:20px;margin:4px 0 16px;max-width:68ch}
+ul.lista li{margin:4px 0}
+b,strong{font-weight:800}
+.tag{display:inline-block;padding:1px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:700;white-space:nowrap}
+.dica{border:1px solid color-mix(in srgb,var(--tq) 35%,transparent);background:color-mix(in srgb,var(--tq) 8%,transparent);border-radius:18px;padding:14px 18px;margin:16px 0;max-width:68ch}
+.dica b{color:#7DE3D8}
+.aviso{border-color:color-mix(in srgb,var(--acc1) 40%,transparent);background:color-mix(in srgb,var(--acc1) 8%,transparent)}
+.aviso b{color:#FFB37A}
+
+/* bloco texto + celulares */
+.par{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(24px,4vw,56px);align-items:start}
+.par .tels{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;max-width:540px}
+@media (max-width:1399px){.par{grid-template-columns:minmax(0,1fr);gap:24px}.par .tels{justify-content:flex-start;max-width:none}}
+@media (max-width:560px){.par .tels{justify-content:center}}
+@media (max-width:860px){.par{grid-template-columns:minmax(0,1fr)}.par .tels{justify-content:flex-start}}
+
+/* mockup de celular */
+figure.tel{margin:0;display:grid;gap:10px;justify-items:center;width:min(250px,72vw)}
+.aparelho{position:relative;width:100%;aspect-ratio:375/812;border-radius:38px;padding:9px;background:linear-gradient(160deg,#2A3142,#11151F 40%,#0A0D14);
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12)}
+.aparelho::after{content:"";position:absolute;top:16px;left:50%;width:30%;height:16px;margin-left:-15%;border-radius:999px;background:#05070B;box-shadow:0 0 0 1px rgba(255,255,255,.05)}
+.aparelho img{display:block;width:100%;height:100%;object-fit:cover;object-position:top;border-radius:30px;background:#0E111A}
+.aparelho.story img{object-fit:cover}
+figure.tel figcaption{font-size:13px;color:var(--muted);text-align:center;max-width:24ch;line-height:1.4}
+
+/* capa */
+.capa{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(24px,5vw,72px);align-items:center;padding-bottom:40px}
+@media (max-width:860px){.capa{grid-template-columns:minmax(0,1fr)}}
+.capa .cabeca{display:flex;align-items:center;gap:16px;margin-bottom:8px}
+.capa .cabeca img{width:68px;height:68px;border-radius:18px;border:1px solid var(--line)}
+.capa .cabeca .wm{font-size:52px}
+.capa .cabeca small{display:block;color:var(--muted);letter-spacing:.14em;font-size:13px}
+.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:22px 0 8px;max-width:760px}
+.cartao{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .2s,transform .2s var(--ease)}
+.cartao:hover{border-color:color-mix(in srgb,var(--acc1) 45%,var(--line));transform:translateY(-2px)}
+.cartao b{display:block;font-size:16px;margin-bottom:2px}
+.cartao span{font-size:14px;color:var(--muted);line-height:1.45;display:block}
+.numeros{display:flex;flex-wrap:wrap;gap:22px 34px;margin:20px 0 6px}
+.numeros div b{display:block;font:700 44px/1 var(--num);letter-spacing:.01em}
+.numeros div span{font-size:13px;color:var(--muted)}
+
+/* perguntas */
+details.faq{border:1px solid var(--line);background:var(--surface);border-radius:18px;margin:10px 0;max-width:760px}
+details.faq summary{cursor:pointer;list-style:none;padding:15px 18px;font-weight:800;display:flex;justify-content:space-between;gap:12px}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::after{content:"+";color:var(--acc1);font:700 22px/1 var(--num)}
+details.faq[open] summary::after{content:"–"}
+details.faq div{padding:0 18px 14px;color:#CDD3E0}
+details.faq div p:last-child{margin:0}
+footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+:focus-visible{outline:2px solid var(--acc1);outline-offset:3px;border-radius:8px}
+</style>
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="#inicio"><img src="assets/icons/icon-192.png" alt=""><b class="wm">WÓD<span class="ap">'</span>IO</b></a>
+  <button class="btnmenu" id="btnMenu" aria-expanded="false" aria-controls="menu">☰ Menu</button>
+</header>
+<div class="veu" id="veu"></div>
+
+<aside class="side" id="menu" aria-label="Seções do manual">
+  <a class="marca" href="#inicio"><img src="assets/icons/icon-192.png" alt=""><span><b class="wm">WÓD<span class="ap">'</span>IO</b><small>MANUAL DO USUÁRIO</small></span></a>
+  <nav>
+    <a href="#inicio"><span>00</span>O que é</a>
+    <a href="#comecar"><span>01</span>Primeiros passos</a>
+    <a href="#resumo"><span>02</span>Tela inicial</a>
+    <p>Registrar</p>
+    <a href="#registrar"><span>03</span>Adicionar treino</a>
+    <a href="#colar"><span>04</span>Colar texto</a>
+    <a href="#crossfit"><span>05</span>Crossfit &amp; Hyrox</a>
+    <a href="#exercicio"><span>06</span>Exercício e progressão</a>
+    <a href="#musculacao"><span>07</span>Musculação</a>
+    <a href="#outros"><span>08</span>Corrida e outros</a>
+    <p>Depois do treino</p>
+    <a href="#concluido"><span>09</span>Tá pago</a>
+    <a href="#compartilhar"><span>10</span>Compartilhar</a>
+    <a href="#treinos"><span>11</span>Histórico de treinos</a>
+    <p>Evolução</p>
+    <a href="#exercicios"><span>12</span>Exercícios e recordes</a>
+    <a href="#corpo"><span>13</span>Corpo e bioimpedância</a>
+    <a href="#ciclo"><span>14</span>Meu ciclo</a>
+    <p>Conta</p>
+    <a href="#conta"><span>15</span>Conta, Strava e backup</a>
+    <a href="#duvidas"><span>16</span>Dúvidas rápidas</a>
+  </nav>
+  <a class="abrir" href="./">Abrir o app</a>
+</aside>
+
+<main>
+<section id="inicio">
+  <div class="capa">
+    <div>
+      <div class="cabeca"><img src="assets/icons/icon-192.png" alt="Ícone do WÓD'IO"><div><span class="wm">WÓD<span class="ap">'</span>IO</span><small>SEU TREINO DIÁRIO</small></div></div>
+      <h1>O caderno de treino que faz as contas por você.</h1>
+      <p class="lead">Você anota o treino do jeito que já anota: cola o texto do WhatsApp, marca as cargas, anexa o print do relógio. O WÓD<span class="ap">'</span>IO organiza tudo, mostra a sua evolução e avisa quando você bate um recorde.</p>
+      <div class="numeros" aria-label="Exemplo: a história do John no app">
+        <div><b>251</b><span>treinos registrados</span></div>
+        <div><b>571,7</b><span>km corridos</span></div>
+        <div><b>+32 kg</b><span>no Front Squat</span></div>
+        <div><b>−15 kg</b><span>de peso</span></div>
+      </div>
+      <p class="muted" style="font-size:14px">Os totais e a evolução mostrados aqui vêm de um uso real do app, com o nome trocado para John (e Mary, na versão feminina).</p>
+      <div class="grade">
+        <a class="cartao" href="#registrar"><b>Registrar treinos</b><span>Crossfit, Hyrox, musculação, corrida, bike e o que mais você fizer.</span></a>
+        <a class="cartao" href="#exercicios"><b>Ver a evolução</b><span>Recordes, carga em alta, gráficos por exercício e grupos musculares.</span></a>
+        <a class="cartao" href="#corpo"><b>Acompanhar o corpo</b><span>Bioimpedância lida da foto do laudo, medidas e Meu ciclo.</span></a>
+        <a class="cartao" href="#compartilhar"><b>Compartilhar</b><span>Card pronto para Stories ou feed, com a sua foto.</span></a>
+      </div>
+    </div>
+    <figure class="tel"><div class="aparelho"><img src="assets/manual/resumo.jpg" alt="Tela inicial do WÓD'IO com 251 treinos e a semana marcada" loading="eager"></div><figcaption>A tela inicial: tudo o que importa, de relance.</figcaption></figure>
+  </div>
+</section>
+
+<section id="comecar">
+  <span class="num">01</span><h2>Primeiros passos</h2>
+  <p>O WÓD<span class="ap">'</span>IO funciona no navegador do celular, mas fica melhor instalado como app, com ícone na tela inicial.</p>
+  <h3>Entrar</h3>
+  <ol class="passos">
+    <li>O acesso é por convite: o seu e-mail precisa estar liberado. Peça ao Davi.</li>
+    <li>Abra o link do app e toque em <b>Criar conta</b> com o e-mail convidado. Nas próximas vezes, é só <b>Entrar</b>. Esqueceu? Use <b>Esqueci minha senha</b>.</li>
+    <li>Preencha o perfil (nome, sexo, altura e nascimento). É com eles que o app calcula as zonas de frequência cardíaca e mostra o boneco certo no mapa muscular.</li>
+  </ol>
+  <h3>Instalar no celular</h3>
+  <ul class="lista">
+    <li><b>iPhone (Safari):</b> toque em Compartilhar e depois em <b>Adicionar à Tela de Início</b>.</li>
+    <li><b>Android (Chrome):</b> toque nos três pontinhos do navegador e em <b>Adicionar à tela inicial</b> (ou <b>Instalar app</b>).</li>
+  </ul>
+  <div class="dica"><b>Privacidade:</b> os seus treinos, medidas, fotos e batimentos ficam na sua conta e só você vê. Nem o administrador vê os seus registros pelo app.</div>
+</section>
+
+<section id="resumo">
+  <span class="num">02</span>
+  <div class="par">
+    <div>
+      <h2>Tela inicial (Resumo)</h2>
+      <p>É a primeira tela que aparece. De cima para baixo:</p>
+      <ul class="lista">
+        <li><b>O placar:</b> o total de treinos e a semana em bolinhas. Bolinha laranja com ✓ é dia treinado, ponto cinza é descanso e a bolinha roxa é hoje.</li>
+        <li><b>Último treino:</b> desde quando você registra e qual foi o último.</li>
+        <li><b>Indicadores:</b> treinos no ano, média de kcal por treino, corridas, peso, gordura e músculo, com a diferença desde a primeira avaliação.</li>
+        <li><b>Quilômetros:</b> tudo o que você correu, somando as corridas livres e a corrida dentro dos treinos.</li>
+        <li><b>Carga em alta:</b> os exercícios em que a sua carga mais subiu (ex.: Clean de 12 para 48 kg).</li>
+      </ul>
+      <p>Depois de treinar, a saudação muda para <b>"Tá pago hoje"</b>. Se você começou a anotar um treino e saiu sem salvar, ele aparece aqui como <span class="tag">não salvo</span> para você continuar.</p>
+      <p>Na barra de baixo ficam as quatro áreas (<b>Resumo, Exercícios, Corpo e Treino</b>) e o botão <b>+</b> do meio, que registra um treino.</p>
+    </div>
+    <div class="tels">
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/resumo.jpg" alt="Resumo com placar, semana e indicadores" loading="lazy"></div><figcaption>Placar, semana e indicadores.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/km-carga.jpg" alt="Quilômetros e carga em alta" loading="lazy"></div><figcaption>Quilômetros e carga em alta, mais abaixo.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="registrar">
+  <span class="num">03</span>
+  <div class="par">
+    <div>
+      <h2>Adicionar um treino</h2>
+      <p>Toque no <b>+</b> no meio da barra (no computador, o botão <b>Registrar treino</b> ou a tecla <b>N</b>). Primeiro escolha a data e o horário. Pode ser um dia que já passou, só não pode ser no futuro. Depois escolha o tipo:</p>
+      <ul class="lista">
+        <li><b>Crossfit &amp; Hyrox:</b> monte o treino em blocos (Warm up, Skill, WOD).</li>
+        <li><b>Musculação:</b> os seus treinos A, B, C…, série por série.</li>
+        <li><b>Outros treinos:</b> corrida, caminhada, bicicleta, aerobic e outras atividades.</li>
+        <li><b>Colar texto:</b> o jeito mais rápido. Cole o treino do grupo do box e pronto.</li>
+      </ul>
+      <div class="dica"><b>Os dados do relógio</b> (tempo, kcal, batimentos e zonas) entram dentro do treino, no fim: pelo print da tela do relógio, digitando ou pelo Strava.</div>
+    </div>
+    <div class="tels"><figure class="tel"><div class="aparelho"><img src="assets/manual/adicionar.jpg" alt="Janela Adicionar treino com as quatro opções" loading="lazy"></div><figcaption>As quatro formas de registrar.</figcaption></figure></div>
+  </div>
+</section>
+
+<section id="colar">
+  <span class="num">04</span>
+  <div class="par">
+    <div>
+      <h2>Colar texto (o mais rápido)</h2>
+      <p>Se o seu box manda o treino do dia por WhatsApp, você não precisa digitar nada.</p>
+      <ol class="passos">
+        <li>Copie o texto do treino no WhatsApp (ou de onde você anotou).</li>
+        <li>No app, toque em <b>+</b> → <b>Colar texto</b> e no botão <b>Colar</b>. Pode colar o treino e o monitoramento do relógio juntos. Calendário, pré-treino e refeições são ignorados.</li>
+        <li>Se quiser, toque em <b>Anexar print do relógio</b>: o app lê os números da imagem ali no celular, e a foto não fica salva.</li>
+        <li>Toque em <b>Ler texto</b>. O app separa os blocos, os exercícios, as repetições e as cargas.</li>
+        <li>Confira a prévia. Exercício com nome novo aparece marcado: escolha o nome que já existe (se for o mesmo movimento escrito diferente) ou deixe como novo. Toque em <b>Salvar treino</b>.</li>
+      </ol>
+      <p>Esquemas como <b>21-15-9</b> são entendidos: cada exercício recebe a soma das repetições.</p>
+    </div>
+    <div class="tels">
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/colar-texto.jpg" alt="Tela Colar texto" loading="lazy"></div><figcaption>Cole e toque em Ler texto.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/conferir.jpg" alt="Prévia do treino lido antes de salvar" loading="lazy"></div><figcaption>Confira e salve.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="crossfit">
+  <span class="num">05</span>
+  <div class="par">
+    <div>
+      <h2>Crossfit &amp; Hyrox</h2>
+      <p>O editor segue a estrutura da aula:</p>
+      <ul class="lista">
+        <li><b>Categoria:</b> Membros Inferiores, Puxadores, Cardio… Dá para somar mais de uma (ex.: Push &amp; Pull = Puxadores + Empurradores) e dar um nome ao treino ("Fran", "Death Burpee").</li>
+        <li><b>Blocos:</b> Warm up, Skill e WOD. O bloco que não teve na aula pode ser marcado como <b>não teve</b>. Precisa de mais? Use <b>+ SKILL II</b> ou <b>+ WOD II</b>.</li>
+        <li><b>Formato do bloco:</b> AMRAP, EMOM, For Time e <b>Mais formatos</b> (Tabata, intervalado, chipper). Coloque o resultado: rounds, tempo, reps.</li>
+        <li><b>Exercícios:</b> toque em <b>+ exercício</b> para adicionar e no exercício para editar. Segure o <b>≡</b> e arraste para trocar de ordem ou de bloco.</li>
+      </ul>
+      <p>Terminou? <b>FINALIZAR TREINO</b>. Ainda está no box? <b>Continuar depois</b> guarda o treino como "em andamento".</p>
+    </div>
+    <div class="tels"><figure class="tel"><div class="aparelho"><img src="assets/manual/editor.jpg" alt="Editor de Crossfit com o bloco Skill" loading="lazy"></div><figcaption>Bloco Skill com as cargas.</figcaption></figure></div>
+  </div>
+</section>
+
+<section id="exercicio">
+  <span class="num">06</span>
+  <div class="par">
+    <div>
+      <h2>Exercício, modos e progressão</h2>
+      <p>Ao adicionar um exercício, a busca mostra primeiro os <b>Recentes</b>. Se você já fez aquele exercício, aparece o cartão <b>Da última vez</b> com a data, o que foi feito e o seu recorde. O botão <b>Repetir</b> preenche tudo igual.</p>
+      <p>Escolha como ele foi feito:</p>
+      <ul class="lista">
+        <li><b>Padrão:</b> carga, repetições, metros, tempo e séries.</li>
+        <li><b>Progressão:</b> para quando a carga muda a cada série (ex.: subir a carga do Snatch). Cada linha é uma série com <b>Carga</b> e <b>Repetições</b>. O <b>+ série</b> já vem com os valores da anterior, é só ajustar.</li>
+        <li><b>Alternado</b> e <b>Unilateral:</b> repetições separadas por lado (D e E).</li>
+      </ul>
+      <div class="dica"><b>Usando dois pesos?</b> Coloque a carga total (ex.: 2 halteres de 18 kg = 36 kg).</div>
+    </div>
+    <div class="tels"><figure class="tel"><div class="aparelho"><img src="assets/manual/progressao.jpg" alt="Seletor de exercício no modo Progressão" loading="lazy"></div><figcaption>Progressão: 30, 35 e 40 kg.</figcaption></figure></div>
+  </div>
+</section>
+
+<section id="musculacao">
+  <span class="num">07</span>
+  <div class="par">
+    <div>
+      <h2>Musculação</h2>
+      <p>Aqui você cria os seus treinos fixos (A, B, C…) uma vez e só preenche as séries no dia.</p>
+      <ol class="passos">
+        <li>Toque em <b>+</b> → <b>Musculação</b> e escolha o treino. Use <b>+ Novo treino</b> para montar outro ou <b>Editar</b> para mudar os exercícios.</li>
+        <li>Os valores vêm da última vez que você fez aquele treino. Ajuste a carga e as repetições de cada série.</li>
+        <li>Aparelho ocupado? Marque <b>não realizado</b>. Fez algo a mais? <b>+ exercício</b>, no topo ou no fim da lista.</li>
+        <li><b>FINALIZAR TREINO</b> salva. <b>Continuar depois</b> guarda para terminar mais tarde.</li>
+      </ol>
+      <div class="dica aviso"><b>Para personal:</b> mande o treino do aluno em PDF, foto ou texto. Em <b>Importar treino do personal</b>, o app cria os treinos A, B, C… de uma vez.</div>
+    </div>
+    <div class="tels">
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/musculacao-treinos.jpg" alt="Escolha do treino de musculação" loading="lazy"></div><figcaption>Os treinos A e B, e o importar do personal.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/musculacao-series.jpg" alt="Séries do Treino A" loading="lazy"></div><figcaption>Série por série.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="outros">
+  <span class="num">08</span>
+  <div class="par">
+    <div>
+      <h2>Corrida e outros treinos</h2>
+      <p>Para corrida, caminhada, bicicleta, aerobic e qualquer outra atividade. Os tipos que você mais usa aparecem primeiro, e o resto fica em <b>Mais atividades</b>.</p>
+      <ul class="lista">
+        <li>Preencha a duração e a distância. O ritmo médio é calculado sozinho.</li>
+        <li>Os dados do relógio são opcionais: <b>Anexar print do relógio</b> ou <b>Digitar dados</b>.</li>
+        <li>Corridas livres entram nos <b>Quilômetros</b> e no seu ritmo médio. O app avisa quando sai a corrida mais longa ou o melhor ritmo.</li>
+      </ul>
+    </div>
+    <div class="tels"><figure class="tel"><div class="aparelho"><img src="assets/manual/outros-treinos.jpg" alt="Tela de outros treinos com corrida selecionada" loading="lazy"></div><figcaption>Corrida com dados do relógio.</figcaption></figure></div>
+  </div>
+</section>
+
+<section id="concluido">
+  <span class="num">09</span>
+  <div class="par">
+    <div>
+      <h2>Tá pago</h2>
+      <p>Ao finalizar, aparece a tela de conclusão com:</p>
+      <ul class="lista">
+        <li>quantos dias você treinou na semana, com o dia de hoje acendendo;</li>
+        <li>uma frase curta (cada dia uma);</li>
+        <li>exercícios, tempo e kcal do treino;</li>
+        <li>o resultado do WOD;</li>
+        <li><b>Recorde novo</b>, quando alguma carga passou o seu melhor anterior, com quanto subiu.</li>
+      </ul>
+      <p>Dali você pode <b>Compartilhar</b>, <b>Ver treino</b> ou <b>Fechar</b>. Sem internet? O treino fica salvo no aparelho e sincroniza sozinho quando a internet voltar.</p>
+    </div>
+    <div class="tels"><figure class="tel"><div class="aparelho"><img src="assets/manual/conclusao.jpg" alt="Tela Tá pago com recorde novo no Front Squat" loading="lazy"></div><figcaption>Recorde novo: Front Squat 46 kg (+2 kg).</figcaption></figure></div>
+  </div>
+</section>
+
+<section id="compartilhar">
+  <span class="num">10</span>
+  <div class="par">
+    <div>
+      <h2>Compartilhar o treino</h2>
+      <p>Na tela de conclusão ou em qualquer treino do histórico, toque em <b>Compartilhar</b>. O app monta um card com o logo, a data e os números do treino. O seu nome não aparece.</p>
+      <ol class="passos">
+        <li><b>Formato:</b> <span class="tag">Stories 9:16</span> ou <span class="tag">Feed 3:4</span>.</li>
+        <li><b>Fundo:</b> o fundo do app ou <b>Sua foto</b>. Com foto, arraste a prévia para enquadrar e use a pinça ou o Zoom para aproximar.</li>
+        <li><b>O que aparece:</b> ligue ou desligue kcal, tempo, exercícios, FC média, WOD, recorde e semana.</li>
+        <li>Toque em <b>Compartilhar</b> para mandar direto no WhatsApp ou no Instagram, ou em <b>Baixar</b> para salvar a imagem.</li>
+      </ol>
+      <p class="muted">A imagem é montada no seu aparelho. A foto não é enviada nem salva.</p>
+    </div>
+    <div class="tels">
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/compartilhar.jpg" alt="Janela Compartilhar treino" loading="lazy"></div><figcaption>Prévia, formato, fundo e informações.</figcaption></figure>
+      <figure class="tel"><div class="aparelho story"><img src="assets/manual/card-story.jpg" alt="Card para Stories com 552 kcal e recorde" loading="lazy"></div><figcaption>O card pronto, no formato Stories.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="treinos">
+  <span class="num">11</span>
+  <div class="par">
+    <div>
+      <h2>Histórico de treinos</h2>
+      <p>Na aba <b>Treino</b> ficam todos os registros.</p>
+      <ul class="lista">
+        <li>Veja <b>Por período</b> (mês ou ano, com as setas) ou <b>Por tipo de treino</b>. Filtre pela categoria e por Tudo, Treinos ou Corridas.</li>
+        <li>No topo, o total do período: treinos, corridas, km e kcal.</li>
+        <li>Toque num treino para abrir. Treinos com recorde de carga levam o selo <span class="tag" style="color:#FFB37A">PR</span>.</li>
+        <li>Aberto, você tem <b>Compartilhar</b> e <b>Editar</b>. Nos <b>⋯</b> estão Copiar treino, Exportar .txt, Anexar print (na corrida) e <b>Excluir</b>.</li>
+      </ul>
+      <div class="dica"><b>Apagou sem querer?</b> Logo depois de excluir aparece o aviso com <b>Desfazer</b>, por alguns segundos.</div>
+    </div>
+    <div class="tels">
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/treinos.jpg" alt="Lista de treinos de outubro" loading="lazy"></div><figcaption>O mês de outubro.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/sessao-menu.jpg" alt="Treino aberto com o menu de ações" loading="lazy"></div><figcaption>Treino aberto e o menu ⋯.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="exercicios">
+  <span class="num">12</span>
+  <div class="par">
+    <div>
+      <h2>Exercícios e recordes</h2>
+      <p>A aba <b>Exercícios</b> junta tudo o que você já fez:</p>
+      <ul class="lista">
+        <li><b>Grupos:</b> Membros Inferiores, Puxadores, Cardio… com quantos treinos de cada.</li>
+        <li><b>Lista:</b> busque pelo nome e ordene por A-Z, Mais feitos, Mais repetições, Maior carga ou Mais recentes.</li>
+        <li><b>Detalhe do exercício:</b> o recorde e a data, quanto subiu desde a primeira vez, total de repetições e sessões, e o gráfico de carga e volume em 3 meses, 6 meses, 1 ano ou tudo.</li>
+      </ul>
+    </div>
+    <div class="tels">
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/exercicios.jpg" alt="Aba Exercícios com grupos e lista" loading="lazy"></div><figcaption>Grupos e lista de movimentos.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/exercicio-detalhe.jpg" alt="Detalhe do Front Squat com recorde de 44 kg" loading="lazy"></div><figcaption>Front Squat: de 12 para 44 kg.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="corpo">
+  <span class="num">13</span>
+  <div class="par">
+    <div>
+      <h2>Corpo e bioimpedância</h2>
+      <h3>Grupos musculares</h3>
+      <p>O mapa mostra quanto cada músculo foi trabalhado no período (Hoje, 7 dias, 30 dias…), em séries e em porcentagem do total. Quanto mais laranja, mais trabalhado.</p>
+      <h3>Bioimpedância</h3>
+      <p>Peso, músculo, gordura, IMC, gordura visceral, metabolismo basal e medidas, sempre com a diferença desde a primeira avaliação e a faixa de referência.</p>
+      <h3>Nova avaliação pela foto do laudo</h3>
+      <ol class="passos">
+        <li>Em <b>Corpo</b>, toque em <b>Nova avaliação</b>.</li>
+        <li>Toque em <b>Ler foto do laudo</b> e tire ou escolha a foto da balança (InBody, Omron, Tanita, Xiaomi ou relatório de nutricionista).</li>
+        <li>O app preenche os campos e a data e marca em laranja o que leu. Confira e toque em <b>Salvar avaliação</b>.</li>
+      </ol>
+      <p class="muted">A foto é lida no próprio celular e não fica salva. Valores de referência ("peso ideal", "alvo") são ignorados.</p>
+    </div>
+    <div class="tels">
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/corpo-mapa.jpg" alt="Mapa de grupos musculares" loading="lazy"></div><figcaption>O mapa muscular do período.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/corpo-bio.jpg" alt="Painel de bioimpedância" loading="lazy"></div><figcaption>Bioimpedância: −15 kg desde jan/25.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/nova-avaliacao.jpg" alt="Nova avaliação com botão Ler foto do laudo" loading="lazy"></div><figcaption>Nova avaliação pela foto.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="ciclo">
+  <span class="num">14</span>
+  <div class="par">
+    <div>
+      <h2>Meu ciclo</h2>
+      <p>No perfil feminino, a tela inicial ganha o cartão <b>Meu ciclo</b>, com quantos dias faltam para a próxima menstruação e a probabilidade de engravidar no dia.</p>
+      <ul class="lista">
+        <li>No <b>Calendário</b>, marque o início da menstruação e veja o período previsto, o período fértil e a ovulação.</li>
+        <li>Em <b>Anotações</b>, registre sintomas e remédios do dia.</li>
+      </ul>
+      <div class="dica aviso"><b>Importante:</b> as datas são estimativas para acompanhamento. O app não é método contraceptivo. Em caso de dúvida, consulte o seu ginecologista.</div>
+    </div>
+    <div class="tels">
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/mary-resumo-claro.jpg" alt="Tela inicial da Mary no tema claro com o cartão Meu ciclo" loading="lazy"></div><figcaption>Mary, no tema claro.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/mary-ciclo.jpg" alt="Calendário do Meu ciclo" loading="lazy"></div><figcaption>O calendário do ciclo.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="conta">
+  <span class="num">15</span>
+  <div class="par">
+    <div>
+      <h2>Conta, Strava e backup</h2>
+      <p>Toque na sua foto (ou inicial), no canto de cima, para abrir a <b>Conta</b>:</p>
+      <ul class="lista">
+        <li><b>Como usar o WÓD<span class="ap">'</span>IO:</b> abre este manual.</li>
+        <li><b>Perfil:</b> nome, foto, sexo, altura e nascimento.</li>
+        <li><b>Dados:</b> <b>Baixar backup</b> gera um arquivo com todos os seus treinos, corridas e avaliações. Além disso, o sistema guarda uma cópia toda madrugada e mantém os últimos 30 dias.</li>
+        <li><b>Notificações:</b> <b>O chamado das 5h</b>, uma cutucada por dia às 5h da manhã, com uma frase diferente. No iPhone, só funciona com o app instalado na Tela de Início.</li>
+        <li><b>Strava:</b> conecte a sua conta para trazer tempo, kcal e batimentos do relógio para os treinos com <b>Sincronizar com o Strava</b>.</li>
+      </ul>
+      <p>O botão da lua, no topo, troca entre o tema escuro e o claro.</p>
+    </div>
+    <div class="tels"><figure class="tel"><div class="aparelho"><img src="assets/manual/conta.jpg" alt="Tela Conta com o atalho Como usar o WÓD'IO" loading="lazy"></div><figcaption>A Conta e o atalho para este manual.</figcaption></figure></div>
+  </div>
+</section>
+
+<section id="duvidas">
+  <span class="num">16</span><h2>Dúvidas rápidas</h2>
+  <details class="faq"><summary>Esqueci de registrar ontem. Dá para lançar depois?</summary><div><p>Dá. Em qualquer registro, escolha a data e o horário no começo. Só não vale data no futuro.</p></div></details>
+  <details class="faq"><summary>Fiquei sem internet no box. Perdi o treino?</summary><div><p>Não. O treino fica salvo no aparelho e sincroniza sozinho quando a internet voltar.</p></div></details>
+  <details class="faq"><summary>Saí do app no meio do registro.</summary><div><p>O que você estava anotando aparece na tela inicial como <span class="tag">não salvo</span>, ou como <span class="tag">em andamento</span> se você tocou em Continuar depois. É só tocar para continuar.</p></div></details>
+  <details class="faq"><summary>O exercício entrou com nome diferente ("Front Squat" e "Agachamento frontal").</summary><div><p>Na prévia do Colar texto, escolha o nome que já existe quando for o mesmo movimento. Assim a evolução e os recordes ficam juntos.</p></div></details>
+  <details class="faq"><summary>Como edito a carga de um treino antigo?</summary><div><p>Na aba Treino, abra o treino, toque em <b>Editar</b>, ajuste e salve. Os recordes e os gráficos se recalculam sozinhos.</p></div></details>
+  <details class="faq"><summary>Apaguei um treino sem querer.</summary><div><p>Toque em <b>Desfazer</b> no aviso que aparece logo depois. Passou do tempo? O backup automático guarda os últimos 30 dias: fale com o Davi.</p></div></details>
+  <details class="faq"><summary>Sou personal. Como passo o treino para o aluno?</summary><div><p>Mande o treino em PDF, foto ou texto. O aluno entra em Musculação → <b>Importar treino do personal</b>, e o app cria os treinos A, B, C… de uma vez.</p></div></details>
+  <footer>WÓD<span class="ap">'</span>IO · seu treino diário. Totais e evolução de um uso real, com nomes trocados (John e Mary). <a href="./">Abrir o app</a></footer>
+</section>
+</main>
+
+<script>
+(function(){
+  var b=document.getElementById('btnMenu'), veu=document.getElementById('veu'), menu=document.getElementById('menu');
+  function abre(on){ document.body.classList.toggle('menu',on); if(b) b.setAttribute('aria-expanded',on); if(on){ var a=menu.querySelector('nav a'); if(a) a.focus({preventScroll:true}); } }
+  if(b) b.addEventListener('click',function(){ abre(!document.body.classList.contains('menu')); });
+  veu.addEventListener('click',function(){ abre(false); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&document.body.classList.contains('menu')){ abre(false); b&&b.focus(); } });
+  menu.addEventListener('click',function(e){ if(e.target.closest('a')) abre(false); });
+  // o menu marca a seção que está na tela
+  var links={}; menu.querySelectorAll('nav a').forEach(function(a){ links[a.getAttribute('href').slice(1)]=a; });
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(!en.isIntersecting) return; Object.keys(links).forEach(function(k){ links[k].removeAttribute('aria-current'); }); var a=links[en.target.id]; if(a) a.setAttribute('aria-current','true'); }); },{rootMargin:'-35% 0px -60% 0px'});
+    document.querySelectorAll('main section[id]').forEach(function(s){ io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
