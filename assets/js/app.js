@@ -1802,7 +1802,7 @@ function renderPickerMus(P,el){ const i=P.item;
     <div class="actions"><button class="btn" data-pkok="mais">Adicionar mais</button><button class="btn primary" data-pkok="ok">Concluído</button></div>`; }
 function seriesMus(n,kg,reps,tempo){ n=Math.max(1,Math.min(12,parseInt(n,10)||3)); return Array.from({length:n},()=>({kg:kg==null||Number.isNaN(kg)?'':String(kg),reps:reps==null||Number.isNaN(reps)?'':String(reps),tempo:tempo||''})); }
 function pickerSalva(){ const P=state.pick; const i=P.item; if(!i||!i.name) return false; delete i.isNew;
-  if(P.alvo.tipo==='mus'&&P.alvo.ii==null){ state.mus.ex.push({name:i.name,tipo:i.tempo?'tempo':'carga',series:seriesMus(i.sets,i.tempo?null:i.loadKg,i.tempo?null:i.reps,i.tempo?(i.tempoTxt||''):'')}); renderMus(); return true; }
+  if(P.alvo.tipo==='mus'&&P.alvo.ii==null){ musVaiAoNovo=true; state.mus.ex.push({name:i.name,tipo:i.tempo?'tempo':'carga',series:seriesMus(i.sets,i.tempo?null:i.loadKg,i.tempo?null:i.reps,i.tempo?(i.tempoTxt||''):'')}); renderMus(); return true; }
   if(!P.complex&&P.alvo.tipo==='hib'){
     if(i.modo==='progressao'){ const L=(i.prog||[]).map(x=>({loadKg:parseFloat(String(x.kg).replace(',','.'))||0,reps:parseInt(x.reps,10)})).filter(x=>x.reps>0);
       if(!L.length){ toast('Coloque as repetições de pelo menos uma série.'); return false; }
@@ -1859,9 +1859,11 @@ function iniciarMus(id,sess){ const m=(state.modelos||[]).find(x=>x.id===id); if
     ex:nomes.map(n=>({name:n,tipo:prevT[n]||(POR_TEMPO.test(n)?'tempo':'carga'),pulado:pulados.has(n),rapido:!(prev[n]&&prev[n].length),series:(prev[n]&&prev[n].length?prev[n]:vazio()).map(x=>({kg:x.kg??'',reps:x.reps??'',tempo:x.tempo??''}))})),base:m?[...m.exercicios]:null};
   if(!sess&&state.stravaMus){ const S=state.stravaMus, M=state.mus; state.stravaMus=null; M.band={...(S.band||{})}; M.stravaIds=S.stravaIds; M.orig=S.id; if(S.band&&S.band.time&&M.date===S.date) M.time=S.band.time; }
   renderMus(); if(!$('#dlgMus').open) $('#dlgMus').showModal(); }
+let musVaiAoNovo=false;
 function renderMus(){ const M=state.mus; $('#musTitle').textContent='Musculação · '+M.nome;
   $('#musBody').innerHTML=`${dtCampos('md',M.date,M.time)}
   <p class="note">Os valores vêm do último ${esc(M.nome)}. Ajuste carga, repetições ou tempo de cada série. Se o aparelho estiver ocupado, marque <b>não realizado</b>.</p>
+  ${M.ex.length?`<div class="mus-topo"><span>${M.ex.length} ${pl(M.ex.length,'exercício','exercícios')}</span><button class="btn ghost small" data-musex="1">+ exercício</button></div>`:''}
   ${M.ex.map((e,ei)=>`<div class="mus-ex ${e.pulado?'pulado':''}"><div class="hbh"><b>${esc(e.name)}</b><span class="hbh-r"><button class="chipbtn ${e.pulado?'on':''}" data-muspula="${ei}">${e.pulado?'não realizado ✓':'não realizado'}</button><button class="iconx" data-musrm="${ei}" aria-label="Remover exercício">✕</button></span></div>
     ${e.pulado?'':`<div class="seg mini" role="group" aria-label="Medida">${[['carga','Carga e reps'],['tempo','Tempo']].map(([k,l])=>`<button class="segb" data-mustipo="${ei}.${k}" aria-pressed="${e.tipo===k}">${l}</button>`).join('')}</div>
     ${e.rapido?linhaRapida(e,ei):''}
@@ -1870,7 +1872,8 @@ function renderMus(){ const M=state.mus; $('#musTitle').textContent='Musculaçã
   <button class="btn ghost small" data-musex="1">+ exercício</button>
   <div class="dtl" style="margin:16px 0 4px">Duração do treino</div>${durPicker('mdur',(M.band&&M.band.durSec)||0)}
   ${relogioCard('m',M.band,M.watchEdit)}`;
-  $('#musActions').innerHTML=`<div class="trow"><button class="btn ghost" data-mussave="0">Continuar depois</button><button class="btn fin" data-mussave="1">FINALIZAR TREINO</button></div>`; guardaRascunhoMus(); }
+  $('#musActions').innerHTML=`<div class="trow"><button class="btn ghost" data-mussave="0">Continuar depois</button><button class="btn fin" data-mussave="1">FINALIZAR TREINO</button></div>`; guardaRascunhoMus();
+  if(musVaiAoNovo){ musVaiAoNovo=false; const u=[...$('#musBody').querySelectorAll('.mus-ex')].pop(); if(u) setTimeout(()=>u.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}),60); } }
 // linha rápida: preenche todas as séries de uma vez (aparece quando o exercício começa vazio)
 function linhaRapida(e,ei){ const s0=e.series[0]||{}; const v=x=>esc(x==null?'':x);
   return `<div class="mus-rap">${e.tipo==='tempo'?'':`<label>Carga<span class="de one"><input data-mq="${ei}.kg" inputmode="decimal" value="${v(s0.kg)}" placeholder="0"><b>kg</b></span></label>`}

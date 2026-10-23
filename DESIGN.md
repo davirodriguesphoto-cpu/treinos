@@ -440,6 +440,9 @@ Na tela de conclusão ("Compartilhar", acima de Ver treino/Fechar) e em toda ses
 
 O card leva no topo o selo do app, como o do relógio: o ícone (carinha laranja num quadrado marinho de cantos arredondados, contorno branco sutil e sombra leve) ao lado do WÓD'IO com o apóstrofo turquesa. Embaixo vêm a data e o tipo, "Tá pago." (Manrope 800), o número principal em Barlow 240px, até três números secundários, o WOD, o recorde (caixa laranja com o ganho em verde) e a semana em bolinhas. Não leva nome nem foto de perfil. A imagem é montada no aparelho, e a foto não é enviada nem salva. Onde o celular permite, abre a folha de compartilhar do sistema; nos outros, baixa o PNG.
 
+### Treino de musculação
+Acima da lista de exercícios fica uma linha com a contagem ("11 exercícios", rótulo 13px em tom suave) e "+ exercício" à direita, além do botão no fim da lista. O exercício novo sempre entra no fim, para manter a ordem, e a tela rola até ele (sem animação com redução de movimento).
+
 ### Ações da sessão
 Numa linha só, à direita: **Compartilhar** (pílula ghost) e **Editar** (pílula), as duas com ícone de traço 18px antes do texto, e um botão **⋯** (44px). Os ⋯ abrem um menu flutuante (fundo elevado, cantos de 18px, sombra suave, abre para cima com um fade curto) com ícone e nome em cada item: Anexar print (só na corrida), Copiar treino e Exportar .txt. Depois de uma linha fina vem **Excluir** em vermelho, sempre por último e longe do Editar. O menu fecha com Esc (o foco volta para os ⋯), ao tocar fora, ao rolar e ao escolher um item. As setas do teclado navegam entre os itens.
 

@@ -1285,3 +1285,7 @@ html{accent-color:var(--acc1);caret-color:var(--acc1)}
 .smi.perigo,.smi.perigo svg{color:var(--bad-t)}
 @keyframes menuAbre{from{opacity:0;transform:translateY(6px) scale(.98)}}
 @media (prefers-reduced-motion: reduce){.smenu{animation:none}}
+
+/* musculação: "+ exercício" também no topo da lista */
+.mus-topo{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 4px}
+.mus-topo span{font-size:var(--t-rotulo);font-weight:700;color:var(--muted)}
