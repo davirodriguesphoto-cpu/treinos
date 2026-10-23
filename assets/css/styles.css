@@ -1248,3 +1248,18 @@ html{accent-color:var(--acc1);caret-color:var(--acc1)}
 /* Meu ciclo: chave de acompanhar */
 .ccliga{display:grid;gap:6px;padding:4px 0 12px;border-bottom:1px solid var(--line);margin-bottom:8px}
 .ccliga .note{margin:0}
+
+/* ================= PROGRESSÃO (carga × repetição no Crossfit) ================= */
+.seg.g2{grid-template-columns:1fr 1fr;border-radius:20px}
+.pk-prog{margin:4px 0 6px}
+.pk-prog .mus-row.cab span{font-size:var(--t-etiqueta);font-weight:700;color:var(--muted);letter-spacing:var(--ls-etiqueta);text-transform:uppercase}
+.pk-prog .mus-row input{padding:10px 12px;font-size:17px;font-family:"Barlow Condensed",sans-serif;font-weight:600}
+.pk-prog .mus-row .m{font-family:"Barlow Condensed",sans-serif;font-weight:600}
+
+/* ================= COMPARTILHAR ================= */
+.fimcomp{width:100%;min-height:48px;margin-top:4px}
+.comp-prev{display:grid;place-items:center;margin:2px 0 10px}
+.comp-prev canvas{display:block;height:min(52vh,520px);width:auto;max-width:100%;aspect-ratio:9/16;border-radius:18px;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.comp-prev.feed canvas{aspect-ratio:3/4;height:min(44vh,440px)}
+#dlgComp label.segb{display:grid;place-items:center;cursor:pointer}
+#dlgComp .fimacts{margin-top:14px}
