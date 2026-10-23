@@ -132,6 +132,13 @@ figure.tel figcaption{font-size:13px;color:var(--muted);text-align:center;max-wi
 .numeros div b{display:block;font:700 44px/1 var(--num);letter-spacing:.01em}
 .numeros div span{font-size:13px;color:var(--muted)}
 
+/* seção com três celulares: uma fileira só */
+.par .tels:has(> figure:nth-child(3)){max-width:600px}
+
+.par .tels:has(> figure:nth-child(3)) figure.tel{width:min(186px,30vw)}
+.par .tels:has(> figure:nth-child(4)){max-width:380px}
+.par .tels:has(> figure:nth-child(4)) figure.tel{width:min(170px,40vw)}
+@media (max-width:560px){.par .tels:has(> figure:nth-child(3)){flex-wrap:wrap}.par .tels:has(> figure:nth-child(3)) figure.tel{width:min(250px,72vw)}}
 /* capa: os dois temas, um sobre o outro */
 figure.duo{margin:0;display:grid;gap:14px;justify-items:center}
 .duo-tels{display:grid;grid-template-columns:repeat(2,min(210px,40vw));align-items:start}
@@ -222,6 +229,12 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
     <li>Preencha o perfil (nome, sexo, altura e nascimento). É com eles que o app calcula as zonas de frequência cardíaca e mostra o corpo certo no mapa muscular.</li>
   </ol>
   <p>Nas próximas vezes, é só <b>Entrar</b> com o e-mail e a senha. Esqueceu a senha? Faça o mesmo caminho do <b>Esqueci minha senha</b>.</p>
+  <h3>Instalar no celular</h3>
+  <ul class="lista">
+    <li><b>iPhone (Safari):</b> toque em Compartilhar e depois em <b>Adicionar à Tela de Início</b>.</li>
+    <li><b>Android (Chrome):</b> toque nos três pontinhos do navegador e em <b>Adicionar à tela inicial</b> (ou <b>Instalar app</b>).</li>
+  </ul>
+  <div class="dica"><b>Privacidade:</b> os seus treinos, medidas, fotos e batimentos ficam na sua conta e só você vê. Nem o administrador vê os seus registros pelo app.</div>
     </div>
     <div class="tels">
       <figure class="tel"><div class="aparelho"><img src="assets/manual/entrar.jpg" alt="Tela Entrar com e-mail, senha e Esqueci minha senha" loading="lazy"></div><figcaption>1. Digite o e-mail e toque em Esqueci minha senha.</figcaption></figure>
@@ -229,12 +242,7 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
       <figure class="tel"><div class="aparelho"><img src="assets/manual/nova-senha.jpg" alt="Tela Nova senha" loading="lazy"></div><figcaption>3. Pelo link, crie a sua senha.</figcaption></figure>
     </div>
   </div>
-  <h3>Instalar no celular</h3>
-  <ul class="lista">
-    <li><b>iPhone (Safari):</b> toque em Compartilhar e depois em <b>Adicionar à Tela de Início</b>.</li>
-    <li><b>Android (Chrome):</b> toque nos três pontinhos do navegador e em <b>Adicionar à tela inicial</b> (ou <b>Instalar app</b>).</li>
-  </ul>
-  <div class="dica"><b>Privacidade:</b> os seus treinos, medidas, fotos e batimentos ficam na sua conta e só você vê. Nem o administrador vê os seus registros pelo app.</div>
+
 </section>
 
 <section id="resumo">
