@@ -443,8 +443,11 @@ O card leva no topo o selo do app, como o do relógio: o ícone (carinha laranja
 ### Treino de musculação
 Acima da lista de exercícios fica uma linha com a contagem ("11 exercícios", rótulo 13px em tom suave) e "+ exercício" à direita, além do botão no fim da lista. O exercício novo sempre entra no fim, para manter a ordem, e a tela rola até ele (sem animação com redução de movimento).
 
+### Conta
+Todos os itens têm um ícone de traço 20px no laranja de texto, antes do nome: Perfil (pessoa), Meu ciclo (gota), Segurança (cadeado), Dados (banco de dados), Notificações (sino), Membros (pessoas), Strava (linha de atividade) e Termos (documento). O Sair leva a porta com seta, na cor do botão. A ordem é: cartão do perfil, os grupos, Termos, Como usar o WÓD'IO e Sair.
+
 ### Manual do usuário
-`manual.html`, na raiz, é publicado junto com o app. Dá para mandar o link como apresentação, e ele também abre pela Conta, no cartão **Como usar o WÓD'IO** (ícone de livro laranja, logo abaixo do cartão do perfil). O cartão abre numa aba nova porque o app instalado no iPhone não tem botão de voltar.
+`manual.html`, na raiz, é publicado junto com o app. Dá para mandar o link como apresentação, e ele também abre pela Conta, no cartão **Como usar o WÓD'IO** (ícone de livro laranja, no fim da Conta, logo antes do Sair). O cartão abre numa aba nova porque o app instalado no iPhone não tem botão de voltar.
 - **Visual:** o mesmo mundo do app, com fundo marinho e os brilhos laranja e roxo, Manrope no texto, Barlow só nos números e o apóstrofo turquesa.
 - **Navegação:** menu lateral fixo em acordeão, com 5 grupos (Começando, Registrar, Depois do treino, Evolução, Conta) e as 17 seções numeradas. Só um grupo fica aberto por vez: abrir um fecha o outro, e a rolagem abre sozinha o grupo da seção que está na tela, que fica destacada. No celular, o menu abre por cima, a partir do botão "Menu" no topo.
 - **Strava:** aparece no manual como **Beta teste**, com o aviso "Apenas 10 vagas disponíveis no total".

@@ -1299,3 +1299,12 @@ html{accent-color:var(--acc1);caret-color:var(--acc1)}
 .acc.ajuda i{font-style:normal;font-size:22px;color:var(--muted)}
 .acc.ajuda:hover{border-color:color-mix(in srgb,var(--acc1) 40%,var(--line))}
 .acc.ajuda .ap{color:var(--z2)}
+
+/* Conta: ícone em todos os itens, no traço do manual */
+.acci{display:inline-flex;align-items:center;gap:12px}
+.acci svg{color:var(--acc1-t);flex:none}
+.acc summary .acci #stravaPill{margin-left:2px}
+.accitem.solto.acci{display:flex;width:100%;justify-content:flex-start;align-items:center}
+.accitem.solto.acci::after{margin-left:auto}
+.btn.sair.acci{display:flex;justify-content:center;gap:10px}
+.btn.sair.acci svg{color:currentColor}
