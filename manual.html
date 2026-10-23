@@ -95,6 +95,7 @@ b,strong{font-weight:800}
 .dica b{color:#7DE3D8}
 .aviso{border-color:color-mix(in srgb,var(--acc1) 40%,transparent);background:color-mix(in srgb,var(--acc1) 8%,transparent)}
 .aviso b{color:#FFB37A}
+.aviso b.gineco{display:inline-block;margin-top:6px;color:#FF7E8E}
 
 /* bloco texto + celulares */
 .par{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(24px,4vw,56px);align-items:start}
@@ -207,14 +208,27 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
 </section>
 
 <section id="comecar">
-  <span class="num">01</span><h2>Primeiros passos</h2>
+  <span class="num">01</span>
+  <div class="par">
+    <div>
+  <h2>Primeiros passos</h2>
   <p>O WÓD<span class="ap">'</span>IO funciona no navegador do celular, mas fica melhor instalado como app, com ícone na tela inicial.</p>
-  <h3>Entrar</h3>
+  <h3>Primeiro acesso</h3>
   <ol class="passos">
     <li>O acesso é por convite: o seu e-mail precisa estar liberado. Peça ao Davi.</li>
-    <li>Abra o link do app e toque em <b>Criar conta</b> com o e-mail convidado. Nas próximas vezes, é só <b>Entrar</b>. Esqueceu? Use <b>Esqueci minha senha</b>.</li>
-    <li>Preencha o perfil (nome, sexo, altura e nascimento). É com eles que o app calcula as zonas de frequência cardíaca e mostra o boneco certo no mapa muscular.</li>
+    <li>Abra o app, digite o e-mail convidado no campo <b>E-mail</b> e toque em <b>Esqueci minha senha</b>. Ainda não precisa de senha.</li>
+    <li>Abra o e-mail que chegou (confira também o spam) e toque no link.</li>
+    <li>O app abre na tela <b>Nova senha</b>. Crie a sua senha, repita e toque em <b>Salvar nova senha</b>. Pronto, você já está dentro.</li>
+    <li>Preencha o perfil (nome, sexo, altura e nascimento). É com eles que o app calcula as zonas de frequência cardíaca e mostra o corpo certo no mapa muscular.</li>
   </ol>
+  <p>Nas próximas vezes, é só <b>Entrar</b> com o e-mail e a senha. Esqueceu a senha? Faça o mesmo caminho do <b>Esqueci minha senha</b>.</p>
+    </div>
+    <div class="tels">
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/entrar.jpg" alt="Tela Entrar com e-mail, senha e Esqueci minha senha" loading="lazy"></div><figcaption>1. Digite o e-mail e toque em Esqueci minha senha.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/esqueci-senha.jpg" alt="Aviso de que o link para criar a senha foi enviado" loading="lazy"></div><figcaption>2. O link chega no seu e-mail.</figcaption></figure>
+      <figure class="tel"><div class="aparelho"><img src="assets/manual/nova-senha.jpg" alt="Tela Nova senha" loading="lazy"></div><figcaption>3. Pelo link, crie a sua senha.</figcaption></figure>
+    </div>
+  </div>
   <h3>Instalar no celular</h3>
   <ul class="lista">
     <li><b>iPhone (Safari):</b> toque em Compartilhar e depois em <b>Adicionar à Tela de Início</b>.</li>
@@ -480,7 +494,7 @@ footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:v
       <h3>Gravidez</h3>
       <p>Em <b>Conta → Meu ciclo</b>, ligue <b>Estou grávida</b> e informe as semanas e os dias de gestação de hoje. As previsões de menstruação ficam pausadas, o app avança a gestação sozinho a cada dia e o cartão da tela inicial passa a mostrar as semanas e o tamanho do bebê.</p>
       <p class="muted">Não menstrua, por exemplo na menopausa ou com medicamentos que interrompem o ciclo? Em Conta → Meu ciclo, desligue <b>Acompanhar meu ciclo</b>. O cartão sai da tela inicial e os seus registros continuam guardados.</p>
-      <div class="dica aviso"><b>Importante:</b> as datas são estimativas para acompanhamento. O app não é método contraceptivo. Em caso de dúvida, consulte o seu ginecologista.</div>
+      <div class="dica aviso"><b>Importante:</b> as datas são estimativas para acompanhamento. O app não é método contraceptivo.<br><b class="gineco">Em caso de dúvidas, consulte o seu ginecologista.</b></div>
     </div>
     <div class="tels">
       <figure class="tel"><div class="aparelho"><img class="claro" src="assets/manual/mary-resumo-claro.jpg" alt="Tela inicial da Mary no tema claro com o cartão Meu ciclo" loading="lazy"></div><figcaption>Mary, no tema claro.</figcaption></figure>
