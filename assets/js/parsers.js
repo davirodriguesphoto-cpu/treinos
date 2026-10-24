@@ -346,7 +346,7 @@ function parseTreinoPersonal(texto){ const linhas=texto.split(/\r?\n/).map(x=>x.
   return ordem.map(L=>({letra:L,foco:focos[L]||'',exercicios:treinos[L]})).filter(t=>t.exercicios.length); }
 if(typeof module!=='undefined') module.exports={parseTreinoPersonal,limpaNomeExercicio};
 
-// leitor de laudo de bioimpedância (texto da foto: InBody, Omron, Tanita, Xiaomi, relatórios de nutricionista)
+// leitor de laudo de bioimpedância (texto da foto ou do PDF: InBody, Omron, Tanita, Xiaomi, Fitmass, relatórios de nutricionista)
 function lerLaudo(texto){
   const tira=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
   const linhas=String(texto||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
@@ -357,24 +357,28 @@ function lerLaudo(texto){
   const corte=i=>{ const k=tira(linhas[i]).search(ignora); return k<0?linhas[i].length:k; };
   // número logo depois do rótulo, antes de qualquer palavra de referência (ou na linha seguinte)
   const depois=(i,re)=>{ const c=corte(i); const l=tira(linhas[i]).slice(0,c); const m=re.exec(l); if(!m) return null;
-    const resto=linhas[i].slice(m.index+m[0].length,c); let v=num(resto);
-    if(v==null&&c===linhas[i].length&&linhas[i+1]&&!ignora.test(tira(linhas[i+1]))) v=num(linhas[i+1]);
+    let resto=linhas[i].slice(m.index+m[0].length,c), v=num(resto);
+    if(v==null&&c===linhas[i].length&&linhas[i+1]&&!ignora.test(tira(linhas[i+1]))){ resto=linhas[i+1]; v=num(resto); }
     return {v,pct:/%/.test(resto)||/%|percent|pgc|pbf|\bbf\b/.test(m[0])}; };
   for(let i=0;i<linhas.length;i++){ const l=tira(linhas[i]).slice(0,corte(i)); if(!l.trim()) continue; let r;
     if((r=depois(i,/\bpeso(?: corporal| atual| total)?\b|\bweight\b/))&&!/agua|massa|osse|livre/.test(l)) achou('peso',r.v,20,300);
     if((r=depois(i,/(?:percentual de gordura|gordura corporal\s*\(?%|% ?de gordura|pgc|pbf|body fat ?%|percent body fat|taxa de gordura|gordura \(%\))/))) achou('gorduraPct',r.v,2,70);
-    else if((r=depois(i,/(?:massa de gordura|massa gorda|gordura corporal|body fat mass|gordura \(kg\)|\bgordura\b)/))&&!/visceral|subcut/.test(l)){ if(r.pct) achou('gorduraPct',r.v,2,70); else achou('gorduraKg',r.v,1,150); }
+    else if((r=depois(i,/(?:massa de gordura|massa gorda|gordura corporal|body fat mass|gordura \(kg\)|\bgordura\b)/))&&!/visceral|subcut|interna/.test(l)){ if(r.pct) achou('gorduraPct',r.v,2,70); else achou('gorduraKg',r.v,1,150); }
     if((r=depois(i,/(?:massa muscular esqueletica|musculo esqueletico|musculatura esqueletica|skeletal muscle(?: mass)?|\bsmm\b)/))){ if(r.pct) achou('musculoPct',r.v,10,70); else achou('musculoKg',r.v,5,90); }
     else if((r=depois(i,/(?:taxa muscular|percentual de musculo|musculo ?%|massa muscular\s*\(%)/))) achou('musculoPct',r.v,10,70);
+    else if((r=depois(i,/\bmassa muscular\b/))){ if(r.pct) achou('musculoPct',r.v,10,70); else achou('musculoKg',r.v,5,90); }
     if((r=depois(i,/\bimc\b|\bbmi\b|indice de massa corporal/))) achou('imc',r.v,10,70);
     if((r=depois(i,/(?:nivel de gordura visceral|gordura visceral|visceral fat(?: level)?|\bvisceral\b)/))) achou('visceral',r.v,1,30);
-    if((r=depois(i,/(?:taxa metabolica basal|metabolismo basal|\btmb\b|\bbmr\b|basal metabolic rate)/))) achou('basal',r.v,700,4500);
+    if((r=depois(i,/(?:taxa metabolica basal|metabolismo basal|metab\.? basal|\btmb\b|\bbmr\b|basal metabolic rate)/))) achou('basal',r.v,700,4500);
     if((r=depois(i,/(?:relacao cintura[- ]?quadril|\brcq\b|\bwhr\b|waist[- ]hip ratio)/))) achou('rcq',r.v,.5,1.4);
-    if((r=depois(i,/(?:idade (?:corporal|metabolica|biologica)|body age|metabolic age)/))) achou('idadeCorporal',r.v,10,100);
+    if((r=depois(i,/(?:idade (?:corporal|metabolica|biologica|fisiolog)|body age|metabolic age)/))) achou('idadeCorporal',r.v,10,100);
   }
   // data do laudo (dd/mm/aaaa ou dd.mm.aa)
   const d=/(\d{1,2})[\/.](\d{1,2})[\/.](\d{2,4})/.exec(texto||''); if(d){ let y=+d[3]; if(y<100) y+=2000; const mm=+d[2], dd=+d[1]; if(mm>=1&&mm<=12&&dd>=1&&dd<=31&&y>2000) out.date=y+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0'); }
   if(out.peso&&out.gorduraKg&&out.gorduraKg>=out.peso) delete out.gorduraKg;
   if(out.peso&&out.musculoKg&&out.musculoKg>=out.peso) delete out.musculoKg;
+  // laudos que só trazem o kg (ex.: Fitmass): o % sai da conta com o peso
+  if(out.peso&&out.musculoKg&&out.musculoPct==null) out.musculoPct=Math.round(out.musculoKg/out.peso*1000)/10;
+  if(out.peso&&out.gorduraKg&&out.gorduraPct==null) out.gorduraPct=Math.round(out.gorduraKg/out.peso*1000)/10;
   return out; }
 if(typeof module!=='undefined') module.exports={lerLaudo}; else window.lerLaudo=lerLaudo;

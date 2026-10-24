@@ -1364,14 +1364,14 @@ function openBio(){
   const f=$('#bioForm');
   const campo=([k,l,u])=>u==='kg'?`<label>${l}<span class="kgg"><input inputmode="numeric" name="${k}__kg" placeholder="0"><span>kg</span><b>,</b><input inputmode="numeric" name="${k}__g" maxlength="3" placeholder="000"><span>g</span></span></label>`:`<label>${l}${u?' ('+u+')':''}<input inputmode="decimal" name="${k}"></label>`;
   const COMP=['peso','pesoAcima','musculoPct','musculoKg','gorduraPct','gorduraKg','gorduraAcima','imc'];
-  f.innerHTML=`<div class="biofoto"><label class="btn" for="bioImg">Ler foto do laudo</label><input type="file" id="bioImg" accept="image/*" hidden><p class="note" id="bioSt">Tire ou escolha a foto do laudo da balança e o app preenche os campos. A foto é lida aqui no celular e não fica salva.</p></div>
+  f.innerHTML=`<div class="biofoto"><label class="btn" for="bioImg">Ler laudo (foto ou PDF)</label><input type="file" id="bioImg" accept="image/*,.pdf,application/pdf" hidden><p class="note" id="bioSt">Tire uma foto do laudo da balança ou escolha o PDF, e o app preenche os campos. O arquivo é lido aqui no celular e não fica salvo.</p></div>
     <label class="biodata">Data<input type="date" name="date" value="${todayISO()}" required></label>
     <fieldset class="biogrp"><legend>Composição</legend><div class="form">${BIO_FIELDS.filter(x=>COMP.includes(x[0])).map(campo).join('')}</div></fieldset>
     <fieldset class="biogrp"><legend>Indicadores</legend><div class="form">${BIO_FIELDS.filter(x=>!COMP.includes(x[0])).map(campo).join('')}</div></fieldset>
     <details class="biogrp biomed"><summary>Medidas (opcional)</summary><div class="form">${MED.map(([k,l])=>`<label>${l} (cm)<input inputmode="decimal" name="m_${k}"></label>`).join('')}</div></details>`;
   $('#dlgBio').showModal();
 }
-// laudo por foto: lê no aparelho, preenche e marca os campos; a pessoa confere antes de salvar
+// laudo por foto ou PDF: lê no aparelho, preenche e marca os campos; a pessoa confere antes de salvar
 function preencheBio(v){ const f=$('#bioForm'); let n=0;
   for(const [k,,u] of BIO_FIELDS){ if(v[k]==null) continue;
     if(u==='kg'){ const kg=Math.floor(v[k]), g=Math.round((v[k]-kg)*1000); const a=f.querySelector(`[name="${k}__kg"]`), b=f.querySelector(`[name="${k}__g"]`); if(a&&b){ a.value=kg; b.value=String(g).padStart(3,'0'); a.classList.add('auto'); b.classList.add('auto'); n++; } }
@@ -1380,9 +1380,10 @@ function preencheBio(v){ const f=$('#bioForm'); let n=0;
   return n; }
 document.addEventListener('change',async e=>{ if(e.target.id!=='bioImg') return; const file=e.target.files[0]; e.target.value=''; if(!file) return; const st=$('#bioSt');
   st.textContent='Lendo o laudo… (na primeira vez demora um pouco)';
-  try{ const n=preencheBio(lerLaudo(await textoDaFoto(file)));
-    st.textContent=n?`Li ${n} ${pl(n,'valor','valores')} do laudo. Confira os campos marcados antes de salvar.`:'Não consegui ler valores nesse laudo. Tente uma foto mais reta e com luz, ou digite abaixo.'; }
-  catch(err){ console.error(err); st.textContent='Não deu para ler a foto agora. Confira a internet (na primeira vez o leitor é baixado) ou digite abaixo.'; } });
+  const pdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name);
+  try{ const n=preencheBio(lerLaudo(pdf?await textoDoPdf(file):await textoDaFoto(file)));
+    st.textContent=n?`Li ${n} ${pl(n,'valor','valores')} do laudo. Confira os campos marcados antes de salvar.`:(pdf?'Não consegui ler valores nesse PDF. Tente uma foto do laudo ou digite abaixo.':'Não consegui ler valores nesse laudo. Tente uma foto mais reta e com luz, ou digite abaixo.'); }
+  catch(err){ console.error(err); st.textContent='Não deu para ler o laudo agora. Confira a internet (na primeira vez o leitor é baixado) ou digite abaixo.'; } });
 document.addEventListener('input',e=>{ if(e.target.classList&&e.target.classList.contains('auto')) e.target.classList.remove('auto'); });
 $('#btnBioSave').onclick=async()=>{
   if(!user){ toast('Entre na sua conta para salvar.'); return; }

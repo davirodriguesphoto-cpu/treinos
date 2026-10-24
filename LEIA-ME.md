@@ -111,6 +111,7 @@ O `index.html` único, com tudo dentro, foi separado em `index.html`, `styles.cs
 ### 3.7 Avaliação corporal por foto do laudo
 - Em "Nova avaliação", o botão **"Ler foto do laudo"** lê a foto no próprio aparelho, e a imagem não é salva.
 - A leitura é feita com Tesseract em português. Funciona com laudos de InBody, Omron, Tanita, Xiaomi e relatórios de nutricionista.
+- Desde 24/10/2026 o botão se chama **"Ler laudo (foto ou PDF)"** e aceita PDF. O PDF é lido pelo pdf.js (o mesmo do "Importar treino do personal"), sem OCR. Testado com o relatório da Fitmass; quando o laudo só traz o kg de músculo ou gordura, o % é calculado pelo peso. Teste: `node tests/laudo-fitmass.test.js`.
 - Campos lidos: peso, % de gordura, gordura em kg, músculo (% e kg), IMC, gordura visceral, metabolismo basal, RCQ, idade corporal e a data.
 - Valores de referência ("peso ideal", "alvo", "controle") são ignorados.
 - Cada campo preenchido fica marcado em laranja até a pessoa mexer nele. Nada é salvo sem tocar em "Salvar avaliação".
